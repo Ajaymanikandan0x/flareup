@@ -27,10 +27,11 @@ migrate_working_dir/
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
+lib/core/config/secure_storage.dart
 .pub-cache/
 .pub/
 /build/
-
+.env
 # Symbolication related
 app.*.symbols
 
