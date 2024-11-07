@@ -27,6 +27,9 @@ jobs:
           channel: ${{ env.FLUTTER_CHANNEL }}
           flutter-version: ${{ env.FLUTTER_VERSION }}
 
+      - name: Clear pub cache
+        run: flutter pub cache repair
+
       - name: Install dependencies
         run: flutter pub get --verbose
 
