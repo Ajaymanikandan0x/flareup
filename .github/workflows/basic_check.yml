@@ -8,11 +8,12 @@ on:
 
 env:
   FLUTTER_CHANNEL: 'stable'
-  FLUTTER_VERSION: '3.24.3'
+  FLUTTER_VERSION: '3.24.4'
   PATH_TO_AAB: 'build/app/outputs/bundle/release/app-release.aab'
   ANDROID_PACKAGE_NAME: 'com.flareup.com'
 
 jobs:
+  # Job 1: Code Analysis and Testing
   code-analysis-and-testing:
     name: Code Analysis and Testing
     runs-on: ubuntu-latest
@@ -20,12 +21,16 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: ${{ env.FLUTTER_CHANNEL }}
           flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      - name: Load environment variables
+        run: |
+          echo "Loading environment variables from .env"
+          set -o allexport; source .env; set +o allexport
 
       - name: Install dependencies
         run: flutter pub get --verbose
@@ -33,5 +38,6 @@ jobs:
       - name: Run Flutter analyze
         run: flutter analyze
 
-     # - name: Run Flutter tests
-     #   run: flutter test
+#      - name: Run Flutter tests
+#        run: flutter test
+
