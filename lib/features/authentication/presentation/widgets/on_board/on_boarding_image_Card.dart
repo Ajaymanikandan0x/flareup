@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../screens/onboard_screen.dart';
+import 'on_boarding_list.dart';
 
 class OnBoardingImageCard extends StatelessWidget {
   final  OnBoarding onBoardingModel;
