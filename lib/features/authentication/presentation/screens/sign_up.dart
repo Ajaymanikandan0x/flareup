@@ -7,7 +7,7 @@ import 'package:flareup/features/authentication/presentation/widgets/auth/form_f
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/widgets/text_theme.dart';
+import '../../../../core/theme/text_theme.dart';
 import '../../../../dependency_injector.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_state.dart';
@@ -66,7 +66,7 @@ class SignUp extends StatelessWidget {
                       icon: const Icon(Icons.person),
                       isObscureText: false,
                       controller: nameController,
-                      validator: FormValidator.validateName),
+                      validator: FormValidator.validateUserName),
                   largeHeight,
                   AppFormField(
                     hint: 'fullName',
@@ -99,7 +99,7 @@ class SignUp extends StatelessWidget {
                     validator: FormValidator.validatePassword,
                   ),
                   largeHeight,
-                  smallHeight,
+                  minHeight,
                   PrimaryButton(
                     onTap: () {
                       if (_formKey.currentState!.validate()) {
@@ -125,7 +125,7 @@ class SignUp extends StatelessWidget {
                     width: 350,
                   ),
                   largeHeight,
-                  smallHeight,
+                  minHeight,
                   Text(
                     'or',
                     style: AppTextStyles.hindTextTheme(fontSize: 20),
@@ -133,7 +133,7 @@ class SignUp extends StatelessWidget {
                   formHeight,
                   const GoogleSignInButton(),
                   largeHeight,
-                  smallHeight,
+                  minHeight,
                   AuthPromptText(
                     prefixText: 'Already have an account? ',
                     suffixText: 'Sign In',

@@ -1,5 +1,5 @@
 import 'package:flareup/core/theme/app_palette.dart';
-import 'package:flareup/core/widgets/text_theme.dart';
+import 'package:flareup/core/theme/text_theme.dart';
 import 'package:flutter/material.dart';
 
 class PrimaryButton extends StatelessWidget {

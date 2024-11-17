@@ -4,10 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/constants.dart';
 import '../../../../core/routes/routs.dart';
+import '../../../../core/theme/text_theme.dart';
 import '../../../../core/widgets/logo_gradient.dart';
 import '../../../../core/widgets/primary_button.dart';
-import '../../../../core/widgets/text_theme.dart';
 import '../../../../dependency_injector.dart';
+import '../../../profile/presentation/bloc/user_profile_bloc.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -31,11 +32,12 @@ class SignIn extends StatelessWidget {
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthFailure) {
-            // Handle error (display snack bar)
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.error)),
             );
           } else if (state is AuthSuccess) {
+                     final userId = state.userEntity.id.toString(); // Adjust this based on your state
+          context.read<UserProfileBloc>().add(LoadUserProfile(userId));
             // Handle success (navigate to home page)
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
@@ -63,9 +65,9 @@ class SignIn extends StatelessWidget {
                 AppFormField(
                   hint: 'name',
                   icon: const Icon(Icons.person),
-                  isObscureText: true,
+                  isObscureText: false,
                   controller: nameController,
-                  validator: FormValidator.validateName,
+                  validator: FormValidator.validateUserName,
                 ),
                 largeHeight,
                 AppFormField(
@@ -114,7 +116,7 @@ class SignIn extends StatelessWidget {
                 formHeight,
                 const GoogleSignInButton(),
                 extraLargeHeight,
-                smallHeight,
+                minHeight,
                 AuthPromptText(
                   prefixText: 'Don\'t have an account?',
                   suffixText: 'Sign Up',

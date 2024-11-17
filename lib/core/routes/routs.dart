@@ -1,5 +1,6 @@
 import 'package:flareup/features/authentication/presentation/screens/sign_in.dart';
 import 'package:flareup/features/authentication/presentation/screens/sign_up.dart';
+import 'package:flareup/features/profile/presentation/screens/profile.dart';
 import 'package:flutter/material.dart';
 
 import '../../features/authentication/presentation/screens/logo.dart';
@@ -12,6 +13,8 @@ class AppRouts {
   static const home = '/home';
   static const signIn = '/signIn';
   static const signUp = '/signUp';
+  static const profile = '/profile';
+  
 
   static final Map<String, WidgetBuilder> routs = {
     logo: (_) => const Logo(),
@@ -19,6 +22,7 @@ class AppRouts {
     signIn: (_) => SignIn(),
     signUp: (_) => SignUp(),
     home: (_) => const Home(),
+    profile: (_) => const Profile(),
   };
 
   static Route<dynamic>? generateRoute(RouteSettings settings) {
