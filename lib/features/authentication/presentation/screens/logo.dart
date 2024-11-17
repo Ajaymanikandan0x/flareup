@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flareup/core/routes/routs.dart';
+import 'package:flareup/core/widgets/logo_gradient.dart';
 import 'package:flutter/material.dart';
 
 class Logo extends StatefulWidget {
@@ -24,11 +25,9 @@ class _LogoState extends State<Logo> {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(
-        child: Text(
-          "flare Up",
-          style: TextStyle(fontSize: 25, color: Colors.white),
-        ),
-      ),
+          child: LogoGradientText(
+        fontSize: 40,
+      )),
     );
   }
 }

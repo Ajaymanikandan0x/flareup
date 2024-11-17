@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/signup_usecase.dart';
 import 'auth_event.dart';
@@ -18,11 +17,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onLoginEvent(LoginEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
-      final userEntity =
-          await loginUseCase.call(event.username, event.password);
-      emit(AuthSuccess(message: 'Login successful!'));
+      final userEntity = await loginUseCase.call(event.username, event.password);
+      emit(AuthSuccess(userEntity: userEntity, message: 'Login successful!'));
     } catch (e) {
-      emit(AuthFailure(error: 'Login failed!'));
+      emit(AuthFailure(error: 'Login failed: ${e.toString()}'));
     }
   }
 
@@ -30,11 +28,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       SignupEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
-      final userEntity = await signupUseCase.call(event.username, event.email,
+      await signupUseCase.call(event.username, event.email,
           event.password, event.role, event.fullName);
-      emit(AuthSuccess(message: 'Signup successful!'));
+      emit(SignupSuccess(message: 'Signup successful!'));
     } catch (e) {
-      emit(AuthFailure(error: 'Signup failed!'));
+      emit(AuthFailure(error: 'Signup failed: ${e.toString()}'));
     }
   }
 }

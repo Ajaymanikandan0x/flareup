@@ -11,8 +11,7 @@ class UserRepositoryImpl implements AuthRepositoryDomain {
   @override
   Future<UserEntitySignIn> login(String username, String password) async {
     try {
-      final userModel =
-          await remoteDatasource.login(username: username, password: password);
+      final userModel = await remoteDatasource.login(username: username, password: password);
       return userModel.toEntity();
     } catch (e) {
       throw Exception('Login failed: $e');

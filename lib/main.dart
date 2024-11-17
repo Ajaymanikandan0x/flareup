@@ -20,6 +20,9 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(
           create: (context) => DependencyInjector().authBloc,
+        ),
+        BlocProvider(
+          create: (context) => DependencyInjector().userProfileBloc,
         )
       ],
       child: MaterialApp(
@@ -28,6 +31,7 @@ class MyApp extends StatelessWidget {
         theme: AppTheme.darkTheme,
         onGenerateRoute: AppRouts.generateRoute,
         initialRoute: AppRouts.logo,
+        // home: const Profile(),
       ),
     );
   }

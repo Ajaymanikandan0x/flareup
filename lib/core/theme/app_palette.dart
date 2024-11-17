@@ -8,7 +8,7 @@ class AppPalette {
   static const Color white = Color(0xFFFFFFFF);
   static const Color hintTextColor = Color(0xFF747688);
   static const Color formIconColor = Color(0xFF747688);
-  static const Color cardColor = Color(0xFF2D303A);
+  static const Color cardColor = Color(0xFF1D2026);
   static const Color paymentColor = Color(0xFFEC441E);
   static const Color error = Colors.redAccent;
   static const Gradient myGradient = LinearGradient(

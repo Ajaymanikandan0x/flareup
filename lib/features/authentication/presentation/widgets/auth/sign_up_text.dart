@@ -1,7 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../core/widgets/text_theme.dart';
+import '../../../../../core/theme/text_theme.dart';
 
 class AuthPromptText extends StatelessWidget {
   final String prefixText;

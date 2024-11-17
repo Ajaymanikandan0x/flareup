@@ -74,4 +74,22 @@ class FormValidator {
 
     return null;
   }
+
+  //Name validateUserName
+  static String? validateUserName(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Name is required';
+    }
+
+    if (value.length < 3) {
+      return 'Name must be at least 3 characters long';
+    }
+
+    // final nameRegex = RegExp(r'^[a-zA-Z][a-zA-Z0-9_\s]*\$');
+    // if (!nameRegex.hasMatch(value)) {
+    //   return 'Please enter a valid name (letters, numbers, underscores allowed)';
+    // }
+
+    return null;
+  }
 }

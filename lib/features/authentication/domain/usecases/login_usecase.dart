@@ -1,5 +1,3 @@
-
-
 import '../entities/user_model_signin.dart';
 import '../repositories/auth_repo_domain.dart';
 
@@ -8,7 +6,7 @@ class LoginUseCase {
 
   LoginUseCase(this.authRepository);
 
-  Future<UserEntitySignIn> call(String email, String password) {
-    return authRepository.login(email, password);
+  Future<UserEntitySignIn> call(String username, String password) {
+    return authRepository.login(username, password);
   }
 }

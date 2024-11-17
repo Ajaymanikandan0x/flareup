@@ -1,26 +1,41 @@
 import '../../domain/entities/user_model_signin.dart';
 
 class UserModelSignIn {
+  final int id;
+  final String accessToken;
+  final String refreshToken;
   final String username;
-  final String password;
+  final String email;
+  final String role;
 
   UserModelSignIn({
+    required this.accessToken,
+    required this.refreshToken,
+    required this.id,
     required this.username,
-    required this.password,
+    required this.email,
+    required this.role,
   });
 
   factory UserModelSignIn.fromJson(Map<String, dynamic> json) {
     return UserModelSignIn(
+      id: json['id'],
+      accessToken:json['accessToken'],
+      refreshToken:json['refreshToken'],
       username: json['username'],
-      password: json['password'],
+      email: json['email'],
+      role: json['role'],
     );
   }
 
-  // Method to convert UserModel to UserEntity (for domain layer)
   UserEntitySignIn toEntity() {
     return UserEntitySignIn(
+      id: id,
+      accessToken:'accessToken',
+      refreshToken:'refreshToken',
       username: username,
-      password: password,
+      email: email,
+      role: role,
     );
   }
 }

@@ -1,9 +1,9 @@
 import 'package:flareup/core/theme/app_palette.dart';
-import 'package:flareup/core/widgets/text_theme.dart';
+import 'package:flareup/core/theme/text_theme.dart';
 import 'package:flutter/material.dart';
 
 class AppFormField extends StatelessWidget {
-  final Icon icon;
+  final Icon? icon;
   final String hint;
   late bool isObscureText;
   final TextEditingController controller;
@@ -11,7 +11,7 @@ class AppFormField extends StatelessWidget {
   AppFormField(
       {super.key,
       required this.hint,
-      required this.icon,
+      this.icon,
       required this.isObscureText,
       required this.controller,
       this.validator});
