@@ -43,7 +43,7 @@ class PrimaryButton extends StatelessWidget {
         child: Center(
             child: Text(
           text,
-          style: textTheme(fontSize: fontSize),
+          style: AppTextStyles.primaryTextTheme(fontSize: fontSize),
         )),
       ),
     );

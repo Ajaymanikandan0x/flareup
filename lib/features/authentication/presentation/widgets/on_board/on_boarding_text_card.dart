@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../../core/theme/app_palette.dart';
-import '../../screens/onboard_screen.dart';
+import 'on_boarding_list.dart';
 
 class OnboardingTextCard extends StatelessWidget {
   final OnBoarding onBoardingModel;

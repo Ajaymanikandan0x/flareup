@@ -1,11 +1,63 @@
 import 'package:flareup/core/theme/app_palette.dart';
 import 'package:flutter/material.dart';
 
-TextStyle textTheme({
-  double? fontSize = 15,
-}) {
-  return TextStyle(
-      color: AppPalette.mainText,
+class AppTextStyles {
+  // Base method for common properties
+  static TextStyle _baseTextStyle({
+    double fontSize = 15,
+    Color? color,
+    FontStyle? fontStyle,
+    FontWeight fontWeight = FontWeight.w600,
+  }) {
+    return TextStyle(
+      color: color,
       fontSize: fontSize,
-      fontWeight: FontWeight.w600);
+      fontWeight: fontWeight,
+      fontStyle: fontStyle,
+    );
+  }
+
+  static TextStyle primaryTextTheme({
+    double? fontSize,
+    FontStyle? fontStyle,
+  }) {
+    return _baseTextStyle(
+      fontSize: fontSize ?? 15,
+      color: AppPalette.mainText,
+      fontStyle: fontStyle,
+    );
+  }
+
+  static TextStyle hindTextTheme({
+    double fontSize = 15,
+    FontStyle? fontStyle,
+  }) {
+    return _baseTextStyle(
+      fontSize: fontSize,
+      color: AppPalette.hintTextColor,
+      fontStyle: fontStyle,
+    );
+  }
+
+  static TextStyle paymentTextTheme({
+    double fontSize = 15,
+    FontStyle? fontStyle,
+  }) {
+    return _baseTextStyle(
+      fontSize: fontSize,
+      color: AppPalette.paymentColor,
+      fontStyle: fontStyle,
+    );
+  }
+
+  static TextStyle gradientText({
+    double fontSize = 15,
+    FontStyle? fontStyle,
+  }) {
+    return _baseTextStyle(
+      fontSize: fontSize,
+      color: AppPalette.gradient2,
+      fontStyle: fontStyle,
+    );
+  }
 }
