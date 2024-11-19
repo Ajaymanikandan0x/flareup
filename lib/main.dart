@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
         theme: AppTheme.darkTheme,
         onGenerateRoute: AppRouts.generateRoute,
         initialRoute: AppRouts.logo,
-        // home: const Profile(),
+        // home: const OtpScreen(),
       ),
     );
   }

@@ -1,3 +1,5 @@
+import 'package:flareup/features/authentication/domain/usecases/otp_send_usecase.dart';
+
 import 'features/authentication/data/datasources/remote_data.dart';
 import 'features/authentication/data/repositories/auth_repo_data.dart';
 import 'features/authentication/domain/repositories/auth_repo_domain.dart';
@@ -24,6 +26,7 @@ class DependencyInjector {
   late UserRemoteDatasource _userRemoteDatasource;
   late AuthRepositoryDomain _authRepository;
   late LoginUseCase _loginUseCase;
+  late SendOtpUseCase _otpUseCase;
   late SignupUseCase _signupUseCase;
   late AuthBloc _authBloc;
 
@@ -43,8 +46,10 @@ class DependencyInjector {
     _userRemoteDatasource = UserRemoteDatasource();
     _authRepository = UserRepositoryImpl(_userRemoteDatasource);
     _loginUseCase = LoginUseCase(_authRepository);
+    _otpUseCase = SendOtpUseCase(_authRepository);
     _signupUseCase = SignupUseCase(_authRepository);
     _authBloc = AuthBloc(
+      otpUsecase: _otpUseCase,
       loginUseCase: _loginUseCase,
       signupUseCase: _signupUseCase,
     );

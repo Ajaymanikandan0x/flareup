@@ -1,3 +1,4 @@
+import 'package:flareup/features/authentication/presentation/screens/otp.dart';
 import 'package:flareup/features/authentication/presentation/screens/sign_in.dart';
 import 'package:flareup/features/authentication/presentation/screens/sign_up.dart';
 import 'package:flareup/features/profile/presentation/screens/profile.dart';
@@ -14,7 +15,7 @@ class AppRouts {
   static const signIn = '/signIn';
   static const signUp = '/signUp';
   static const profile = '/profile';
-  
+  static const otpScreen = '/otpScreen';
 
   static final Map<String, WidgetBuilder> routs = {
     logo: (_) => const Logo(),
@@ -23,6 +24,7 @@ class AppRouts {
     signUp: (_) => SignUp(),
     home: (_) => const Home(),
     profile: (_) => const Profile(),
+    otpScreen:(_)=> const OtpScreen() ,
   };
 
   static Route<dynamic>? generateRoute(RouteSettings settings) {
