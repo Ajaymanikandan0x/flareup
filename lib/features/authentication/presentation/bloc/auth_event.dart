@@ -34,3 +34,31 @@ class SignupEvent extends AuthEvent {
   @override
   List<Object?> get props => [username, fullName, role, email, password];
 }
+
+class SignupSuccessEvent extends AuthEvent {
+  final String email;
+  
+  const SignupSuccessEvent({required this.email});
+  
+  @override
+  List<Object?> get props => [email];
+}
+
+class SendOtpEvent extends AuthEvent {
+  final String email;
+  final String otp;
+
+  const SendOtpEvent({required this.email,required this.otp});
+
+  @override
+  List<Object?> get props => [email, otp];
+}
+
+class ResendOtpEvent extends AuthEvent {
+  final String email;
+
+  const ResendOtpEvent({required this.email});
+
+  @override
+  List<Object?> get props => [email];
+}

@@ -37,12 +37,12 @@ class SignUp extends StatelessWidget {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.error)),
             );
-          } else if (state is AuthSuccess) {
+            print(state.error);
+          } else if (state is SignupSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
             );
-
-            Navigator.pushReplacementNamed(context, AppRouts.home);
+            Navigator.pushReplacementNamed(context, AppRouts.otpScreen);
           }
         },
         child: SingleChildScrollView(
@@ -105,13 +105,22 @@ class SignUp extends StatelessWidget {
                       if (_formKey.currentState!.validate()) {
                         if (passwordController.text ==
                             passwordConformController.text) {
+                        
+                          // Ensure correct mapping
+                          final email = emailController.text.trim();
+                          final fullName = fullNameController.text.trim();
+                          final username = nameController.text.trim();
+                          final password =
+                              passwordConformController.text.trim();
+
+                          // Add signup event with correct values
                           authBloc.add(SignupEvent(
-                              username: nameController.text,
-                              role: 'user',
-                              email: emailController.text,
-                              password: passwordConformController.text,
-                              fullName: fullNameController.text));
-                          print('call');
+                            username: username,
+                            role: 'user',
+                            email: email,
+                            password: password,
+                            fullName: fullName,
+                          ));
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(

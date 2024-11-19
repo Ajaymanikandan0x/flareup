@@ -15,8 +15,8 @@ class UserModelSignup {
 
   factory UserModelSignup.fromJson(Map<String, dynamic> json) {
     return UserModelSignup(
-        userName: json['userName'],
-        fullName: json['fullName'],
+        userName: json['username'],
+        fullName: json['fullname'],
         role: json['role'],
         email: json['email'],
         password: json['password']);
@@ -24,10 +24,11 @@ class UserModelSignup {
 
   Map<String, dynamic> toJson() {
     return {
-      'userName': userName,
-      'role': role,
+      'username': userName,
+      'fullname': fullName,
       'email': email,
-      'password': password
+      'role': role,
+      'password': password,
     };
   }
 
