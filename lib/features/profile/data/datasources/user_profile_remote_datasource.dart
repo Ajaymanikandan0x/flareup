@@ -53,6 +53,7 @@ class UserProfileRemoteDataSourceImpl implements UserProfileRemoteDataSource {
       print('Profile update data: $data');
       print('onlyProfileImage flag: $onlyProfileImage');
       
+      print('Sending data: ${data}');
       final response = await dio.patch(
         endpoint,
         data: data,
@@ -61,23 +62,24 @@ class UserProfileRemoteDataSourceImpl implements UserProfileRemoteDataSource {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer $token',
           },
-          validateStatus: (status) {
-            return status! < 500; // Accept all status codes less than 500
-          },
         ),
       );
+      print('Received response: ${response.data}');
       
       print('Profile update response status: ${response.statusCode}');
       print('Profile update response data: ${response.data}');
       
       if (response.statusCode != 200 && response.statusCode != 202) {
-        throw Exception('Failed to update profile: ${response.data['message'] ?? response.data ?? 'Unknown error'}');
+        final errorMessage = response.data is Map ? 
+            response.data['message'] ?? 'Unknown error' :
+            'Server error: ${response.statusCode}';
+        throw Exception(errorMessage);
       }
     } catch (e) {
-      print('Profile update error: $e');
-      if (e is DioException) {
-        print('Response data: ${e.response?.data}');
-        throw Exception(e.response?.data?['message'] ?? e.message);
+      print('Error type: ${e.runtimeType}');
+      print('Error message: $e');
+      if (e is TypeError) {
+        print('Type error in data handling');
       }
       rethrow;
     }

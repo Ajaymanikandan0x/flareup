@@ -29,25 +29,23 @@ class UserProfileModel {
       fullName: json['fullname'] ?? '',
       email: json['email'] ?? '',
       role: json['role'] ?? '',
-      password: null,
       phoneNumber: json['phone_number'],
+      password: null,
     );
   }
 
   Map<String, dynamic> toJson({bool onlyProfileImage = false}) {
-    if (onlyProfileImage) {
-      return {
-        'profile_picture': profileImage,
-        'update_type': 'profile_image_only'
-      };
-    }
-    return {
+    Map<String, dynamic> data = {
+      'id': id,
       'username': username,
       'fullname': fullName,
       'email': email,
       'phone_number': phoneNumber,
-      'update_type': 'full_profile'
+      'update_type': onlyProfileImage ? 'profile_image_only' : 'full_profile',
+      'profile_publicId': profileImage
     };
+
+    return data;
   }
 
   UserProfileEntity toEntity() {

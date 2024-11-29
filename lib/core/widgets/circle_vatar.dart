@@ -17,6 +17,7 @@ class Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('Image URL: $imgUrl');
     return CircleAvatar(
         radius: radius ?? 24,
         backgroundColor: backgroundColor ?? AppPalette.hintTextColor,
@@ -26,10 +27,8 @@ class Avatar extends StatelessWidget {
                   imgUrl!,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
-                    return FaIcon(
-                      FontAwesomeIcons.userLarge,
-                      size: iconSize,
-                    );
+                    print('Error loading image: $error');
+                    return Icon(Icons.error);
                   },
                 ),
               )
