@@ -35,6 +35,8 @@ class UserProfileRemoteDataSourceImpl implements UserProfileRemoteDataSource {
       } else {
         throw Exception('Failed to load user profile: Status ${response.statusCode}');
       }
+    } on FormatException {
+      throw Exception('Invalid user ID format');
     } catch (e) {
       print('Error fetching user profile: $e');
       rethrow;
@@ -57,14 +59,7 @@ class UserProfileRemoteDataSourceImpl implements UserProfileRemoteDataSource {
       final response = await dio.patch(
         endpoint,
         data: data,
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $token',
-          },
-        ),
       );
-      print('Received response: ${response.data}');
       
       print('Profile update response status: ${response.statusCode}');
       print('Profile update response data: ${response.data}');
@@ -75,12 +70,11 @@ class UserProfileRemoteDataSourceImpl implements UserProfileRemoteDataSource {
             'Server error: ${response.statusCode}';
         throw Exception(errorMessage);
       }
+    } on FormatException {
+      throw Exception('Invalid user ID format');
     } catch (e) {
       print('Error type: ${e.runtimeType}');
       print('Error message: $e');
-      if (e is TypeError) {
-        print('Type error in data handling');
-      }
       rethrow;
     }
   }

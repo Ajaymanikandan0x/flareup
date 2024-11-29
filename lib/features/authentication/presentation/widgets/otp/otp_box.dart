@@ -33,7 +33,7 @@ class OtpBox extends StatelessWidget {
         textAlign: TextAlign.center,
         decoration: InputDecoration(
           hintText: "0",
-          hintStyle: const TextStyle(color: Color(0xFF757575)),
+          hintStyle: const TextStyle(color: AppPalette.white),
           border: _authOutlineInputBorder,
           enabledBorder: _authOutlineInputBorder,
           focusedBorder: _authOutlineInputBorder.copyWith(

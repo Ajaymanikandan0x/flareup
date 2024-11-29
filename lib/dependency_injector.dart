@@ -5,6 +5,8 @@ import 'features/authentication/data/repositories/auth_repo_data.dart';
 import 'features/authentication/domain/repositories/auth_repo_domain.dart';
 import 'features/authentication/domain/usecases/login_usecase.dart';
 import 'features/authentication/domain/usecases/signup_usecase.dart';
+import 'features/authentication/domain/usecases/logout_usecase.dart';
+import 'features/authentication/domain/usecases/resend_otp_usecase.dart';
 import 'features/authentication/presentation/bloc/auth_bloc.dart';
 import 'features/profile/data/datasources/user_profile_remote_datasource.dart';
 import 'features/profile/data/repositories/user_profile_repository_impl.dart';
@@ -32,6 +34,8 @@ class DependencyInjector {
   late LoginUseCase _loginUseCase;
   late SendOtpUseCase _otpUseCase;
   late SignupUseCase _signupUseCase;
+  late LogoutUseCase _logoutUseCase;
+  late ResendOtpUseCase _resendOtpUseCase;
   late AuthBloc _authBloc;
 
   // User profile dependencies
@@ -53,10 +57,15 @@ class DependencyInjector {
     _loginUseCase = LoginUseCase(_authRepository);
     _otpUseCase = SendOtpUseCase(_authRepository);
     _signupUseCase = SignupUseCase(_authRepository);
+    _logoutUseCase = LogoutUseCase(_authRepository);
+    _resendOtpUseCase = ResendOtpUseCase(_authRepository);
+    
     _authBloc = AuthBloc(
       otpUsecase: _otpUseCase,
       loginUseCase: _loginUseCase,
       signupUseCase: _signupUseCase,
+      resendOtpUseCase: _resendOtpUseCase,
+      logoutUseCase: _logoutUseCase,
       storageService: storageService,
     );
   }

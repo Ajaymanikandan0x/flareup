@@ -2,52 +2,109 @@ import 'package:flareup/core/widgets/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../core/theme/app_palette.dart';
 import '../../bloc/auth_bloc.dart';
 import '../../bloc/auth_event.dart';
 import '../../bloc/auth_state.dart';
 import 'otp_box.dart';
 
 class OtpForm extends StatelessWidget {
-  const OtpForm({super.key});
+  final String email;
+  
+  const OtpForm({
+    super.key,
+    required this.email,
+  });
 
   @override
   Widget build(BuildContext context) {
     List<TextEditingController> controllers =
         List.generate(6, (index) => TextEditingController());
 
-    return BlocBuilder<AuthBloc, AuthState>(
- 
-      builder: (context, state) {
-        final email = state is SignupSuccess
-            ? state.email
-            : (state as OtpVerificationState).email;
+    void clearOtpFields() {
+      for (var controller in controllers) {
+        controller.clear();
+      }
+    }
 
-        return Form(
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(6, (index) {
-                  return OtpBox(controller: controllers[index]);
-                }),
-              ),
-              const SizedBox(height: 100),
-              PrimaryButton(
-                width: 250,
-                height: 60,
-                onTap: () {
-                  String otp =
-                      controllers.map((controller) => controller.text).join();
-                  context.read<AuthBloc>().add(
-                        SendOtpEvent(email: email, otp: otp),
-                      );
-                },
-                text: 'Verify',
-              ),
-            ],
+    void verifyOtp() {
+      String otp = controllers.map((controller) => controller.text).join();
+      
+      // Validate OTP
+      if (otp.length != 6) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please enter a valid 6-digit OTP'),
+            backgroundColor: AppPalette.error,
           ),
         );
+        return;
+      }
+
+      if (!RegExp(r'^[0-9]+$').hasMatch(otp)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('OTP should only contain numbers'),
+            backgroundColor: AppPalette.error,
+          ),
+        );
+        return;
+      }
+
+      context.read<AuthBloc>().add(
+        SendOtpEvent(email: email, otp: otp),
+      );
+    }
+
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthFailure) {
+          String message = state.error;
+          
+          // Clean up error message
+          if (message.contains('Exception:')) {
+            message = message.replaceAll('Exception:', '').trim();
+          }
+          
+          // Clear fields only for invalid OTP
+          if (message.contains('Invalid OTP') || 
+              message.contains('Please try again')) {
+            clearOtpFields();
+          }
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(message),
+              backgroundColor: AppPalette.error,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
       },
+      child: Form(
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: List.generate(6, (index) {
+                return OtpBox(controller: controllers[index]);
+              }),
+            ),
+            const SizedBox(height: 100),
+            BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, state) {
+                final bool isLoading = state is AuthLoading;
+                return PrimaryButton(
+                  width: 250,
+                  height: 60,
+                  onTap: isLoading ? () {} : verifyOtp,
+                  text: isLoading ? 'Verifying...' : 'Verify',
+                );
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

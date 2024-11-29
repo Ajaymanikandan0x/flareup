@@ -58,17 +58,10 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
       UpdateUserProfile event, Emitter<UserProfileState> emit) async {
     emit(UserProfileLoading());
     try {
-      print('Starting profile update with data:');
-      print('ID: ${event.updatedProfile.id}');
-      print('Username: ${event.updatedProfile.username}');
-      print('Full Name: ${event.updatedProfile.fullName}');
-      print('Email: ${event.updatedProfile.email}');
-      print('Phone: ${event.updatedProfile.phoneNumber}');
-      print('Profile Image: ${event.updatedProfile.profileImage}');
+      await updateUserProfile(event.updatedProfile, onlyProfileImage: event.onlyProfileImage);
       
-      await updateUserProfile(event.updatedProfile);
-      
-      // Fetch the updated profile
+      // Introduce a delay or retry mechanism
+      await Future.delayed(Duration(seconds: 2));  // Example delay
       final updatedUser = await getUserProfile(event.updatedProfile.id);
       emit(UserProfileLoaded(updatedUser));
     } catch (e) {

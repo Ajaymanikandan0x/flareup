@@ -17,11 +17,15 @@ class LoadUserProfile extends UserProfileEvent {
 
 class UpdateUserProfile extends UserProfileEvent {
   final UserProfileEntity updatedProfile;
+  final bool onlyProfileImage;
 
-  const UpdateUserProfile(this.updatedProfile);
+  const UpdateUserProfile(this.updatedProfile, {this.onlyProfileImage = false});
 
   @override
-  List<Object> get props => [updatedProfile];
+  List<Object> get props => [updatedProfile, onlyProfileImage];
+
+  @override
+  String toString() => 'UpdateUserProfile { updatedProfile: $updatedProfile, onlyProfileImage: $onlyProfileImage }';
 }
 
 class UpdateProfileField extends UserProfileEvent {

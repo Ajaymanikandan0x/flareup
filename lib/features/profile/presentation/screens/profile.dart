@@ -53,7 +53,7 @@ class Profile extends StatelessWidget {
               return Column(
                 children: [
                   Avatar(
-                    radius: 30,
+                    radius: MediaQuery.of(context).size.width * 0.16,
                     imgUrl: user.profileImage,
                   ),
                   minHeight,
@@ -64,7 +64,7 @@ class Profile extends StatelessWidget {
                         context.read<UserProfileBloc>().add(UploadProfileImage(imageFile));
                       }
                     },
-                    child: const Text('Change Profile Photo')
+                    child: Text('Change Profile Photo', style: AppTextStyles.primaryTextTheme(fontSize: 16),)
                   ),
                   largeHeight,
                   NameListTile(

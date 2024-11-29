@@ -47,6 +47,13 @@ class UserRemoteDatasource {
     required String role,
   }) async {
     try {
+      // Set proper headers
+      dio.options.headers['Content-Type'] = 'application/json';
+      
+      // Log request details for debugging
+      print('Attempting signup with endpoint: ${ApiEndpoints.baseUrl}${ApiEndpoints.signUp}');
+      print('Request payload: {username: $username, fullname: $fullName, email: $email, role: $role}');
+
       final response = await dio.post(
         '${ApiEndpoints.baseUrl}${ApiEndpoints.signUp}',
         data: {
@@ -58,6 +65,10 @@ class UserRemoteDatasource {
           'password': password,
         },
       );
+
+      print('Response status code: ${response.statusCode}');
+      print('Response data: ${response.data}');
+
       if (response.statusCode == 201) {
         return UserModelSignup(
           userName: username,
@@ -67,12 +78,27 @@ class UserRemoteDatasource {
           role: role,
         );
       }
-      throw Exception(
-          'Signup failed: Unexpected status code ${response.statusCode}');
+
+      // Handle non-201 responses
+      if (response.data is Map) {
+        throw Exception('Signup failed: ${response.data['message'] ?? 'Unknown error'}');
+      } else {
+        throw Exception('Signup failed: Unexpected response format');
+      }
     } on DioException catch (e) {
-      throw Exception('Signup failed: ${e.response?.data ?? e.message}');
+      // Better error handling for Dio exceptions
+      if (e.type == DioExceptionType.connectionTimeout) {
+        throw Exception('Connection timeout. Please check your internet connection.');
+      } else if (e.type == DioExceptionType.connectionError) {
+        throw Exception('Cannot connect to server. Please check if the server is running.');
+      }
+      
+      final errorMessage = e.response?.data is Map 
+          ? e.response?.data['message'] ?? e.message
+          : 'Connection error. Please check your server configuration.';
+      throw Exception('Signup failed: $errorMessage');
     } catch (e) {
-      throw Exception('Unexpected error: $e');
+      throw Exception('Unexpected error during signup: $e');
     }
   }
 
@@ -82,22 +108,35 @@ class UserRemoteDatasource {
       final response = await dio.post(
         ApiEndpoints.baseUrl + ApiEndpoints.otpVerification,
         data: {'email': email, 'enteredOtp': otp},
+        options: Options(
+          validateStatus: (status) => status! < 500,
+        ),
       );
 
-      print('OTP verification response status code: ${response.statusCode}');
-      print('OTP verification response data: ${response.data}');
-
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print('OTP verification successful');
-        // Return the OTP model with the data we sent
         return OtpModel(email: email, otp: otp);
-        //  return OtpModel.fromJson(response.data);
       }
-      print('OTP verification failed with status code: ${response.statusCode}');
-      throw Exception('Failed to verify OTP: Status code ${response.statusCode}');
+
+      // Handle different error cases
+      if (response.statusCode == 400) {
+        final data = response.data;
+        if (data is Map) {
+          if (data.containsKey('email')) {
+            throw Exception('Please restart the verification process');
+          }
+          if (data.containsKey('message')) {
+            throw Exception(data['message']);
+          }
+        }
+        throw Exception('Invalid OTP code');
+      }
+
+      throw Exception('Please try again');
     } catch (e) {
-      print('Error during OTP verification: $e');
-      throw Exception('OTP verification failed: $e');
+      if (e is Exception) {
+        rethrow;
+      }
+      throw Exception('Please try again');
     }
   }
 
@@ -107,19 +146,43 @@ class UserRemoteDatasource {
       final response = await dio.post(
         ApiEndpoints.baseUrl + ApiEndpoints.resendOtp,
         data: {'email': email},
+        options: Options(
+          validateStatus: (status) => status! < 500, // Accept both 2xx and 4xx responses
+        ),
       );
 
       print('Resend OTP response status code: ${response.statusCode}');
       print('Resend OTP response data: ${response.data}');
 
-      if (response.statusCode != 200) {
-        print('Resend OTP failed with status code: ${response.statusCode}');
-        throw Exception('Failed to resend OTP: Status code ${response.statusCode}');
+      if (response.statusCode == 400 && response.data['error']?.contains('cache') == true) {
+        // Handle cache-specific error
+        throw Exception('Session expired. Please go back and try again.');
+      } else if (response.statusCode != 200 && response.statusCode != 201) {
+        final errorMessage = response.data['error'] ?? response.data['message'] ?? 'Failed to resend OTP';
+        throw Exception(errorMessage);
       }
-      print('OTP resent successfully');
     } catch (e) {
       print('Error during OTP resend: $e');
-      throw Exception('Resend OTP failed: $e');
+      if (e is DioException) {
+        if (e.response?.statusCode == 400) {
+          throw Exception('Session expired. Please restart the signup process.');
+        }
+      }
+      throw Exception('Failed to resend OTP. Please try again.');
+    }
+  }
+
+  Future<void> logout() async {
+    try {
+      final response = await dio.post(
+        ApiEndpoints.baseUrl + ApiEndpoints.logout,
+      );
+      
+      if (response.statusCode != 200) {
+        throw Exception('Logout failed: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Logout request failed: $e');
     }
   }
 }

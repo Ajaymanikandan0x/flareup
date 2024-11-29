@@ -14,4 +14,6 @@ abstract class AuthRepositoryDomain {
     required String password,
   });
   Future<OtpEntity> sendOtp({required String email, required String otp});
+  Future<void> logout();
+  Future<void> resendOtp({required String email});
 }
