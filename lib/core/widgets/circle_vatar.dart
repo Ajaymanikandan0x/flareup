@@ -25,6 +25,12 @@ class Avatar extends StatelessWidget {
                 child: Image.network(
                   imgUrl!,
                   fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return FaIcon(
+                      FontAwesomeIcons.userLarge,
+                      size: iconSize,
+                    );
+                  },
                 ),
               )
             : FaIcon(

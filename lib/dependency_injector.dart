@@ -12,6 +12,10 @@ import 'features/profile/domain/repositories/user_profile_repository.dart';
 import 'features/profile/domain/usecases/get_user_profile_usecase.dart';
 import 'features/profile/domain/usecases/update_user_profile_usecase.dart';
 import 'features/profile/presentation/bloc/user_profile_bloc.dart';
+import 'core/storage/secure_storage_service.dart';
+import 'core/utils/cloudinary_service.dart';
+import 'features/profile/data/repositories/profile_image_repository_impl.dart';
+import 'features/profile/domain/usecases/upload_profile_image_usecase.dart';
 
 class DependencyInjector {
   static final DependencyInjector _instance = DependencyInjector._internal();
@@ -43,6 +47,7 @@ class DependencyInjector {
   }
 
   void _setupAuthenticationDependencies() {
+    final storageService = SecureStorageService();
     _userRemoteDatasource = UserRemoteDatasource();
     _authRepository = UserRepositoryImpl(_userRemoteDatasource);
     _loginUseCase = LoginUseCase(_authRepository);
@@ -52,19 +57,25 @@ class DependencyInjector {
       otpUsecase: _otpUseCase,
       loginUseCase: _loginUseCase,
       signupUseCase: _signupUseCase,
+      storageService: storageService,
     );
   }
 
   void _setupUserProfileDependencies() {
-    _userProfileRemoteDatasource = UserProfileRemoteDataSourceImpl();
-    _userProfileRepository =
-        UserProfileRepositoryImpl(_userProfileRemoteDatasource);
+    final storageService = SecureStorageService();
+    final cloudinaryService = CloudinaryService(storageService);
+    final profileImageRepository = ProfileImageRepositoryImpl(cloudinaryService);
+    final uploadProfileImageUseCase = UploadProfileImageUseCase(profileImageRepository);
+    
+    _userProfileRemoteDatasource = UserProfileRemoteDataSourceImpl(storageService);
+    _userProfileRepository = UserProfileRepositoryImpl(_userProfileRemoteDatasource);
     _getUserProfileUseCase = GetUserProfileUseCase(_userProfileRepository);
-    _updateUserProfileUseCase =
-        UpdateUserProfileUseCase(_userProfileRepository);
+    _updateUserProfileUseCase = UpdateUserProfileUseCase(_userProfileRepository);
     _userProfileBloc = UserProfileBloc(
       getUserProfile: _getUserProfileUseCase,
       updateUserProfile: _updateUserProfileUseCase,
+      uploadProfileImage: uploadProfileImageUseCase,
+      storageService: storageService,
     );
   }
 

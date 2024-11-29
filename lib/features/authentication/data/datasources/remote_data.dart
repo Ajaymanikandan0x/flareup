@@ -11,11 +11,11 @@ class UserRemoteDatasource {
   Future<UserModelSignIn> login(
       {required String username, required String password}) async {
     try {
-      // dio.options.headers['Content-Type'] = 'application/json';
-      // print('Logging in with username: $username and password: $password');
-      // print('Request URL: ${ApiEndpoints.baseUrl + ApiEndpoints.login}');
-      // print('Request Headers: ${dio.options.headers}');
-      // print('Request Body: { "username": "$username", "password": "$password" }');
+      dio.options.headers['Content-Type'] = 'application/json';
+      print('Logging in with username: $username and password: $password');
+      print('Request URL: ${ApiEndpoints.baseUrl + ApiEndpoints.login}');
+      print('Request Headers: ${dio.options.headers}');
+      print('Request Body: { "username": "$username", "password": "$password" }');
       final response = await dio.post(
         ApiEndpoints.baseUrl + ApiEndpoints.login,
         data: {
@@ -23,8 +23,8 @@ class UserRemoteDatasource {
           'password': password,
         },
       );
-      // print('Response status code: ${response.statusCode}');
-      // print('Response body: ${response.data}');
+      print('Response status code: ${response.statusCode}');
+      print('Response body: ${response.data}');
 
       if (response.statusCode == 200) {
         return UserModelSignIn.fromJson(response.data);

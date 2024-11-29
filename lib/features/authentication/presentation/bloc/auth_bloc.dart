@@ -1,20 +1,24 @@
 import 'package:flareup/features/authentication/domain/usecases/otp_send_usecase.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/storage/secure_storage_service.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/signup_usecase.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
+
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase loginUseCase;
   final SignupUseCase signupUseCase;
   final SendOtpUseCase otpUsecase;
+  final SecureStorageService storageService;
 
-  AuthBloc(
-      {required this.loginUseCase,
-      required this.signupUseCase,
-      required this.otpUsecase})
-      : super(AuthInitial()) {
+  AuthBloc({
+    required this.loginUseCase,
+    required this.signupUseCase,
+    required this.otpUsecase,
+    required this.storageService,
+  }) : super(AuthInitial()) {
     on<LoginEvent>(_onLoginEvent);
     on<SignupEvent>(_onSignupEvent);
     on<SendOtpEvent>(_otpSend);
@@ -25,7 +29,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
     try {
       final userEntity = await loginUseCase.call(
-          username: event.username, password: event.password);
+        username: event.username,
+        password: event.password,
+      );
+
+      await storageService.saveTokens(
+        accessToken: userEntity.accessToken,
+        refreshToken: userEntity.refreshToken,
+        userId: userEntity.id.toString(),
+      );
+
       emit(AuthSuccess(userEntity: userEntity, message: 'Login successful!'));
     } catch (e) {
       emit(AuthFailure(error: 'Login failed: ${e.toString()}'));

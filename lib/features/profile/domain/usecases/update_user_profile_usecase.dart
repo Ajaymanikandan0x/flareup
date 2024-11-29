@@ -6,7 +6,7 @@ class UpdateUserProfileUseCase {
 
   UpdateUserProfileUseCase(this.repository);
 
-  Future<void> call(UserProfileEntity userProfile) {
-    return repository.updateUserProfile(userProfile);
+  Future<void> call(UserProfileEntity userProfile, {bool onlyProfileImage = false}) {
+    return repository.updateUserProfile(userProfile, onlyProfileImage: onlyProfileImage);
   }
 }

@@ -1,14 +1,13 @@
 import 'dart:io';
-
 import 'package:flareup/core/constants/constants.dart';
 import 'package:flareup/core/theme/text_theme.dart';
 import 'package:flareup/core/widgets/circle_vatar.dart';
 import 'package:flareup/features/profile/presentation/widgets/name_list_title.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_picker/image_picker.dart';
 
-import '../../domain/entities/user_profile_entity.dart';
+import '../../../../core/routes/routs.dart';
+import '../../../../core/utils/image_picker_service.dart';
 import '../bloc/user_profile_bloc.dart';
 
 class Profile extends StatelessWidget {
@@ -26,22 +25,10 @@ class Profile extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () async {
-              // Ensure you are in the context of the UserProfileLoaded state
               final state = context.read<UserProfileBloc>().state;
               if (state is UserProfileLoaded) {
-                final user = state.user; // Access the user from the loaded state
-
-                final updatedUserProfile = UserProfileEntity(
-                  id: user.id,
-                  username: user.username,
-                  fullName: user.fullName,
-                  email: user.email,
-                  phoneNumber: user.phoneNumber,
-                  gender: user.gender,
-                  profileImage: user.profileImage,
-                  role: user.role,
-                );
-                context.read<UserProfileBloc>().add(UpdateUserProfile( updatedUserProfile));
+                final user = state.user;
+                context.read<UserProfileBloc>().add(UpdateUserProfile(user));
               }
             },
             child: const Text('Done'),
@@ -50,7 +37,14 @@ class Profile extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(9),
-        child: BlocBuilder<UserProfileBloc, UserProfileState>(
+        child: BlocConsumer<UserProfileBloc, UserProfileState>(
+          listener: (context, state) {
+            if (state is UserProfileError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.message)),
+              );
+            }
+          },
           builder: (context, state) {
             if (state is UserProfileLoading) {
               return const Center(child: CircularProgressIndicator());
@@ -59,50 +53,94 @@ class Profile extends StatelessWidget {
               return Column(
                 children: [
                   Avatar(
+                    radius: 30,
                     imgUrl: user.profileImage,
                   ),
                   minHeight,
                   TextButton(
-                      onPressed: ()async {
-                         final picker = ImagePicker();
-                        final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-                        if (pickedFile != null) {
-                          File imageFile = File(pickedFile.path); // Convert to File
-                        //server logic
-                        }
-                      },
-                      child: const Text('Change Profile Photo')),
+                    onPressed: () async {
+                      File? imageFile = await ImagePickerService.pickImageFromGallery();
+                      if (imageFile != null) {
+                        context.read<UserProfileBloc>().add(UploadProfileImage(imageFile));
+                      }
+                    },
+                    child: const Text('Change Profile Photo')
+                  ),
                   largeHeight,
                   NameListTile(
-                      leading: 'Name', title: user.username, onTap: () {}),
+                    leading: 'UserName',
+                    title: user.username,
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRouts.editProf,
+                          arguments: {
+                            'field': user.username,
+                            'fieldType': 'UserName'
+                          });
+                    }),
                   minHeight,
                   NameListTile(
-                      leading: 'FullName', title: user.fullName, onTap: () {}),
+                    leading: 'FullName',
+                    title: user.fullName,
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRouts.editProf,
+                          arguments: {
+                            'field': user.fullName,
+                            'fieldType': 'FullName'
+                          });
+                    }),
                   minHeight,
-                  NameListTile(
-                      leading: 'Name', title: user.username, onTap: () {}),
-                  largeHeight,
                   Text(
                     'Private Information',
                     style: AppTextStyles.primaryTextTheme(),
                   ),
                   mediumHeight,
                   NameListTile(
-                      leading: 'Email', title: user.email, onTap: () {}),
+                    leading: 'Email',
+                    title: user.email,
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRouts.editProf,
+                          arguments: {
+                            'field': user.email,
+                            'fieldType': 'Email'
+                          });
+                    }),
                   minHeight,
                   NameListTile(
-                      leading: 'Phone',
-                      title: user.phoneNumber ?? '',
-                      onTap: () {}),
+                    leading: 'Phone',
+                    title: user.phoneNumber ?? 'Not set',
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRouts.editProf,
+                          arguments: {
+                            'field': user.phoneNumber ?? '',
+                            'fieldType': 'PhoneNumber'
+                          });
+                    }),
                   minHeight,
                   NameListTile(
-                      leading: 'Gender',
-                      title: user.gender ?? '',
-                      onTap: () {}),
+                    leading: 'Role',
+                    title: user.role,
+                    onTap: () {},
+                  ),
                 ],
               );
+            } else if (state is UserProfileError) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('Error: ${state.message}'),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pushReplacementNamed(
+                        context, 
+                        AppRouts.signIn
+                      ),
+                      child: const Text('Return to Login'),
+                    ),
+                  ],
+                ),
+              );
             }
-            return const Center(child: Text('Something went wrong'));
+            return const Center(child: CircularProgressIndicator());
           },
         ),
       ),

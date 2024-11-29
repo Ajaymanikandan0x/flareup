@@ -39,9 +39,8 @@ class AppFormField extends StatelessWidget {
           borderRadius: BorderRadius.circular(15.0),
           borderSide: const BorderSide(color: AppPalette.gradient2, width: 2.0),
         ),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 23,
-        ),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 23, horizontal: 23),
         hintText: hint,
         prefixIcon: icon,
         suffixIcon: IconButton(

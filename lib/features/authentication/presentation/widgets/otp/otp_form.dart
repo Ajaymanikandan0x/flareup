@@ -1,4 +1,3 @@
-import 'package:flareup/core/routes/routs.dart';
 import 'package:flareup/core/widgets/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,17 +15,8 @@ class OtpForm extends StatelessWidget {
     List<TextEditingController> controllers =
         List.generate(6, (index) => TextEditingController());
 
-    return BlocConsumer<AuthBloc, AuthState>(
-      listener: (context, state) {
-        // if (state is OtpVerificationSuccess) {
-        //   Navigator.pushNamedAndRemoveUntil(
-        //       context, AppRouts.signIn, (route) => false);
-        // } else if (state is AuthFailure) {
-        //   ScaffoldMessenger.of(context).showSnackBar(
-        //     SnackBar(content: Text(state.error)),
-        //   );
-        // }
-      },
+    return BlocBuilder<AuthBloc, AuthState>(
+ 
       builder: (context, state) {
         final email = state is SignupSuccess
             ? state.email

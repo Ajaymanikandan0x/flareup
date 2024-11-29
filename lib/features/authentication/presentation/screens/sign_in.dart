@@ -36,7 +36,7 @@ class SignIn extends StatelessWidget {
               SnackBar(content: Text(state.error)),
             );
           } else if (state is AuthSuccess) {
-                     final userId = state.userEntity.id.toString(); // Adjust this based on your state
+                     final userId = state.userEntity.id.toString(); 
           context.read<UserProfileBloc>().add(LoadUserProfile(userId));
             // Handle success (navigate to home page)
             ScaffoldMessenger.of(context).showSnackBar(

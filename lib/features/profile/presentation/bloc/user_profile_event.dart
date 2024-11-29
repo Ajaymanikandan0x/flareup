@@ -23,3 +23,25 @@ class UpdateUserProfile extends UserProfileEvent {
   @override
   List<Object> get props => [updatedProfile];
 }
+
+class UpdateProfileField extends UserProfileEvent {
+  final String fieldType;
+  final String newValue;
+
+  const UpdateProfileField({
+    required this.fieldType,
+    required this.newValue,
+  });
+
+  @override
+  List<Object> get props => [fieldType, newValue];
+}
+
+class UploadProfileImage extends UserProfileEvent {
+  final File image;
+
+  const UploadProfileImage(this.image);
+
+  @override
+  List<Object> get props => [image];
+}
