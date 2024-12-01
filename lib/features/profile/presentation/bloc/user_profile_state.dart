@@ -28,3 +28,23 @@ final class UserProfileError extends UserProfileState {
   @override
   List<Object> get props => [message];
 }
+
+class ProfileImageUploading extends UserProfileState {}
+
+class ProfileImageUploadSuccess extends UserProfileState {
+  final String imageUrl;
+
+  const ProfileImageUploadSuccess(this.imageUrl);
+
+  @override
+  List<Object> get props => [imageUrl];
+}
+
+class ProfileImageUploadFailure extends UserProfileState {
+  final String error;
+
+  const ProfileImageUploadFailure(this.error);
+
+  @override
+  List<Object> get props => [error];
+}

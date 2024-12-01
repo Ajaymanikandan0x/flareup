@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../features/authentication/presentation/screens/logo.dart';
 import '../../features/authentication/presentation/screens/onboard_screen.dart';
 import '../../features/home/presentation/screens/home.dart';
+import '../../features/profile/presentation/screens/edit.dart';
 
 class AppRouts {
   static const logo = '/';
@@ -16,22 +17,27 @@ class AppRouts {
   static const signUp = '/signUp';
   static const profile = '/profile';
   static const otpScreen = '/otpScreen';
+  static const editProf = '/editProfile';
 
-  static final Map<String, WidgetBuilder> routs = {
+  static final Map<String, Widget Function(BuildContext)> routs = {
     logo: (_) => const Logo(),
     onBoard: (_) => const OnBoardingScreen(),
     signIn: (_) => SignIn(),
     signUp: (_) => SignUp(),
     home: (_) => const Home(),
     profile: (_) => const Profile(),
-    otpScreen:(_)=> const OtpScreen() ,
+    otpScreen: (_) => const OtpScreen(),
+    editProf: (_) => const EditProfile(),
   };
 
   static Route<dynamic>? generateRoute(RouteSettings settings) {
     final builder = routs[settings.name];
     if (builder != null) {
-      return MaterialPageRoute(builder: builder);
+      return MaterialPageRoute(
+        builder: (context) => builder(context),
+        settings: settings,
+      );
     }
-    return null;
+    throw Exception('Route not found: ${settings.name}');
   }
 }

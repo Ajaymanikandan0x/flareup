@@ -12,7 +12,7 @@ import '../../../profile/presentation/bloc/user_profile_bloc.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
-import '../widgets/auth/form_feild.dart';
+import '../../../../core/widgets/form_feild.dart';
 import '../widgets/auth/google_log.dart';
 import '../widgets/auth/sign_up_text.dart';
 
@@ -36,7 +36,7 @@ class SignIn extends StatelessWidget {
               SnackBar(content: Text(state.error)),
             );
           } else if (state is AuthSuccess) {
-                     final userId = state.userEntity.id.toString(); // Adjust this based on your state
+                     final userId = state.userEntity.id.toString(); 
           context.read<UserProfileBloc>().add(LoadUserProfile(userId));
             // Handle success (navigate to home page)
             ScaffoldMessenger.of(context).showSnackBar(

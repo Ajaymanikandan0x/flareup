@@ -11,11 +11,17 @@ class OnBoardingImageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset(
-      onBoardingModel.image,
-      height: 300,
-      width: double.maxFinite,
-      fit: BoxFit.fitWidth,
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage(onBoardingModel.image),
+          fit: BoxFit.cover,
+          colorFilter: ColorFilter.mode(
+            Colors.black.withOpacity(0.3),
+            BlendMode.darken,
+          ),
+        ),
+      ),
     );
   }
 }

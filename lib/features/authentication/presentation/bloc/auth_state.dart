@@ -22,6 +22,20 @@ class AuthSuccess extends AuthState {
   List<Object> get props => [userEntity, message];
 }
 
+// Add this new state for Google Auth
+class GoogleAuthSuccess extends AuthState {
+  final UserEntitySignIn userEntity;
+  final String message;
+
+  const GoogleAuthSuccess({
+    required this.userEntity,
+    required this.message,
+  });
+
+  @override
+  List<Object> get props => [userEntity, message];
+}
+
 class AuthFailure extends AuthState {
   final String error;
 
@@ -61,6 +75,13 @@ class OtpVerificationSuccess extends AuthState {
 
   @override
   List<Object> get props => [email, message];
+}
+
+class EmailAuthSuccess extends AuthState {
+  final UserEntitySignIn userEntity;
+  final String message;
+
+  const EmailAuthSuccess({required this.userEntity, required this.message});
 }
 
 

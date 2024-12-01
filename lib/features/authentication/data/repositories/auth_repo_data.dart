@@ -51,4 +51,32 @@ class UserRepositoryImpl implements AuthRepositoryDomain {
       throw Exception(' failed: $e');
     }
   }
+
+  @override
+  Future<void> logout() async {
+    try {
+      await remoteDatasource.logout();
+    } catch (e) {
+      throw Exception('Logout failed: $e');
+    }
+  }
+
+  @override
+  Future<void> resendOtp({required String email}) async {
+    try {
+      await remoteDatasource.resendOtp(email: email);
+    } catch (e) {
+      throw Exception('Resend OTP failed: $e');
+    }
+  }
+
+  @override
+  Future<UserEntitySignIn> googleAuth({required String accessToken}) async {
+    try {
+      final responseModel = await remoteDatasource.googleAuth(accessToken: accessToken);
+      return responseModel.toEntity();
+    } catch (e) {
+      throw Exception('Google authentication failed: $e');
+    }
+  }
 }

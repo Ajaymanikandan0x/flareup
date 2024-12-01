@@ -3,8 +3,8 @@ import 'package:flareup/core/theme/app_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
+import '../../../../core/theme/text_theme.dart';
 import '../../../../core/widgets/primary_button.dart';
-import '../widgets/on_board/on_boarding_image_Card.dart';
 import '../widgets/on_board/on_boarding_list.dart';
 import '../widgets/on_board/on_boarding_text_card.dart';
 
@@ -16,9 +16,14 @@ class OnBoardingScreen extends StatefulWidget {
 }
 
 class _OnBoardingScreenState extends State<OnBoardingScreen> {
-  final PageController _pageController1 = PageController(initialPage: 0);
-  final PageController _pageController2 = PageController(initialPage: 0);
+  final PageController _pageController = PageController(initialPage: 0);
   int _currentIndex = 0;
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,23 +35,28 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
               scrollDirection: Axis.horizontal,
               itemCount: onBoardingList.length,
               physics: const BouncingScrollPhysics(),
-              controller: _pageController1,
+              controller: _pageController,
               onPageChanged: (index) {
                 setState(() {
                   _currentIndex = index;
                 });
               },
               itemBuilder: (context, index) {
-                return SizedBox(
-                  width: double.infinity,
-                  height: double.infinity,
-                  child: OnBoardingImageCard(
-                    onBoardingModel: onBoardingList[index],
+                return Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage(onBoardingList[index].image),
+                      fit: BoxFit.cover,
+                      colorFilter: ColorFilter.mode(
+                        Colors.black.withOpacity(0.3),
+                        BlendMode.darken,
+                      ),
+                    ),
                   ),
                 );
               }),
           Positioned(
-            bottom: 160, // Adjust as needed
+            bottom: 160,
             left: 0,
             right: 0,
             child: OnboardingTextCard(
@@ -54,12 +64,12 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
             ),
           ),
           Positioned(
-            bottom: 110, // Adjust as needed
+            bottom: 110,
             left: 0,
             right: 0,
             child: Center(
               child: SmoothPageIndicator(
-                controller: _pageController1,
+                controller: _pageController,
                 count: onBoardingList.length,
                 effect: const ExpandingDotsEffect(
                     dotWidth: 10,
@@ -69,17 +79,31 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
             ),
           ),
           Positioned(
-            top: 30,
-            right: 20,
-            child: Container(
-              height: 40,
-              width: 40,
-              margin: const EdgeInsets.all(30),
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(15)),
-                gradient: AppPalette.myGradient,
+            top: 48,
+            right: 24,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pushReplacementNamed(context, AppRouts.signIn);
+              },
+              child: Container(
+                height: 36,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(18),
+                  gradient: AppPalette.myGradient,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child:  Text(
+                  'Skip',
+                  style: AppTextStyles.primaryTextTheme(fontSize: 14),
+                ),
               ),
-              child: Text('Skip'),
             ),
           ),
           Positioned(
@@ -88,21 +112,14 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
             right: 25,
             child: PrimaryButton(
               elevation: 0,
-              onTap: () async {
-                if (_pageController1.hasClients && _currentIndex < onBoardingList.length) {
-                  if (_currentIndex == onBoardingList.length - 1) {
-                    Navigator.pushNamed(context, AppRouts.signIn);
-                  } else {
-                    await Future.delayed(const Duration(milliseconds: 100));
-                    _pageController1.nextPage(
-                      duration: const Duration(milliseconds: 500),
-                      curve: Curves.fastOutSlowIn,
-                    );
-                    _pageController2.nextPage(
-                      duration: const Duration(milliseconds: 500),
-                      curve: Curves.fastOutSlowIn,
-                    );
-                  }
+              onTap: () {
+                if (_currentIndex == onBoardingList.length - 1) {
+                  Navigator.pushReplacementNamed(context, AppRouts.signIn);
+                } else {
+                  _pageController.nextPage(
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.fastOutSlowIn,
+                  );
                 }
               },
               text: _currentIndex == onBoardingList.length - 1

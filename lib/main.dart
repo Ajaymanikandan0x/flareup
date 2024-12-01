@@ -3,9 +3,12 @@ import 'package:flareup/core/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'core/config/app_config.dart';
 import 'dependency_injector.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await AppConfig.initialize();
   final injector = DependencyInjector();
   injector.setup();
   runApp(const MyApp());

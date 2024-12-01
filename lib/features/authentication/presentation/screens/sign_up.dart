@@ -3,7 +3,7 @@ import 'package:flareup/core/routes/routs.dart';
 import 'package:flareup/core/utils/validation.dart';
 import 'package:flareup/core/widgets/primary_button.dart';
 import 'package:flareup/features/authentication/presentation/bloc/auth_event.dart';
-import 'package:flareup/features/authentication/presentation/widgets/auth/form_feild.dart';
+import 'package:flareup/core/widgets/form_feild.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -37,7 +37,6 @@ class SignUp extends StatelessWidget {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.error)),
             );
-            print(state.error);
           } else if (state is SignupSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
@@ -113,7 +112,6 @@ class SignUp extends StatelessWidget {
                           final password =
                               passwordConformController.text.trim();
 
-                          // Add signup event with correct values
                           authBloc.add(SignupEvent(
                             username: username,
                             role: 'user',
