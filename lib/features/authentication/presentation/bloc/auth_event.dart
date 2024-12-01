@@ -67,3 +67,12 @@ class LogoutEvent extends AuthEvent {
   @override
   List<Object?> get props => [];
 }
+
+class GoogleAuthEvent extends AuthEvent {
+  final String accessToken;
+
+  GoogleAuthEvent({required this.accessToken});
+
+  @override
+  List<Object?> get props => [accessToken];
+}

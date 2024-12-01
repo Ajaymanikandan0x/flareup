@@ -36,20 +36,18 @@ class UserProfileModel {
 
   Map<String, dynamic> toJson({bool onlyProfileImage = false}) {
     if (onlyProfileImage) {
-        return {
-            'id': id,
-            'profile_publicId': profileImage
-        };
+      return {
+        'id': id,
+        'profile_publicId': profileImage,
+      };
     } else {
-        return {
-            'id': id,
-            'username': username,
-            'fullname': fullName,
-            'email': email,
-            'phone_number': phoneNumber,
-            'update_type': 'full_profile',
-            'profile_publicId': profileImage
-        };
+      return {
+        'id': id,
+        'username': username,
+        'fullname': fullName,
+        'email': email,
+        'phone_number': phoneNumber,
+      };
     }
   }
 

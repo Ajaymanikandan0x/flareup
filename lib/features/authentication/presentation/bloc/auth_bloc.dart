@@ -1,12 +1,14 @@
 import 'package:flareup/features/authentication/domain/usecases/otp_send_usecase.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/storage/secure_storage_service.dart';
+import '../../domain/repositories/auth_repo_domain.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/signup_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/resend_otp_usecase.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
+
 
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
@@ -16,6 +18,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final ResendOtpUseCase resendOtpUseCase;
   final LogoutUseCase logoutUseCase;
   final SecureStorageService storageService;
+  final AuthRepositoryDomain authRepository;
 
   AuthBloc({
     required this.loginUseCase,
@@ -24,12 +27,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.resendOtpUseCase,
     required this.logoutUseCase,
     required this.storageService,
+    required this.authRepository,
   }) : super(AuthInitial()) {
     on<LoginEvent>(_onLoginEvent);
     on<SignupEvent>(_onSignupEvent);
     on<SendOtpEvent>(_otpSend);
     on<ResendOtpEvent>(_resendOtp);
     on<LogoutEvent>(_onLogoutEvent);
+    on<GoogleAuthEvent>(_onGoogleAuthEvent);
   }
 
   Future<void> _onLoginEvent(LoginEvent event, Emitter<AuthState> emit) async {
@@ -99,6 +104,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthInitial());
     } catch (e) {
       emit(AuthFailure(error: 'Logout failed: ${e.toString()}'));
+    }
+  }
+
+  Future<void> _onGoogleAuthEvent(
+    GoogleAuthEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    try {
+      final userEntity = await authRepository.googleAuth(accessToken: event.accessToken);
+      emit(AuthSuccess(userEntity: userEntity, message: 'Google login successful!'));
+    } catch (e) {
+      emit(AuthFailure(error: 'Google authentication failed: ${e.toString()}'));
     }
   }
 }

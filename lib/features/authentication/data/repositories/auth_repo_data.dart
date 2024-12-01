@@ -69,4 +69,14 @@ class UserRepositoryImpl implements AuthRepositoryDomain {
       throw Exception('Resend OTP failed: $e');
     }
   }
+
+  @override
+  Future<UserEntitySignIn> googleAuth({required String accessToken}) async {
+    try {
+      final responseModel = await remoteDatasource.googleAuth(accessToken: accessToken);
+      return responseModel.toEntity();
+    } catch (e) {
+      throw Exception('Google authentication failed: $e');
+    }
+  }
 }

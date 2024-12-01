@@ -60,8 +60,9 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     try {
       await updateUserProfile(event.updatedProfile, onlyProfileImage: event.onlyProfileImage);
       
-      // Introduce a delay or retry mechanism
-      await Future.delayed(Duration(seconds: 2));  // Example delay
+      // Wait for the update to be processed
+      await Future.delayed(const Duration(milliseconds: 500));
+      
       final updatedUser = await getUserProfile(event.updatedProfile.id);
       emit(UserProfileLoaded(updatedUser));
     } catch (e) {
@@ -142,14 +143,18 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
         email: event.fieldType == 'Email' ? event.newValue : currentUser.email,
         phoneNumber: event.fieldType == 'PhoneNumber' ? event.newValue : currentUser.phoneNumber,
         role: currentUser.role,
-        profileImage: currentUser.profileImage,
+        profileImage: null,
         password: currentUser.password,
       );
 
       emit(UserProfileLoading());
       try {
         print('Updating field: ${event.fieldType} with value: ${event.newValue}');
-        await updateUserProfile(updatedUser);
+        await updateUserProfile(updatedUser, onlyProfileImage: false);
+        
+        // Add a small delay before fetching updated profile
+        await Future.delayed(const Duration(milliseconds: 500));
+        
         final refreshedUser = await getUserProfile(updatedUser.id);
         emit(UserProfileLoaded(refreshedUser));
       } catch (e) {

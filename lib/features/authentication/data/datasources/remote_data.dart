@@ -1,12 +1,42 @@
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:flareup/core/constants/api_constants.dart';
 import 'package:flareup/features/authentication/data/models/user_model_signup.dart';
 
 import '../models/otp_model.dart';
 import '../models/user_model_signin.dart';
 
+import 'dart:math';
+
 class UserRemoteDatasource {
-  final dio = Dio();
+  late final Dio dio;
+
+  UserRemoteDatasource() {
+    dio = Dio();
+    dio.options.headers['Content-Type'] = 'application/json';
+    
+    if (!const bool.fromEnvironment('dart.vm.product')) {
+      // Development-only certificate handling
+      (dio.httpClientAdapter as IOHttpClientAdapter).validateCertificate = (cert, host, port) {
+        // TODO: Add proper certificate validation logic
+        // For development, you might want to:
+        // 1. Validate against specific known certificates
+        // 2. Check certificate fingerprints
+        // 3. Verify certificate chain
+        return true; // Still unsafe, but at least confined to development
+      };
+    } else {
+      // Production certificate handling
+      (dio.httpClientAdapter as IOHttpClientAdapter).validateCertificate = (cert, host, port) {
+        // Proper certificate validation
+        final isValidHost = cert?.subject.contains(host) ?? false;
+        final isValidIssuer = cert?.issuer.contains("YourExpectedIssuer") ?? false;
+        final isNotExpired = cert?.endValidity.isAfter(DateTime.now()) ?? false;
+        
+        return isValidHost && isValidIssuer && isNotExpired;
+      };
+    }
+  }
 
   Future<UserModelSignIn> login(
       {required String username, required String password}) async {
@@ -183,6 +213,40 @@ class UserRemoteDatasource {
       }
     } catch (e) {
       throw Exception('Logout request failed: $e');
+    }
+  }
+
+  Future<UserModelSignIn> googleAuth({required String accessToken}) async {
+    try {
+      print('\n=== Starting Backend Google Auth Request ===');
+      print('Endpoint: ${ApiEndpoints.baseUrl + ApiEndpoints.googleAuth}');
+      
+      final response = await dio.post(
+        ApiEndpoints.baseUrl + ApiEndpoints.googleAuth,
+        data: {
+          'gToken': accessToken,
+        },
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      print('\n=== Backend Response ===');
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
+
+      if (response.statusCode == 200) {
+        return UserModelSignIn.fromJson(response.data);
+      } else {
+        throw Exception('Google authentication failed: ${response.statusCode} - ${response.data}');
+      }
+    } catch (e) {
+      print('\n=== Request Error ===');
+      print('Error Type: ${e.runtimeType}');
+      print('Error Message: $e');
+      throw Exception('Google authentication failed: $e');
     }
   }
 }

@@ -67,6 +67,7 @@ class DependencyInjector {
       resendOtpUseCase: _resendOtpUseCase,
       logoutUseCase: _logoutUseCase,
       storageService: storageService,
+      authRepository: _authRepository,
     );
   }
 
