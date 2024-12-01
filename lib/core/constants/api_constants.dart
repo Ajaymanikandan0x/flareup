@@ -11,4 +11,6 @@ class ApiEndpoints {
   static const updateUserProfile =
       'user/user_id/update_user_profile/'; //(patch) username, fullname, phone_number, email, profile_publicId  update user profile
   static const googleAuth = 'GoogleAuth/'; //gToken
+  static const updatePassword =
+      'user/user_id/set_password/'; //{’new_password’: ‘’, ‘confirm_password’: ‘'
 }

@@ -53,12 +53,15 @@ class UserProfileRemoteDataSourceImpl implements UserProfileRemoteDataSource {
       final data = userProfile.toJson(onlyProfileImage: onlyProfileImage);
       print('Profile update endpoint: $endpoint');
       print('Profile update data: $data');
-      print('onlyProfileImage flag: $onlyProfileImage');
       
-      print('Sending data: ${data}');
       final response = await dio.patch(
         endpoint,
         data: data,
+        options: Options(
+          validateStatus: (status) {
+            return status! < 500; // Don't throw on 4xx errors
+          },
+        ),
       );
       
       print('Profile update response status: ${response.statusCode}');
@@ -70,8 +73,11 @@ class UserProfileRemoteDataSourceImpl implements UserProfileRemoteDataSource {
             'Server error: ${response.statusCode}';
         throw Exception(errorMessage);
       }
-    } on FormatException {
-      throw Exception('Invalid user ID format');
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 500) {
+        throw Exception('Server error. Please try again later.');
+      }
+      throw Exception(e.message ?? 'Failed to update profile');
     } catch (e) {
       print('Error type: ${e.runtimeType}');
       print('Error message: $e');

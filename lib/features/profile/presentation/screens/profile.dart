@@ -27,8 +27,7 @@ class Profile extends StatelessWidget {
             onPressed: () async {
               final state = context.read<UserProfileBloc>().state;
               if (state is UserProfileLoaded) {
-                final user = state.user;
-                context.read<UserProfileBloc>().add(UpdateUserProfile(user));
+                Navigator.pop(context);
               }
             },
             child: const Text('Done'),

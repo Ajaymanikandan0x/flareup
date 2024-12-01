@@ -12,7 +12,7 @@ import '../../../profile/presentation/bloc/user_profile_bloc.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
-import '../widgets/auth/form_feild.dart';
+import '../../../../core/widgets/form_feild.dart';
 import '../widgets/auth/google_log.dart';
 import '../widgets/auth/sign_up_text.dart';
 

@@ -24,24 +24,29 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
   Future<void> _handleSignIn() async {
     try {
       print('\n=== Starting Google Sign In Process ===');
-      
+
       // Clear any existing sessions
       await _googleSignIn.signOut();
-      
+
       print('\nAttempting to sign in...');
-      
+
       final GoogleSignInAccount? account = await _googleSignIn.signIn();
-      
+
       if (account != null) {
         print('\n=== Successfully Retrieved Google Account ===');
         final GoogleSignInAuthentication auth = await account.authentication;
-        final String? idToken = auth.idToken;
-        
-        if (idToken != null) {
+        final String? accessToken = auth.accessToken;
+        print('\n=== Access Token: $accessToken ===');
+
+        if (accessToken != null) {
           if (!context.mounted) return;
-          context.read<AuthBloc>().add(GoogleAuthEvent(accessToken: idToken));
+
+          // Send access token to backend using AuthBloc
+          context
+              .read<AuthBloc>()
+              .add(GoogleAuthEvent(accessToken: accessToken));
         } else {
-          throw Exception('Failed to obtain ID token');
+          throw Exception('Failed to obtain access token');
         }
       } else {
         print('\n=== Sign In Cancelled by User ===');
@@ -50,7 +55,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
       print('\n=== Error Details ===');
       print('Error Type: ${error.runtimeType}');
       print('Error Message: $error');
-      
+
       String errorMessage = 'Google Sign In failed';
       if (error is PlatformException) {
         switch (error.code) {
@@ -64,10 +69,11 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
             errorMessage = 'Sign in was cancelled';
             break;
           default:
-            errorMessage = 'Please make sure Google Play Services is installed and updated';
+            errorMessage =
+                'Please make sure Google Play Services is installed and updated';
         }
       }
-      
+
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
