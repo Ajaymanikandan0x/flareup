@@ -6,6 +6,9 @@ import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/signup_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/resend_otp_usecase.dart';
+
+import '../../domain/usecases/verify_reset_password_otp_usecase.dart';
+
 import 'auth_event.dart';
 import 'auth_state.dart';
 
@@ -20,6 +23,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SecureStorageService storageService;
   final AuthRepositoryDomain authRepository;
 
+  final VerifyResetPasswordOtpUseCase verifyResetPasswordOtpUseCase;
+
+
   AuthBloc({
     required this.loginUseCase,
     required this.signupUseCase,
@@ -28,6 +34,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.logoutUseCase,
     required this.storageService,
     required this.authRepository,
+
+    required this.verifyResetPasswordOtpUseCase,
+
   }) : super(AuthInitial()) {
     on<LoginEvent>(_onLoginEvent);
     on<SignupEvent>(_onSignupEvent);
@@ -35,6 +44,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<ResendOtpEvent>(_resendOtp);
     on<LogoutEvent>(_onLogoutEvent);
     on<GoogleAuthEvent>(_onGoogleAuthEvent);
+    on<ForgotPasswordEvent>(_onForgotPasswordEvent);
+    on<ResetPasswordEvent>(_onResetPasswordEvent);
+    on<VerifyResetPasswordOtpEvent>(_onVerifyResetPasswordOtp);
+
   }
 
   Future<void> _onLoginEvent(LoginEvent event, Emitter<AuthState> emit) async {
@@ -79,7 +92,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await otpUsecase.call(email: event.email, otp: event.otp);
       emit(OtpVerificationSuccess(
         email: event.email,
-        message: 'OTP verification successful!'
+        message: 'OTP verification successful!',
+        otp: event.otp,
       ));
     } catch (e) {
       emit(AuthFailure(error: 'OTP verification failed: ${e.toString()}'));
@@ -96,7 +110,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onLogoutEvent(LogoutEvent event, Emitter<AuthState> emit) async {
+
+  Future<void> _onLogoutEvent(
+      LogoutEvent event, Emitter<AuthState> emit) async {
+
     emit(AuthLoading());
     try {
       await logoutUseCase.call();
@@ -113,10 +130,126 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthLoading());
     try {
-      final userEntity = await authRepository.googleAuth(accessToken: event.accessToken);
-      emit(AuthSuccess(userEntity: userEntity, message: 'Google login successful!'));
+
+      print('Attempting Google Sign In...');
+      try {
+        final userEntity = await authRepository.googleSignIn(
+          accessToken: event.accessToken,
+        );
+        print('Google Sign In successful');
+        await storageService.saveTokens(
+          accessToken: userEntity.accessToken,
+          refreshToken: userEntity.refreshToken,
+          userId: userEntity.id.toString(),
+        );
+        emit(AuthSuccess(
+            userEntity: userEntity, message: 'Google login successful!'));
+      } catch (signInError) {
+        print('Sign In Error: $signInError');
+        if (signInError.toString().contains('REGISTRATION_REQUIRED')) {
+          print('Registration required, attempting signup...');
+          final userEntity = await authRepository.googleSignUp(
+            accessToken: event.accessToken,
+            role: 'user',
+          );
+          print('Registration successful');
+          await storageService.saveTokens(
+            accessToken: userEntity.accessToken,
+            refreshToken: userEntity.refreshToken,
+            userId: userEntity.id.toString(),
+          );
+          emit(AuthSuccess(
+              userEntity: userEntity,
+              message: 'Google registration successful!'));
+        } else {
+          final errorMessage = signInError
+              .toString()
+              .replaceAll('Exception: ', '')
+              .replaceAll('Google sign in failed: ', '');
+          throw Exception(errorMessage);
+        }
+      }
     } catch (e) {
-      emit(AuthFailure(error: 'Google authentication failed: ${e.toString()}'));
+      print('Google Auth Error: $e');
+      final errorMessage = e
+          .toString()
+          .replaceAll('Exception: ', '')
+          .replaceAll('Google Oauth Failed: ', '');
+      emit(AuthFailure(error: errorMessage));
+    }
+  }
+
+  Future<void> _onForgotPasswordEvent(
+    ForgotPasswordEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    try {
+      print('\n=== Forgot Password Request ===');
+      print('Attempting to send reset password email to: ${event.email}');
+
+      await authRepository.forgotPassword(email: event.email);
+
+      emit(ForgotPasswordSuccess(
+        email: event.email,
+        message: 'An OTP has been sent to your email',
+      ));
+    } catch (e) {
+      print('\nError in forgot password: $e');
+      String errorMessage = e.toString().replaceAll('Exception:', '').trim();
+      emit(AuthFailure(error: errorMessage));
+    }
+  }
+
+  Future<void> _onResetPasswordEvent(
+    ResetPasswordEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    try {
+      await authRepository.resetPassword(
+        email: event.email,
+        newPassword: event.newPassword,
+        otp: event.otp,
+      );
+      emit(const ResetPasswordSuccess(
+        message: 'Password reset successful! Please login with your new password.',
+      ));
+    } catch (e) {
+      String errorMessage = e.toString().replaceAll('Exception:', '').trim();
+      emit(AuthFailure(error: errorMessage));
+    }
+  }
+
+  Future<void> _onVerifyResetPasswordOtp(
+    VerifyResetPasswordOtpEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    try {
+      print('\n=== Processing Verify Reset Password OTP ===');
+      print('Email: ${event.email}');
+      print('OTP: ${event.otp}');
+
+      await verifyResetPasswordOtpUseCase.call(
+        email: event.email,
+        otp: event.otp,
+      );
+
+      print('\nOTP verification successful, emitting success state');
+      emit(PasswordResetOtpSuccess(
+        email: event.email,
+        message: 'OTP verified successfully',
+        otp: event.otp,
+      ));
+    } catch (e) {
+      print('\nError in verify reset password OTP: $e');
+      String errorMessage = e.toString();
+      if (errorMessage.contains('Exception:')) {
+        errorMessage = errorMessage.replaceAll('Exception:', '').trim();
+      }
+      emit(AuthFailure(error: errorMessage));
+
     }
   }
 }

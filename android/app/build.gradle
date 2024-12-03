@@ -21,7 +21,9 @@ android {
 
     defaultConfig {
         applicationId = "com.example.flareup"
-        minSdk = 21
+
+        minSdk = flutter.minSdkVersion
+
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -29,17 +31,20 @@ android {
 
     signingConfigs {
         debug {
-            storeFile file('my-keystore.jks')
-            storePassword 'flareUp'
-            keyAlias 'androiddebugkey'
-            keyPassword 'flareUp'
+            storeFile file("debug.keystore")
+            storePassword "flare-up"
+            keyAlias "androiddebugkey"
+            keyPassword "flare-up"
+
         }
     }
 
     buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+
             signingConfig signingConfigs.debug
         }
     }
@@ -50,5 +55,7 @@ flutter {
 }
 
 dependencies {
-    implementation 'com.google.android.gms:play-services-auth:20.7.0'
+
+    implementation 'com.google.android.gms:play-services-auth:21.2.0'
+
 }

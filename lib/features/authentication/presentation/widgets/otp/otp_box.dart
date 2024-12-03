@@ -29,7 +29,9 @@ class OtpBox extends StatelessWidget {
           LengthLimitingTextInputFormatter(1),
           FilteringTextInputFormatter.digitsOnly,
         ],
-        style: Theme.of(context).textTheme.titleLarge,
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              color: AppPalette.white,
+            ),
         textAlign: TextAlign.center,
         decoration: InputDecoration(
           hintText: "0",

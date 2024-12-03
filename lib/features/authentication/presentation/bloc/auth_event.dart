@@ -76,3 +76,42 @@ class GoogleAuthEvent extends AuthEvent {
   @override
   List<Object?> get props => [accessToken];
 }
+
+
+class ForgotPasswordEvent extends AuthEvent {
+  final String email;
+
+  const ForgotPasswordEvent({required this.email});
+
+  @override
+  List<Object?> get props => [email];
+}
+
+class ResetPasswordEvent extends AuthEvent {
+  final String email;
+  final String newPassword;
+  final String otp;
+
+  const ResetPasswordEvent({
+    required this.email,
+    required this.newPassword,
+    required this.otp,
+  });
+
+  @override
+  List<Object?> get props => [email, newPassword, otp];
+}
+
+class VerifyResetPasswordOtpEvent extends AuthEvent {
+  final String email;
+  final String otp;
+
+  const VerifyResetPasswordOtpEvent({
+    required this.email,
+    required this.otp,
+  });
+
+  @override
+  List<Object?> get props => [email, otp];
+}
+

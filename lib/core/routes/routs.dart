@@ -4,8 +4,10 @@ import 'package:flareup/features/authentication/presentation/screens/sign_up.dar
 import 'package:flareup/features/profile/presentation/screens/profile.dart';
 import 'package:flutter/material.dart';
 
+import '../../features/authentication/presentation/screens/forgot_password.dart';
 import '../../features/authentication/presentation/screens/logo.dart';
 import '../../features/authentication/presentation/screens/onboard_screen.dart';
+import '../../features/authentication/presentation/screens/reset_password.dart';
 import '../../features/home/presentation/screens/home.dart';
 import '../../features/profile/presentation/screens/edit.dart';
 
@@ -18,6 +20,9 @@ class AppRouts {
   static const profile = '/profile';
   static const otpScreen = '/otpScreen';
   static const editProf = '/editProfile';
+  static const forgotPassword = '/forgotPassword';
+  static const resetPassword = '/resetPassword';
+
 
   static final Map<String, Widget Function(BuildContext)> routs = {
     logo: (_) => const Logo(),
@@ -28,6 +33,9 @@ class AppRouts {
     profile: (_) => const Profile(),
     otpScreen: (_) => const OtpScreen(),
     editProf: (_) => const EditProfile(),
+    forgotPassword: (_) => const ForgotPasswordScreen(),
+    resetPassword: (_) => ResetPasswordScreen(),
+
   };
 
   static Route<dynamic>? generateRoute(RouteSettings settings) {

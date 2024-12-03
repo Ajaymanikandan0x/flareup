@@ -18,66 +18,90 @@ class GoogleSignInButton extends StatefulWidget {
 
 class _GoogleSignInButtonState extends State<GoogleSignInButton> {
   final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: ['email', 'profile'],
+
+    scopes: [
+      'email',
+      'profile',
+      'openid',
+    ],
+    signInOption: SignInOption.standard,
+    serverClientId:
+        '837006381197-ntpeojnppdcu0g5j01enk4gm8spaimfm.apps.googleusercontent.com',
+
   );
 
   Future<void> _handleSignIn() async {
     try {
       print('\n=== Starting Google Sign In Process ===');
 
-      // Clear any existing sessions
+      print('1. Initiating sign out to ensure fresh sign-in...');
       await _googleSignIn.signOut();
 
-      print('\nAttempting to sign in...');
-
+      print('2. Attempting to sign in...');
       final GoogleSignInAccount? account = await _googleSignIn.signIn();
 
-      if (account != null) {
-        print('\n=== Successfully Retrieved Google Account ===');
-        final GoogleSignInAuthentication auth = await account.authentication;
-        final String? accessToken = auth.accessToken;
-        print('\n=== Access Token: $accessToken ===');
+      if (account == null) {
+        print('Sign in cancelled by user');
+        return;
 
-        if (accessToken != null) {
-          if (!context.mounted) return;
-
-          // Send access token to backend using AuthBloc
-          context
-              .read<AuthBloc>()
-              .add(GoogleAuthEvent(accessToken: accessToken));
-        } else {
-          throw Exception('Failed to obtain access token');
-        }
-      } else {
-        print('\n=== Sign In Cancelled by User ===');
       }
+
+      print('\n3. Account Details:');
+      print('Email: ${account.email}');
+      print('Display Name: ${account.displayName}');
+      print('ID: ${account.id}');
+
+      print('\n4. Requesting authentication...');
+      final GoogleSignInAuthentication auth = await account.authentication;
+
+      print('\n5. Authentication tokens:');
+      print('Access Token present: ${auth.accessToken != null}');
+      print('ID Token present: ${auth.idToken != null}');
+
+      // Always use ID token for backend authentication
+      final String? token = auth.idToken;
+
+      if (token == null) {
+        print('\nERROR: Failed to obtain ID token');
+        print('Access Token: ${auth.accessToken}');
+        throw Exception('Failed to obtain ID token');
+      }
+
+      print('\n6. ID Token obtained successfully');
+      print('Token length: ${token.length}');
+      print('Token prefix: ${token.substring(0, 10)}...');
+
+      if (!mounted) return;
+      context.read<AuthBloc>().add(GoogleAuthEvent(accessToken: token));
     } catch (error) {
       print('\n=== Error Details ===');
-      print('Error Type: ${error.runtimeType}');
-      print('Error Message: $error');
 
-      String errorMessage = 'Google Sign In failed';
+      print('Error type: ${error.runtimeType}');
+      print('Full error details: $error');
+      print('Stack trace:');
+      print(StackTrace.current);
+
+      if (!mounted) return;
+
+      String message = 'Authentication failed';
       if (error is PlatformException) {
-        switch (error.code) {
-          case 'network_error':
-            errorMessage = 'Please check your internet connection';
-            break;
-          case 'sign_in_required':
-            errorMessage = 'Please sign in to continue';
-            break;
-          case 'sign_in_canceled':
-            errorMessage = 'Sign in was cancelled';
-            break;
-          default:
-            errorMessage =
-                'Please make sure Google Play Services is installed and updated';
+        print('\nPlatform Exception Details:');
+        print('Error code: ${error.code}');
+        print('Error message: ${error.message}');
+        print('Error details: ${error.details}');
+
+        if (error.code == 'sign_in_failed') {
+          message =
+              'Google Sign In configuration error. Please check your setup.';
+        } else {
+          message = error.message ?? 'Google Sign In failed';
         }
       }
 
-      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(errorMessage),
+          content: Text(message),
+
           backgroundColor: Colors.red,
         ),
       );
@@ -88,15 +112,18 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-        if (state is GoogleAuthSuccess) {
-          // Handle successful Google authentication
-          Navigator.pushReplacementNamed(
-              context, '/home'); // Or your desired route
+
+        if (state is AuthSuccess) {
+          Navigator.pushReplacementNamed(context, '/home');
+
         } else if (state is AuthFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.error),
               backgroundColor: Colors.red,
+
+              duration: const Duration(seconds: 3),
+
             ),
           );
         }

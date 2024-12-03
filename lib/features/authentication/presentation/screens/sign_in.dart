@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/routes/routs.dart';
 import '../../../../core/theme/text_theme.dart';
+import '../../../../core/widgets/form_feild.dart';
 import '../../../../core/widgets/logo_gradient.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../../../../dependency_injector.dart';
@@ -12,7 +13,7 @@ import '../../../profile/presentation/bloc/user_profile_bloc.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
-import '../../../../core/widgets/form_feild.dart';
+
 import '../widgets/auth/google_log.dart';
 import '../widgets/auth/sign_up_text.dart';
 
@@ -36,8 +37,10 @@ class SignIn extends StatelessWidget {
               SnackBar(content: Text(state.error)),
             );
           } else if (state is AuthSuccess) {
-                     final userId = state.userEntity.id.toString(); 
-          context.read<UserProfileBloc>().add(LoadUserProfile(userId));
+
+            final userId = state.userEntity.id.toString();
+            context.read<UserProfileBloc>().add(LoadUserProfile(userId));
+
             // Handle success (navigate to home page)
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
@@ -72,7 +75,7 @@ class SignIn extends StatelessWidget {
                 largeHeight,
                 AppFormField(
                   hint: 'password',
-                  icon: const Icon(Icons.person_2),
+                  icon: const Icon(Icons.lock),
                   isObscureText: true,
                   controller: passwordController,
                   validator: FormValidator.validatePassword,
@@ -80,9 +83,14 @@ class SignIn extends StatelessWidget {
                 largeHeight,
                 Align(
                   alignment: const Alignment(1.0, 0.0),
-                  child: Text(
-                    'Forgot Password ',
-                    style: AppTextStyles.hindTextTheme(),
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, AppRouts.forgotPassword);
+                    },
+                    child: Text(
+                      'Forgot Password',
+                      style: AppTextStyles.hindTextTheme(),
+                    ),
                   ),
                 ),
                 largeHeight,

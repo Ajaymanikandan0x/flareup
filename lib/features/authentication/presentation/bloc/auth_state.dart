@@ -70,11 +70,16 @@ class OtpVerificationState extends AuthState {
 class OtpVerificationSuccess extends AuthState {
   final String email;
   final String message;
+  final String otp;
 
-  const OtpVerificationSuccess({required this.email, required this.message});
+  const OtpVerificationSuccess({
+    required this.email,
+    required this.message,
+    required this.otp,
+  });
 
   @override
-  List<Object> get props => [email, message];
+  List<Object> get props => [email, message, otp];
 }
 
 class EmailAuthSuccess extends AuthState {
@@ -82,6 +87,57 @@ class EmailAuthSuccess extends AuthState {
   final String message;
 
   const EmailAuthSuccess({required this.userEntity, required this.message});
+}
+
+class ForgotPasswordSuccess extends AuthState {
+  final String email;
+  final String message;
+
+  const ForgotPasswordSuccess({required this.email, required this.message});
+
+  @override
+  List<Object> get props => [email, message];
+}
+
+
+class ResetPasswordSuccess extends AuthState {
+  final String message;
+
+  const ResetPasswordSuccess({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}
+
+// Add this new state for password reset OTP verification
+class PasswordResetOtpSuccess extends AuthState {
+  final String email;
+  final String message;
+  final String otp;
+
+  const PasswordResetOtpSuccess({
+    required this.email,
+    required this.message,
+    required this.otp,
+  });
+
+  @override
+  List<Object> get props => [email, message, otp];
+}
+
+// Add this class after PasswordResetOtpSuccess
+class ResetPasswordInitial extends AuthState {
+  final String email;
+  final String otp;
+
+  const ResetPasswordInitial({
+    required this.email,
+    required this.otp,
+  });
+
+  @override
+  List<Object> get props => [email, otp];
+
 }
 
 

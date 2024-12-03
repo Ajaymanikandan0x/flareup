@@ -71,12 +71,86 @@ class UserRepositoryImpl implements AuthRepositoryDomain {
   }
 
   @override
-  Future<UserEntitySignIn> googleAuth({required String accessToken}) async {
+
+  Future<UserEntitySignIn> googleSignIn({required String accessToken}) async {
     try {
-      final responseModel = await remoteDatasource.googleAuth(accessToken: accessToken);
+      print('\n=== Repository: Starting Google Sign In ===');
+      print('Token length: ${accessToken.length}');
+      print('Token prefix: ${accessToken.substring(0, 10)}...');
+      
+      final responseModel = await remoteDatasource.googleSignIn(
+        accessToken: accessToken,
+      );
+      print('Sign in successful, converting to entity...');
+      return responseModel.toEntity();
+    } catch (e, stackTrace) {
+      print('\n=== Repository Error ===');
+      print('Error type: ${e.runtimeType}');
+      print('Error details: $e');
+      print('Stack trace: $stackTrace');
+      throw Exception('Google sign in failed: $e');
+    }
+  }
+
+  @override
+  Future<UserEntitySignIn> googleSignUp({
+    required String accessToken,
+    required String role,
+  }) async {
+    try {
+      final responseModel = await remoteDatasource.googleSignUp(
+        accessToken: accessToken,
+        role: role,
+      );
       return responseModel.toEntity();
     } catch (e) {
-      throw Exception('Google authentication failed: $e');
+      throw Exception('Google sign up failed: $e');
+    }
+  }
+
+  @override
+  Future<void> forgotPassword({required String email}) async {
+    try {
+      final response = await remoteDatasource.forgotPassword(email: email);
+      return;
+    } catch (e) {
+      String errorMessage = e.toString();
+      if (errorMessage.contains('Exception:')) {
+        errorMessage = errorMessage.replaceAll('Exception:', '').trim();
+      }
+      throw Exception(errorMessage);
+    }
+  }
+
+  @override
+  Future<void> resetPassword({
+    required String email,
+    required String newPassword,
+    required String otp,
+  }) async {
+    try {
+      await remoteDatasource.resetPassword(
+        email: email,
+        newPassword: newPassword,
+      );
+    } catch (e) {
+      throw Exception('Reset password failed: $e');
+    }
+  }
+
+  @override
+  Future<void> verifyOtpForgotPassword({
+    required String email,
+    required String otp,
+  }) async {
+    try {
+      await remoteDatasource.verifyOtpForgotPassword(
+        email: email,
+        otp: otp,
+      );
+    } catch (e) {
+      throw Exception('Failed to verify OTP: $e');
+
     }
   }
 }
