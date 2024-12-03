@@ -13,11 +13,10 @@ class OtpForm extends StatelessWidget {
 
   final bool isPasswordReset;
 
-  
   const OtpForm({
     super.key,
     required this.email,
-
+    this.isPasswordReset = false,
   });
 
   @override
@@ -33,7 +32,6 @@ class OtpForm extends StatelessWidget {
 
     void verifyOtp() {
       String otp = controllers.map((controller) => controller.text).join();
-      
 
       if (otp.length != 6) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -55,23 +53,21 @@ class OtpForm extends StatelessWidget {
         return;
       }
 
-
       print('Verifying OTP: $otp for email: $email');
       print('Is Password Reset: $isPasswordReset');
 
       if (isPasswordReset) {
         context.read<AuthBloc>().add(
-          VerifyResetPasswordOtpEvent(
-            email: email,
-            otp: otp,
-          ),
-        );
+              VerifyResetPasswordOtpEvent(
+                email: email,
+                otp: otp,
+              ),
+            );
       } else {
         context.read<AuthBloc>().add(
-          SendOtpEvent(email: email, otp: otp),
-        );
+              SendOtpEvent(email: email, otp: otp),
+            );
       }
-
     }
 
     return BlocListener<AuthBloc, AuthState>(
@@ -83,7 +79,7 @@ class OtpForm extends StatelessWidget {
             message = message.replaceAll('Exception:', '').trim();
           }
 
-          if (message.contains('Invalid OTP') || 
+          if (message.contains('Invalid OTP') ||
               message.contains('Please try again')) {
             clearOtpFields();
           }
