@@ -18,6 +18,7 @@ class GoogleSignInButton extends StatefulWidget {
 
 class _GoogleSignInButtonState extends State<GoogleSignInButton> {
   final GoogleSignIn _googleSignIn = GoogleSignIn(
+
     scopes: [
       'email',
       'profile',
@@ -26,11 +27,13 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
     signInOption: SignInOption.standard,
     serverClientId:
         '837006381197-ntpeojnppdcu0g5j01enk4gm8spaimfm.apps.googleusercontent.com',
+
   );
 
   Future<void> _handleSignIn() async {
     try {
       print('\n=== Starting Google Sign In Process ===');
+
       print('1. Initiating sign out to ensure fresh sign-in...');
       await _googleSignIn.signOut();
 
@@ -40,6 +43,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
       if (account == null) {
         print('Sign in cancelled by user');
         return;
+
       }
 
       print('\n3. Account Details:');
@@ -71,6 +75,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
       context.read<AuthBloc>().add(GoogleAuthEvent(accessToken: token));
     } catch (error) {
       print('\n=== Error Details ===');
+
       print('Error type: ${error.runtimeType}');
       print('Full error details: $error');
       print('Stack trace:');
@@ -96,6 +101,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
+
           backgroundColor: Colors.red,
         ),
       );
@@ -106,14 +112,18 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
+
         if (state is AuthSuccess) {
           Navigator.pushReplacementNamed(context, '/home');
+
         } else if (state is AuthFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.error),
               backgroundColor: Colors.red,
+
               duration: const Duration(seconds: 3),
+
             ),
           );
         }

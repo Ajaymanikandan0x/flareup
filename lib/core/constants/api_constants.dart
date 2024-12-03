@@ -19,4 +19,5 @@ class ApiEndpoints {
       'verify-otp-forgot-password/'; //(post) email, enteredOtp
   static const setNewPassword =
       'set-new-password/'; //(post) new_password, confirm_password, email
+
 }

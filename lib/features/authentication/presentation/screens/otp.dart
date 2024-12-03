@@ -17,6 +17,7 @@ class OtpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     final Map<String, dynamic> args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final String email = args['email'] as String;
@@ -53,14 +54,24 @@ class OtpScreen extends StatelessWidget {
               content: Text('OTP has been resent successfully'),
               backgroundColor: Colors.green,
               duration: Duration(seconds: 2),
+
             ),
           );
+
+          // Only navigate back for session expiration
+          if (error.contains('Session expired')) {
+            Future.delayed(const Duration(seconds: 3), () {
+              Navigator.of(context).pop();
+            });
+          }
         }
+
       },
       child: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
           // Show OTP screen for all states except loading
           if (state is! AuthLoading) {
+
             return Scaffold(
               backgroundColor: AppPalette.backGroundColor,
               appBar: AppBar(
@@ -79,6 +90,7 @@ class OtpScreen extends StatelessWidget {
               body: SafeArea(
                 child: SingleChildScrollView(
                   child: Padding(
+
                     padding: const EdgeInsets.symmetric(
                         horizontal: 24, vertical: 16),
                     child: Column(
@@ -124,14 +136,17 @@ class OtpScreen extends StatelessWidget {
                           },
                         ),
                         const SizedBox(height: 40),
+
                         OtpForm(
                           email: email,
                           isPasswordReset: isPasswordReset,
                         ),
+
                         const SizedBox(height: 32),
                         BlocBuilder<AuthBloc, AuthState>(
                           builder: (context, state) {
                             final bool isLoading = state is AuthLoading;
+
                             final bool isSessionExpired =
                                 state is AuthFailure &&
                                     state.error.contains('Session expired');
@@ -148,6 +163,7 @@ class OtpScreen extends StatelessWidget {
                                 foregroundColor: AppPalette.gradient2,
                               ),
                               child: Text(
+
                                 isLoading
                                     ? "Sending..."
                                     : isSessionExpired
@@ -155,6 +171,7 @@ class OtpScreen extends StatelessWidget {
                                         : "Resend OTP Code",
                                 style: AppTextStyles.primaryTextTheme(
                                     fontSize: 16),
+
                               ),
                             );
                           },

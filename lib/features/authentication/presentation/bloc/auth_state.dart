@@ -99,6 +99,7 @@ class ForgotPasswordSuccess extends AuthState {
   List<Object> get props => [email, message];
 }
 
+
 class ResetPasswordSuccess extends AuthState {
   final String message;
 
@@ -136,6 +137,7 @@ class ResetPasswordInitial extends AuthState {
 
   @override
   List<Object> get props => [email, otp];
+
 }
 
 

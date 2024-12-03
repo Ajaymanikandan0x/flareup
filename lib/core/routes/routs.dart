@@ -23,6 +23,7 @@ class AppRouts {
   static const forgotPassword = '/forgotPassword';
   static const resetPassword = '/resetPassword';
 
+
   static final Map<String, Widget Function(BuildContext)> routs = {
     logo: (_) => const Logo(),
     onBoard: (_) => const OnBoardingScreen(),
@@ -34,6 +35,7 @@ class AppRouts {
     editProf: (_) => const EditProfile(),
     forgotPassword: (_) => const ForgotPasswordScreen(),
     resetPassword: (_) => ResetPasswordScreen(),
+
   };
 
   static Route<dynamic>? generateRoute(RouteSettings settings) {

@@ -77,6 +77,7 @@ class GoogleAuthEvent extends AuthEvent {
   List<Object?> get props => [accessToken];
 }
 
+
 class ForgotPasswordEvent extends AuthEvent {
   final String email;
 
@@ -113,3 +114,4 @@ class VerifyResetPasswordOtpEvent extends AuthEvent {
   @override
   List<Object?> get props => [email, otp];
 }
+

@@ -6,9 +6,13 @@ import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/signup_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/resend_otp_usecase.dart';
+
 import '../../domain/usecases/verify_reset_password_otp_usecase.dart';
+
 import 'auth_event.dart';
 import 'auth_state.dart';
+
+
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase loginUseCase;
@@ -18,7 +22,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LogoutUseCase logoutUseCase;
   final SecureStorageService storageService;
   final AuthRepositoryDomain authRepository;
+
   final VerifyResetPasswordOtpUseCase verifyResetPasswordOtpUseCase;
+
 
   AuthBloc({
     required this.loginUseCase,
@@ -28,7 +34,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.logoutUseCase,
     required this.storageService,
     required this.authRepository,
+
     required this.verifyResetPasswordOtpUseCase,
+
   }) : super(AuthInitial()) {
     on<LoginEvent>(_onLoginEvent);
     on<SignupEvent>(_onSignupEvent);
@@ -39,6 +47,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<ForgotPasswordEvent>(_onForgotPasswordEvent);
     on<ResetPasswordEvent>(_onResetPasswordEvent);
     on<VerifyResetPasswordOtpEvent>(_onVerifyResetPasswordOtp);
+
   }
 
   Future<void> _onLoginEvent(LoginEvent event, Emitter<AuthState> emit) async {
@@ -101,8 +110,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+
   Future<void> _onLogoutEvent(
       LogoutEvent event, Emitter<AuthState> emit) async {
+
     emit(AuthLoading());
     try {
       await logoutUseCase.call();
@@ -119,6 +130,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthLoading());
     try {
+
       print('Attempting Google Sign In...');
       try {
         final userEntity = await authRepository.googleSignIn(
@@ -237,6 +249,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         errorMessage = errorMessage.replaceAll('Exception:', '').trim();
       }
       emit(AuthFailure(error: errorMessage));
+
     }
   }
 }

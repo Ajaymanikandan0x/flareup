@@ -6,12 +6,15 @@ import 'package:flareup/features/authentication/data/models/user_model_signup.da
 import '../models/otp_model.dart';
 import '../models/user_model_signin.dart';
 
+import 'dart:math';
+
 class UserRemoteDatasource {
   late final Dio dio;
 
   UserRemoteDatasource() {
     dio = Dio();
     dio.options.headers['Content-Type'] = 'application/json';
+
 
     if (!const bool.fromEnvironment('dart.vm.product')) {
       // Development-only certificate handling
@@ -26,6 +29,7 @@ class UserRemoteDatasource {
       };
     } else {
       // Production certificate handling
+
       (dio.httpClientAdapter as IOHttpClientAdapter).validateCertificate =
           (cert, host, port) {
         // Proper certificate validation
@@ -33,6 +37,7 @@ class UserRemoteDatasource {
         final isValidIssuer =
             cert?.issuer.contains("YourExpectedIssuer") ?? false;
         final isNotExpired = cert?.endValidity.isAfter(DateTime.now()) ?? false;
+
 
         return isValidHost && isValidIssuer && isNotExpired;
       };
@@ -46,8 +51,10 @@ class UserRemoteDatasource {
       print('Logging in with username: $username and password: $password');
       print('Request URL: ${ApiEndpoints.baseUrl + ApiEndpoints.login}');
       print('Request Headers: ${dio.options.headers}');
+
       print(
           'Request Body: { "username": "$username", "password": "$password" }');
+
       final response = await dio.post(
         ApiEndpoints.baseUrl + ApiEndpoints.login,
         data: {
@@ -82,11 +89,13 @@ class UserRemoteDatasource {
       // Set proper headers
       dio.options.headers['Content-Type'] = 'application/json';
 
+
       // Log request details for debugging
       print(
           'Attempting signup with endpoint: ${ApiEndpoints.baseUrl}${ApiEndpoints.signUp}');
       print(
           'Request payload: {username: $username, fullname: $fullName, email: $email, role: $role}');
+
 
       final response = await dio.post(
         '${ApiEndpoints.baseUrl}${ApiEndpoints.signUp}',
@@ -115,14 +124,17 @@ class UserRemoteDatasource {
 
       // Handle non-201 responses
       if (response.data is Map) {
+
         throw Exception(
             'Signup failed: ${response.data['message'] ?? 'Unknown error'}');
+
       } else {
         throw Exception('Signup failed: Unexpected response format');
       }
     } on DioException catch (e) {
       // Better error handling for Dio exceptions
       if (e.type == DioExceptionType.connectionTimeout) {
+
         throw Exception(
             'Connection timeout. Please check your internet connection.');
       } else if (e.type == DioExceptionType.connectionError) {
@@ -131,6 +143,7 @@ class UserRemoteDatasource {
       }
 
       final errorMessage = e.response?.data is Map
+
           ? e.response?.data['message'] ?? e.message
           : 'Connection error. Please check your server configuration.';
       throw Exception('Signup failed: $errorMessage');
@@ -184,13 +197,16 @@ class UserRemoteDatasource {
         ApiEndpoints.baseUrl + ApiEndpoints.resendOtp,
         data: {'email': email},
         options: Options(
+
           validateStatus: (status) =>
               status! < 500, // Accept both 2xx and 4xx responses
+
         ),
       );
 
       print('Resend OTP response status code: ${response.statusCode}');
       print('Resend OTP response data: ${response.data}');
+
 
       if (response.statusCode == 400 &&
           response.data['error']?.contains('cache') == true) {
@@ -200,14 +216,17 @@ class UserRemoteDatasource {
         final errorMessage = response.data['error'] ??
             response.data['message'] ??
             'Failed to resend OTP';
+
         throw Exception(errorMessage);
       }
     } catch (e) {
       print('Error during OTP resend: $e');
       if (e is DioException) {
         if (e.response?.statusCode == 400) {
+
           throw Exception(
               'Session expired. Please restart the signup process.');
+
         }
       }
       throw Exception('Failed to resend OTP. Please try again.');
@@ -227,6 +246,7 @@ class UserRemoteDatasource {
       throw Exception('Logout request failed: $e');
     }
   }
+
 
   Future<UserModelSignIn> googleSignIn({required String accessToken}) async {
     return _handleGoogleAuth(
@@ -271,6 +291,7 @@ class UserRemoteDatasource {
         data: requestBody,
         options: Options(
           validateStatus: (status) => status! < 500,
+
           headers: {
             'Content-Type': 'application/json',
           },
@@ -283,6 +304,7 @@ class UserRemoteDatasource {
 
       if (response.statusCode == 200) {
         return UserModelSignIn.fromJson(response.data);
+
       }
 
       // Handle registration required case
@@ -430,6 +452,7 @@ class UserRemoteDatasource {
         rethrow;
       }
       throw Exception('Failed to verify OTP. Please try again.');
+
     }
   }
 }

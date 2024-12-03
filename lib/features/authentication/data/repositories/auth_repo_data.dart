@@ -71,6 +71,7 @@ class UserRepositoryImpl implements AuthRepositoryDomain {
   }
 
   @override
+
   Future<UserEntitySignIn> googleSignIn({required String accessToken}) async {
     try {
       print('\n=== Repository: Starting Google Sign In ===');
@@ -149,6 +150,7 @@ class UserRepositoryImpl implements AuthRepositoryDomain {
       );
     } catch (e) {
       throw Exception('Failed to verify OTP: $e');
+
     }
   }
 }

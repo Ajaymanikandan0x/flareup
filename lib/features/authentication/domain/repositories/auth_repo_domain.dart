@@ -16,6 +16,7 @@ abstract class AuthRepositoryDomain {
   Future<OtpEntity> sendOtp({required String email, required String otp});
   Future<void> logout();
   Future<void> resendOtp({required String email});
+
   // Future<UserEntitySignIn> googleAuth({required String accessToken});
   Future<void> forgotPassword({required String email});
   Future<void> resetPassword({
@@ -32,4 +33,5 @@ abstract class AuthRepositoryDomain {
     required String accessToken,
     required String role,
   });
+
 }
