@@ -10,10 +10,12 @@ import 'otp_box.dart';
 
 class OtpForm extends StatelessWidget {
   final String email;
+  final bool isPasswordReset;
   
   const OtpForm({
     super.key,
     required this.email,
+    this.isPasswordReset = false,
   });
 
   @override
@@ -30,7 +32,6 @@ class OtpForm extends StatelessWidget {
     void verifyOtp() {
       String otp = controllers.map((controller) => controller.text).join();
       
-      // Validate OTP
       if (otp.length != 6) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -51,27 +52,34 @@ class OtpForm extends StatelessWidget {
         return;
       }
 
-      context.read<AuthBloc>().add(
-        SendOtpEvent(email: email, otp: otp),
-      );
+      print('Verifying OTP: $otp for email: $email');
+      print('Is Password Reset: $isPasswordReset');
+
+      if (isPasswordReset) {
+        context.read<AuthBloc>().add(
+          VerifyResetPasswordOtpEvent(
+            email: email,
+            otp: otp,
+          ),
+        );
+      } else {
+        context.read<AuthBloc>().add(
+          SendOtpEvent(email: email, otp: otp),
+        );
+      }
     }
 
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthFailure) {
           String message = state.error;
-          
-          // Clean up error message
           if (message.contains('Exception:')) {
             message = message.replaceAll('Exception:', '').trim();
           }
-          
-          // Clear fields only for invalid OTP
           if (message.contains('Invalid OTP') || 
               message.contains('Please try again')) {
             clearOtpFields();
           }
-          
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(message),

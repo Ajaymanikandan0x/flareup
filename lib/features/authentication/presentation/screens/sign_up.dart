@@ -41,7 +41,14 @@ class SignUp extends StatelessWidget {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
             );
-            Navigator.pushReplacementNamed(context, AppRouts.otpScreen);
+            Navigator.pushReplacementNamed(
+              context, 
+              AppRouts.otpScreen,
+              arguments: {
+                'email': state.email,
+                'isPasswordReset': false,
+              },
+            );
           }
         },
         child: SingleChildScrollView(

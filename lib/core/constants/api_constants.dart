@@ -10,7 +10,13 @@ class ApiEndpoints {
   static const logout = 'logout/'; //(post)  just send a request
   static const updateUserProfile =
       'user/user_id/update_user_profile/'; //(patch) username, fullname, phone_number, email, profile_publicId  update user profile
-  static const googleAuth = 'GoogleAuth/'; //gToken
+  static const googleAuth =
+      'GoogleAuth/'; //(post) registration gToken,role  login gToken
   static const updatePassword =
       'user/user_id/set_password/'; //{’new_password’: ‘’, ‘confirm_password’: ‘'
+  static const forgotPassword = 'forgot-password/'; //(post) email
+  static const verifyOtpForgotPassword =
+      'verify-otp-forgot-password/'; //(post) email, enteredOtp
+  static const setNewPassword =
+      'set-new-password/'; //(post) new_password, confirm_password, email
 }

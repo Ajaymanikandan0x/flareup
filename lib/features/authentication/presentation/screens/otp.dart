@@ -17,43 +17,43 @@ class OtpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, dynamic> args =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final String email = args['email'] as String;
+    final bool isPasswordReset = args['isPasswordReset'] ?? false;
+
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthFailure) {
-          final error = state.error;
-          String displayMessage = error;
-          
-          // Convert error messages to user-friendly format
-          if (error.contains('Invalid OTP')) {
-            displayMessage = 'Invalid OTP. Please try again.';
-          } else if (error.contains('Session expired')) {
-            displayMessage = 'Session expired. Please restart the signup process.';
+          String message = state.error;
+          if (message.contains('Exception:')) {
+            message = message.replaceAll('Exception:', '').trim();
           }
-
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(displayMessage),
+              content: Text(message),
               backgroundColor: AppPalette.error,
               duration: const Duration(seconds: 2),
             ),
           );
-
-          // Only navigate back for session expiration
-          if (error.contains('Session expired')) {
-            Future.delayed(const Duration(seconds: 3), () {
-              Navigator.of(context).pop();
-            });
-          }
-        }
-        
-        if (state is OtpVerificationSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
+        } else if (state is PasswordResetOtpSuccess) {
+          print(
+              'Navigation to reset password screen with email: ${state.email} and OTP: ${state.otp}');
+          Navigator.pushNamed(
+            context,
+            AppRouts.resetPassword,
+            arguments: {
+              'email': state.email,
+              'otp': state.otp,
+            },
           );
-          Navigator.pushNamedAndRemoveUntil(
-            context, 
-            AppRouts.signIn, 
-            (route) => false
+        } else if (state is OtpVerificationState) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('OTP has been resent successfully'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
           );
         }
       },
@@ -61,12 +61,6 @@ class OtpScreen extends StatelessWidget {
         builder: (context, state) {
           // Show OTP screen for all states except loading
           if (state is! AuthLoading) {
-            final email = state is SignupSuccess 
-                ? state.email 
-                : state is OtpVerificationState 
-                    ? state.email 
-                    : '';
-            
             return Scaffold(
               backgroundColor: AppPalette.backGroundColor,
               appBar: AppBar(
@@ -85,7 +79,8 @@ class OtpScreen extends StatelessWidget {
               body: SafeArea(
                 child: SingleChildScrollView(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -129,32 +124,37 @@ class OtpScreen extends StatelessWidget {
                           },
                         ),
                         const SizedBox(height: 40),
-                        OtpForm(email: email),
+                        OtpForm(
+                          email: email,
+                          isPasswordReset: isPasswordReset,
+                        ),
                         const SizedBox(height: 32),
                         BlocBuilder<AuthBloc, AuthState>(
                           builder: (context, state) {
                             final bool isLoading = state is AuthLoading;
-                            final bool isSessionExpired = state is AuthFailure && 
-                                state.error.contains('Session expired');
-                            
+                            final bool isSessionExpired =
+                                state is AuthFailure &&
+                                    state.error.contains('Session expired');
+
                             return TextButton(
                               onPressed: (isLoading || isSessionExpired)
-                                ? null 
-                                : () {
-                                    context.read<AuthBloc>().add(
-                                      ResendOtpEvent(email: email),
-                                    );
-                                  },
+                                  ? null
+                                  : () {
+                                      context.read<AuthBloc>().add(
+                                            ResendOtpEvent(email: email),
+                                          );
+                                    },
                               style: TextButton.styleFrom(
                                 foregroundColor: AppPalette.gradient2,
                               ),
                               child: Text(
-                                isLoading 
-                                  ? "Sending..." 
-                                  : isSessionExpired
-                                    ? "Session Expired"
-                                    : "Resend OTP Code",
-                                style: AppTextStyles.primaryTextTheme(fontSize: 16),
+                                isLoading
+                                    ? "Sending..."
+                                    : isSessionExpired
+                                        ? "Session Expired"
+                                        : "Resend OTP Code",
+                                style: AppTextStyles.primaryTextTheme(
+                                    fontSize: 16),
                               ),
                             );
                           },
@@ -230,7 +230,7 @@ class _CountdownTimerState extends State<CountdownTimer> {
   Widget build(BuildContext context) {
     String minutes = (_remainingTime.inMinutes % 60).toString().padLeft(2, '0');
     String seconds = (_remainingTime.inSeconds % 60).toString().padLeft(2, '0');
-    
+
     return Text(
       "This code will expire in $minutes:$seconds",
       style: AppTextStyles.hindTextTheme(fontSize: 16),

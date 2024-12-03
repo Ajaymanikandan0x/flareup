@@ -18,6 +18,7 @@ import 'core/storage/secure_storage_service.dart';
 import 'core/utils/cloudinary_service.dart';
 import 'features/profile/data/repositories/profile_image_repository_impl.dart';
 import 'features/profile/domain/usecases/upload_profile_image_usecase.dart';
+import 'features/authentication/domain/usecases/verify_reset_password_otp_usecase.dart';
 
 class DependencyInjector {
   static final DependencyInjector _instance = DependencyInjector._internal();
@@ -60,6 +61,8 @@ class DependencyInjector {
     _logoutUseCase = LogoutUseCase(_authRepository);
     _resendOtpUseCase = ResendOtpUseCase(_authRepository);
     
+    final verifyResetPasswordOtpUseCase = VerifyResetPasswordOtpUseCase(_authRepository);
+    
     _authBloc = AuthBloc(
       otpUsecase: _otpUseCase,
       loginUseCase: _loginUseCase,
@@ -68,6 +71,7 @@ class DependencyInjector {
       logoutUseCase: _logoutUseCase,
       storageService: storageService,
       authRepository: _authRepository,
+      verifyResetPasswordOtpUseCase: verifyResetPasswordOtpUseCase,
     );
   }
 

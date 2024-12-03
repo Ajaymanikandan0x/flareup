@@ -81,6 +81,5 @@ class AuthInterceptor extends Interceptor {
   Future<void> _logout() async {
     await storageService.clearAll();
     // Redirect to login screen or emit a logout event
-    // This depends on your app's architecture
   }
 }
