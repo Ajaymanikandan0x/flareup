@@ -37,9 +37,9 @@ class SignupEvent extends AuthEvent {
 
 class SignupSuccessEvent extends AuthEvent {
   final String email;
-  
+
   const SignupSuccessEvent({required this.email});
-  
+
   @override
   List<Object?> get props => [email];
 }
@@ -48,7 +48,7 @@ class SendOtpEvent extends AuthEvent {
   final String email;
   final String otp;
 
-  const SendOtpEvent({required this.email,required this.otp});
+  const SendOtpEvent({required this.email, required this.otp});
 
   @override
   List<Object?> get props => [email, otp];
@@ -71,12 +71,11 @@ class LogoutEvent extends AuthEvent {
 class GoogleAuthEvent extends AuthEvent {
   final String accessToken;
 
-  GoogleAuthEvent({required this.accessToken});
+  const GoogleAuthEvent({required this.accessToken});
 
   @override
   List<Object?> get props => [accessToken];
 }
-
 
 class ForgotPasswordEvent extends AuthEvent {
   final String email;
@@ -114,4 +113,3 @@ class VerifyResetPasswordOtpEvent extends AuthEvent {
   @override
   List<Object?> get props => [email, otp];
 }
-

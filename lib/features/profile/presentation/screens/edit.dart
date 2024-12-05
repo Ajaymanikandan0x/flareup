@@ -4,12 +4,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/utils/validation.dart';
 import '../../../../core/widgets/custome_text.dart';
-import '../../../../core/widgets/primary_button.dart';
 import '../../../../core/widgets/form_feild.dart';
+import '../../../../core/widgets/primary_button.dart';
 import '../../../profile/presentation/bloc/user_profile_bloc.dart';
 
 class EditProfile extends StatefulWidget {
-  const EditProfile({Key? key}) : super(key: key);
+  const EditProfile({super.key});
 
   @override
   State<EditProfile> createState() => _EditProfileState();
@@ -75,11 +75,11 @@ class _EditProfileState extends State<EditProfile> {
                     onTap: () {
                       if (_formKey.currentState!.validate()) {
                         context.read<UserProfileBloc>().add(
-                          UpdateProfileField(
-                            fieldType: fieldType,
-                            newValue: controller.text.trim(),
-                          ),
-                        );
+                              UpdateProfileField(
+                                fieldType: fieldType,
+                                newValue: controller.text.trim(),
+                              ),
+                            );
                       }
                     },
                     text: state is UserProfileLoading ? 'Saving...' : 'Save',

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'on_boarding_list.dart';
 
 class OnBoardingImageCard extends StatelessWidget {
-  final  OnBoarding onBoardingModel;
+  final OnBoarding onBoardingModel;
   const OnBoardingImageCard({
     super.key,
     required this.onBoardingModel,

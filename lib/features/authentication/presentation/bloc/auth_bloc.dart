@@ -1,18 +1,17 @@
 import 'package:flareup/features/authentication/domain/usecases/otp_send_usecase.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../../core/error/app_error.dart';
 import '../../../../core/storage/secure_storage_service.dart';
+import '../../../../core/utils/logger.dart';
 import '../../domain/repositories/auth_repo_domain.dart';
 import '../../domain/usecases/login_usecase.dart';
-import '../../domain/usecases/signup_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/resend_otp_usecase.dart';
-
+import '../../domain/usecases/signup_usecase.dart';
 import '../../domain/usecases/verify_reset_password_otp_usecase.dart';
-
 import 'auth_event.dart';
 import 'auth_state.dart';
-
-
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase loginUseCase;
@@ -25,7 +24,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   final VerifyResetPasswordOtpUseCase verifyResetPasswordOtpUseCase;
 
-
   AuthBloc({
     required this.loginUseCase,
     required this.signupUseCase,
@@ -34,9 +32,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.logoutUseCase,
     required this.storageService,
     required this.authRepository,
-
     required this.verifyResetPasswordOtpUseCase,
-
   }) : super(AuthInitial()) {
     on<LoginEvent>(_onLoginEvent);
     on<SignupEvent>(_onSignupEvent);
@@ -47,7 +43,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<ForgotPasswordEvent>(_onForgotPasswordEvent);
     on<ResetPasswordEvent>(_onResetPasswordEvent);
     on<VerifyResetPasswordOtpEvent>(_onVerifyResetPasswordOtp);
-
   }
 
   Future<void> _onLoginEvent(LoginEvent event, Emitter<AuthState> emit) async {
@@ -74,29 +69,50 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       SignupEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
+      Logger.debug('Starting signup process for ${event.username}');
+
       await signupUseCase.call(
           username: event.username,
           fullName: event.fullName,
           email: event.email,
           password: event.password,
           role: event.role);
-      emit(SignupSuccess(email: event.email, message: 'Otp send successful!'));
+
+      Logger.debug('Signup successful');
+      emit(SignupSuccess(
+          email: event.email, message: 'Account created successfully!'));
+    } on AppError catch (e) {
+      Logger.error('Signup failed with AppError', e);
+      emit(AuthFailure(error: e.userMessage));
     } catch (e) {
-      emit(AuthFailure(error: 'Signup failed: ${e.toString()}'));
+      Logger.error('Signup failed with unexpected error', e);
+      emit(AuthFailure(error: 'Failed to create account. Please try again.'));
     }
   }
 
   Future<void> _otpSend(SendOtpEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
-      await otpUsecase.call(email: event.email, otp: event.otp);
+      Logger.debug('Starting OTP verification for ${event.email}');
+      final result = await otpUsecase.call(
+        email: event.email,
+        otp: event.otp,
+      );
+
+      Logger.debug('OTP verification completed successfully');
       emit(OtpVerificationSuccess(
         email: event.email,
-        message: 'OTP verification successful!',
+        message: result.message,
         otp: event.otp,
       ));
+    } on AppError catch (e) {
+      Logger.error('OTP verification failed with AppError', e);
+      emit(AuthFailure(error: e.userMessage));
     } catch (e) {
-      emit(AuthFailure(error: 'OTP verification failed: ${e.toString()}'));
+      Logger.error('Unexpected error during OTP verification', e);
+      emit(AuthFailure(
+        error: 'Invalid OTP code. Please try again.',
+      ));
     }
   }
 
@@ -104,16 +120,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
     try {
       await resendOtpUseCase.call(email: event.email);
-      emit(OtpVerificationState(email: event.email));
+      emit(OtpResendSuccess(
+        email: event.email,
+        message: 'OTP has been resent to your email',
+      ));
+    } on AppError catch (e) {
+      emit(AuthFailure(error: e.userMessage));
     } catch (e) {
-      emit(AuthFailure(error: 'Failed to resend OTP: ${e.toString()}'));
+      emit(AuthFailure(error: 'Failed to resend OTP. Please try again.'));
     }
   }
 
-
   Future<void> _onLogoutEvent(
       LogoutEvent event, Emitter<AuthState> emit) async {
-
     emit(AuthLoading());
     try {
       await logoutUseCase.call();
@@ -130,7 +149,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthLoading());
     try {
-
       print('Attempting Google Sign In...');
       try {
         final userEntity = await authRepository.googleSignIn(
@@ -213,7 +231,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         otp: event.otp,
       );
       emit(const ResetPasswordSuccess(
-        message: 'Password reset successful! Please login with your new password.',
+        message:
+            'Password reset successful! Please login with your new password.',
       ));
     } catch (e) {
       String errorMessage = e.toString().replaceAll('Exception:', '').trim();
@@ -227,29 +246,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthLoading());
     try {
-      print('\n=== Processing Verify Reset Password OTP ===');
-      print('Email: ${event.email}');
-      print('OTP: ${event.otp}');
+      Logger.debug('Processing Verify Reset Password OTP');
+      Logger.debug('Email: ${event.email}');
 
       await verifyResetPasswordOtpUseCase.call(
         email: event.email,
         otp: event.otp,
       );
 
-      print('\nOTP verification successful, emitting success state');
+      Logger.debug('Reset password OTP verification successful');
       emit(PasswordResetOtpSuccess(
         email: event.email,
         message: 'OTP verified successfully',
         otp: event.otp,
       ));
     } catch (e) {
-      print('\nError in verify reset password OTP: $e');
+      Logger.error('Error in verify reset password OTP', e);
       String errorMessage = e.toString();
       if (errorMessage.contains('Exception:')) {
         errorMessage = errorMessage.replaceAll('Exception:', '').trim();
       }
       emit(AuthFailure(error: errorMessage));
-
     }
   }
 }

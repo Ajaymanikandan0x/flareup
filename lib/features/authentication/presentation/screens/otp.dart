@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flareup/features/authentication/presentation/widgets/otp/otp_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/routes/routs.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/text_theme.dart';
+import '../../../../core/utils/countdown_timer.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -25,20 +24,14 @@ class OtpScreen extends StatelessWidget {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthFailure) {
-          String message = state.error;
-          if (message.contains('Exception:')) {
-            message = message.replaceAll('Exception:', '').trim();
-          }
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(message),
+              content: Text(state.error.replaceAll('Exception:', '').trim()),
               backgroundColor: AppPalette.error,
               duration: const Duration(seconds: 2),
             ),
           );
         } else if (state is PasswordResetOtpSuccess) {
-          print(
-              'Navigation to reset password screen with email: ${state.email} and OTP: ${state.otp}');
           Navigator.pushNamed(
             context,
             AppRouts.resetPassword,
@@ -47,7 +40,21 @@ class OtpScreen extends StatelessWidget {
               'otp': state.otp,
             },
           );
-        } else if (state is OtpVerificationState) {
+        } else if (state is OtpVerificationSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+          
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            AppRouts.signIn,
+            (route) => false,
+          );
+        } else if (state is OtpResendSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('OTP has been resent successfully'),
@@ -179,62 +186,6 @@ class OtpScreen extends StatelessWidget {
           );
         },
       ),
-    );
-  }
-}
-
-class CountdownTimer extends StatefulWidget {
-  final Duration duration;
-  final Function() onTimerComplete;
-
-  const CountdownTimer({
-    super.key,
-    required this.duration,
-    required this.onTimerComplete,
-  });
-
-  @override
-  State<CountdownTimer> createState() => _CountdownTimerState();
-}
-
-class _CountdownTimerState extends State<CountdownTimer> {
-  late Timer _timer;
-  late Duration _remainingTime;
-
-  @override
-  void initState() {
-    super.initState();
-    _remainingTime = widget.duration;
-    _startTimer();
-  }
-
-  void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        if (_remainingTime.inSeconds > 0) {
-          _remainingTime = Duration(seconds: _remainingTime.inSeconds - 1);
-        } else {
-          _timer.cancel();
-          widget.onTimerComplete();
-        }
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    String minutes = (_remainingTime.inMinutes % 60).toString().padLeft(2, '0');
-    String seconds = (_remainingTime.inSeconds % 60).toString().padLeft(2, '0');
-
-    return Text(
-      "This code will expire in $minutes:$seconds",
-      style: AppTextStyles.hindTextTheme(fontSize: 16),
     );
   }
 }
