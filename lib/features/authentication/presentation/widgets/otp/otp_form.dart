@@ -34,6 +34,7 @@ class OtpForm extends StatelessWidget {
       String otp =
           controllers.map((controller) => controller.text.trim()).join();
 
+
       if (otp.length != 6) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -70,10 +71,12 @@ class OtpForm extends StatelessWidget {
 
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
+
         if (state is AuthFailure &&
             (state.error.contains('Invalid OTP') ||
                 state.error.contains('verification failed'))) {
           clearOtpFields();
+
         }
       },
       child: Form(
