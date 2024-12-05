@@ -31,7 +31,9 @@ class OtpForm extends StatelessWidget {
     }
 
     void verifyOtp() {
-      String otp = controllers.map((controller) => controller.text).join();
+      String otp =
+          controllers.map((controller) => controller.text.trim()).join();
+
 
       if (otp.length != 6) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -53,9 +55,6 @@ class OtpForm extends StatelessWidget {
         return;
       }
 
-      print('Verifying OTP: $otp for email: $email');
-      print('Is Password Reset: $isPasswordReset');
-
       if (isPasswordReset) {
         context.read<AuthBloc>().add(
               VerifyResetPasswordOtpEvent(
@@ -72,25 +71,12 @@ class OtpForm extends StatelessWidget {
 
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-        if (state is AuthFailure) {
-          String message = state.error;
 
-          if (message.contains('Exception:')) {
-            message = message.replaceAll('Exception:', '').trim();
-          }
+        if (state is AuthFailure &&
+            (state.error.contains('Invalid OTP') ||
+                state.error.contains('verification failed'))) {
+          clearOtpFields();
 
-          if (message.contains('Invalid OTP') ||
-              message.contains('Please try again')) {
-            clearOtpFields();
-          }
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(message),
-              backgroundColor: AppPalette.error,
-              duration: const Duration(seconds: 2),
-            ),
-          );
         }
       },
       child: Form(
@@ -105,12 +91,11 @@ class OtpForm extends StatelessWidget {
             const SizedBox(height: 100),
             BlocBuilder<AuthBloc, AuthState>(
               builder: (context, state) {
-                final bool isLoading = state is AuthLoading;
                 return PrimaryButton(
                   width: 250,
                   height: 60,
-                  onTap: isLoading ? () {} : verifyOtp,
-                  text: isLoading ? 'Verifying...' : 'Verify',
+                  onTap: state is AuthLoading ? () {} : verifyOtp,
+                  text: state is AuthLoading ? 'Verifying...' : 'Verify',
                 );
               },
             ),

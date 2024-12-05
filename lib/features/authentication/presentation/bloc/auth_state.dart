@@ -140,4 +140,14 @@ class ResetPasswordInitial extends AuthState {
 
 }
 
+class OtpResendSuccess extends AuthState {
+  final String email;
+  final String message;
+
+  const OtpResendSuccess({
+    required this.email,
+    required this.message,
+  });
+}
+
 

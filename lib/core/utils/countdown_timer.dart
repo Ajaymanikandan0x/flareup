@@ -1,3 +1,4 @@
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -6,12 +7,12 @@ import '../theme/text_theme.dart';
 
 class CountdownTimer extends StatefulWidget {
   final Duration duration;
-  final VoidCallback? onTimerComplete;
+  final Function() onTimerComplete;
 
   const CountdownTimer({
     super.key,
     required this.duration,
-    this.onTimerComplete,
+    required this.onTimerComplete,
   });
 
   @override
@@ -36,7 +37,7 @@ class _CountdownTimerState extends State<CountdownTimer> {
           _remainingTime = Duration(seconds: _remainingTime.inSeconds - 1);
         } else {
           _timer.cancel();
-          widget.onTimerComplete?.call();
+          widget.onTimerComplete();
         }
       });
     });
@@ -52,7 +53,7 @@ class _CountdownTimerState extends State<CountdownTimer> {
   Widget build(BuildContext context) {
     String minutes = (_remainingTime.inMinutes % 60).toString().padLeft(2, '0');
     String seconds = (_remainingTime.inSeconds % 60).toString().padLeft(2, '0');
-    
+
     return Text(
       "This code will expire in $minutes:$seconds",
       style: AppTextStyles.hindTextTheme(fontSize: 16),

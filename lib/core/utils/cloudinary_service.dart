@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 
 import '../constants/constants.dart';
+import '../error/app_error.dart';
 import '../storage/secure_storage_service.dart';
 
 enum UploadType { profile, event, video }
@@ -13,98 +14,134 @@ class CloudinaryService {
   final SecureStorageService _storageService;
   static const String _cloudinaryUrl =
       'https://api.cloudinary.com/v1_1/$cloudinaryCloudName/upload';
+  static const int _connectionTimeout = 5;
+  static const int _uploadTimeout = 60;
 
   CloudinaryService(this._storageService) : _dio = Dio();
 
   Future<String?> uploadFile(File file, UploadType type) async {
     try {
-      print('=== CloudinaryService.uploadFile ===');
-      print('File path: ${file.path}');
-      print('File exists: ${await file.exists()}');
-      print('File size: ${await file.length()} bytes');
-      print('Upload type: $type');
-      
-      // Add timeout to connectivity check
-      final connectivityCheck = InternetAddress.lookup('api.cloudinary.com')
-          .timeout(
-            const Duration(seconds: 5),
-            onTimeout: () => throw TimeoutException('Connection check timed out'),
-          );
-      
-      try {
-        final result = await connectivityCheck;
-        if (result.isEmpty || result[0].rawAddress.isEmpty) {
-          throw Exception('No internet connection');
-        }
-      } catch (e) {
-        if (e is TimeoutException) {
-          print('Connection check timed out, attempting upload anyway...');
-        } else if (e is SocketException) {
-          print('Socket exception during connection check, attempting upload anyway...');
-        } else {
-          print('Connection check error: $e');
-        }
-        // Continue with upload attempt even if connectivity check fails
+      // Validate file
+      if (!await file.exists()) {
+        throw AppError(
+          userMessage: 'File not found',
+          technicalMessage: 'File does not exist at path: ${file.path}',
+          type: ErrorType.validation,
+        );
       }
 
+      final fileSize = await file.length();
+      if (fileSize > 10 * 1024 * 1024) { // 10MB limit
+        throw AppError(
+          userMessage: 'File size too large',
+          technicalMessage: 'File size: ${fileSize / (1024 * 1024)}MB exceeds 10MB limit',
+          type: ErrorType.validation,
+        );
+      }
+
+      // Check connectivity with proper error handling
+      try {
+        await InternetAddress.lookup('api.cloudinary.com')
+            .timeout(Duration(seconds: _connectionTimeout));
+      } on SocketException {
+        throw AppError(
+          userMessage: ErrorMessages.networkError,
+          technicalMessage: 'No internet connection',
+          type: ErrorType.network,
+        );
+      } on TimeoutException {
+        throw AppError(
+          userMessage: 'Slow internet connection',
+          technicalMessage: 'Connection check timed out after $_connectionTimeout seconds',
+          type: ErrorType.network,
+        );
+      }
+
+      // Prepare upload data
       final formData = FormData.fromMap({
         'file': await MultipartFile.fromFile(file.path),
         'upload_preset': cloudinaryUploadPreset,
         'folder': _getFolderName(type),
       });
 
-      print('\nSending request to Cloudinary...');
+      // Upload with progress tracking
       final response = await _dio.post(
         _cloudinaryUrl,
         data: formData,
         options: Options(
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
+          headers: {'Content-Type': 'multipart/form-data'},
           validateStatus: (status) => true,
           receiveTimeout: const Duration(seconds: 30),
           sendTimeout: const Duration(seconds: 30),
         ),
+        onSendProgress: (sent, total) {
+          final progress = (sent / total * 100).toStringAsFixed(2);
+          print('Upload progress: $progress%');
+        },
       ).timeout(
-        const Duration(seconds: 60),
-        onTimeout: () => throw TimeoutException('Upload request timed out'),
+        Duration(seconds: _uploadTimeout),
+        onTimeout: () {
+          throw AppError(
+            userMessage: 'Upload timed out',
+            technicalMessage: 'Upload exceeded $_uploadTimeout seconds',
+            type: ErrorType.network,
+          );
+        },
       );
 
-      print('Response status: ${response.statusCode}');
-      print('Response data: ${response.data}');
-
+      // Handle response
       if (response.statusCode == 200) {
         final secureUrl = response.data['secure_url'] as String?;
         if (secureUrl != null) {
-          print('Upload successful: $secureUrl');
           return secureUrl;
         }
       }
 
-      throw Exception('Upload failed: ${_parseErrorMessage(response.data)}');
-    } on TimeoutException catch (e) {
-      print('Timeout error: $e');
-      throw Exception('Upload timed out. Please try again.');
+      throw AppError(
+        userMessage: 'Failed to upload file',
+        technicalMessage: _parseErrorMessage(response.data),
+        type: ErrorType.server,
+      );
+
+    } on AppError {
+      rethrow;
     } on DioException catch (e) {
-      print('\nDio error: ${e.type} - ${e.message}');
-      String errorMessage = 'Upload failed';
-      switch (e.type) {
-        case DioExceptionType.connectionTimeout:
-          errorMessage = 'Connection timed out';
-          break;
-        case DioExceptionType.connectionError:
-          errorMessage = 'Connection error - please check your internet';
-          break;
-        case DioExceptionType.receiveTimeout:
-          errorMessage = 'Server not responding';
-          break;
-        default:
-          errorMessage = e.message ?? 'Unknown error occurred';
-      }
-      throw Exception(errorMessage);
+      throw _handleDioError(e);
     } catch (e) {
-      print('\nUnexpected error: $e');
-      throw Exception('Failed to upload image: $e');
+      throw AppError(
+        userMessage: 'Unexpected error occurred',
+        technicalMessage: e.toString(),
+        type: ErrorType.unknown,
+      );
+    }
+  }
+
+  AppError _handleDioError(DioException e) {
+    switch (e.type) {
+      case DioExceptionType.connectionTimeout:
+        return AppError(
+          userMessage: 'Connection timed out',
+          technicalMessage: e.message,
+          type: ErrorType.network,
+        );
+      case DioExceptionType.connectionError:
+        return AppError(
+          userMessage: ErrorMessages.networkError,
+          technicalMessage: e.message,
+          type: ErrorType.network,
+        );
+      case DioExceptionType.receiveTimeout:
+        return AppError(
+          userMessage: 'Server not responding',
+          technicalMessage: e.message,
+          type: ErrorType.server,
+        );
+      default:
+        return AppError(
+          userMessage: 'Upload failed',
+          technicalMessage: e.message,
+          type: ErrorType.unknown,
+        );
     }
   }
 
