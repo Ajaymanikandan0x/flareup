@@ -5,6 +5,7 @@ import '../../domain/entities/user_entities_signup.dart';
 import '../../domain/entities/user_model_signin.dart';
 import '../../domain/repositories/auth_repo_domain.dart';
 import '../datasources/remote_data.dart';
+import '../../../../core/error/error_handler.dart';
 
 class UserRepositoryImpl implements AuthRepositoryDomain {
   final UserRemoteDatasource _remoteDatasource;
@@ -66,12 +67,7 @@ class UserRepositoryImpl implements AuthRepositoryDomain {
       );
     } catch (e) {
       Logger.error('Repository signup error', e);
-      if (e is AppError) rethrow;
-      throw AppError(
-        userMessage: 'Failed to create account',
-        technicalMessage: e.toString(),
-        type: ErrorType.unknown,
-      );
+      throw ErrorHandler.handle(e, customUserMessage: 'Failed to create account');
     }
   }
 

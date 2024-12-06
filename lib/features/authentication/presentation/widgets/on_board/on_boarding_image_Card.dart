@@ -20,6 +20,7 @@ class OnBoardingImageCard extends StatelessWidget {
             Colors.black.withOpacity(0.3),
             BlendMode.darken,
           ),
+          filterQuality: FilterQuality.high,
         ),
       ),
     );

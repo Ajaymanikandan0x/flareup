@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../../core/theme/app_palette.dart';
+import '../../../../../core/utils/responsive_utils.dart';
 
 class OtpBox extends StatelessWidget {
   final TextEditingController controller;
@@ -13,9 +14,17 @@ class OtpBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Initialize responsive utilities
+    Responsive.init(context);
+
+    // Calculate responsive dimensions
+    final boxSize = Responsive.isTablet ? 72.0 : 64.0;
+    final fontSize = Responsive.isTablet ? 24.0 : 20.0;
+    final borderRadius = Responsive.isTablet ? 16.0 : 12.0;
+
     return SizedBox(
-      height: 64,
-      width: 64,
+      height: boxSize,
+      width: boxSize,
       child: TextFormField(
         controller: controller,
         onChanged: (pin) {
@@ -30,28 +39,35 @@ class OtpBox extends StatelessWidget {
           FilteringTextInputFormatter.digitsOnly,
         ],
         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: AppPalette.white,
+              color: Theme.of(context).brightness == Brightness.dark 
+                ? AppPalette.darkCard 
+                : AppPalette.lightCard,
+              fontSize: fontSize,
             ),
         textAlign: TextAlign.center,
         decoration: InputDecoration(
           hintText: "0",
-          hintStyle: const TextStyle(color: AppPalette.white),
-          border: _authOutlineInputBorder,
-          enabledBorder: _authOutlineInputBorder,
-          focusedBorder: _authOutlineInputBorder.copyWith(
-            borderSide: const BorderSide(
-              color: AppPalette.gradient2,
-              width: 2.0, // Adjust the width as needed
-            ),
+          hintStyle: TextStyle(
+            color: Theme.of(context).brightness == Brightness.dark 
+                ? AppPalette.darkCard 
+                : AppPalette.lightCard,
+            fontSize: fontSize,
           ),
+          border: _buildBorder(borderRadius),
+          enabledBorder: _buildBorder(borderRadius),
+          focusedBorder: _buildBorder(borderRadius, focused: true),
         ),
       ),
     );
   }
 
-  static OutlineInputBorder get _authOutlineInputBorder =>
-      const OutlineInputBorder(
-        borderSide: BorderSide(color: AppPalette.gradient2),
-        borderRadius: BorderRadius.all(Radius.circular(12)),
-      );
+  OutlineInputBorder _buildBorder(double radius, {bool focused = false}) {
+    return OutlineInputBorder(
+      borderSide: BorderSide(
+        color: AppPalette.gradient2,
+        width: focused ? 2.0 : 1.0,
+      ),
+      borderRadius: BorderRadius.all(Radius.circular(radius)),
+    );
+  }
 }

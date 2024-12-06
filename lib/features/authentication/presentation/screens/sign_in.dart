@@ -1,8 +1,6 @@
 import 'package:flareup/core/utils/validation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../../../core/constants/constants.dart';
 import '../../../../core/routes/routs.dart';
 import '../../../../core/theme/text_theme.dart';
 import '../../../../core/widgets/form_feild.dart';
@@ -16,6 +14,7 @@ import '../bloc/auth_state.dart';
 
 import '../widgets/auth/google_log.dart';
 import '../widgets/auth/sign_up_text.dart';
+import 'package:flareup/core/utils/responsive_utils.dart';
 
 class SignIn extends StatelessWidget {
   SignIn({super.key});
@@ -26,10 +25,15 @@ class SignIn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Responsive.init(context);
+    
     final authBloc = DependencyInjector().authBloc;
     return Scaffold(
         body: Padding(
-      padding: const EdgeInsets.all(10.0),
+      padding: EdgeInsets.symmetric(
+        horizontal: Responsive.horizontalPadding,
+        vertical: Responsive.verticalPadding,
+      ),
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthFailure) {
@@ -54,33 +58,34 @@ class SignIn extends StatelessWidget {
             key: _formKey,
             child: Column(
               children: [
-                const SizedBox(height: 120),
-                const LogoGradientText(fontSize: 50),
-                const SizedBox(height: 40),
+                SizedBox(height: Responsive.screenHeight * 0.15),
+                LogoGradientText(fontSize: Responsive.titleFontSize * 2.5),
+                SizedBox(height: Responsive.spacingHeight * 1.6),
                 Align(
                   alignment: const Alignment(-1, 0.0),
                   child: Text(
-                    style: AppTextStyles.primaryTextTheme(fontSize: 30),
                     'Sign in',
+                    style: AppTextStyles.primaryTextTheme(
+                      fontSize: Responsive.titleFontSize,
+                    ),
                   ),
                 ),
-                formHeight,
+                SizedBox(height: Responsive.spacingHeight),
                 AppFormField(
                   hint: 'name',
                   icon: const Icon(Icons.person),
-                  isObscureText: false,
                   controller: nameController,
                   validator: FormValidator.validateUserName,
                 ),
-                largeHeight,
+                SizedBox(height: Responsive.spacingHeight),
                 AppFormField(
                   hint: 'password',
                   icon: const Icon(Icons.lock),
-                  isObscureText: true,
+                  isPassword: true,
                   controller: passwordController,
                   validator: FormValidator.validatePassword,
                 ),
-                largeHeight,
+                SizedBox(height: Responsive.spacingHeight),
                 Align(
                   alignment: const Alignment(1.0, 0.0),
                   child: TextButton(
@@ -89,15 +94,16 @@ class SignIn extends StatelessWidget {
                     },
                     child: Text(
                       'Forgot Password',
-                      style: AppTextStyles.hindTextTheme(),
+                      style: AppTextStyles.hindTextTheme(
+                        fontSize: Responsive.bodyFontSize,
+                      ),
                     ),
                   ),
                 ),
-                largeHeight,
-                largeHeight,
+                SizedBox(height: Responsive.spacingHeight * 2),
                 PrimaryButton(
-                  width: 320,
-                  height: 60,
+                  width: Responsive.screenWidth * 0.85,
+                  height: Responsive.buttonHeight,
                   onTap: () {
                     if (_formKey.currentState!.validate()) {
                       if (nameController.text.isEmpty ||
@@ -113,18 +119,19 @@ class SignIn extends StatelessWidget {
                       }
                     }
                   },
-                  fontSize: 20,
+                  fontSize: Responsive.titleFontSize,
                   text: 'Sign in',
                 ),
-                largeHeight,
+                SizedBox(height: Responsive.spacingHeight),
                 Text(
                   'or',
-                  style: AppTextStyles.hindTextTheme(fontSize: 20),
+                  style: AppTextStyles.hindTextTheme(
+                    fontSize: Responsive.subtitleFontSize,
+                  ),
                 ),
-                formHeight,
+                SizedBox(height: Responsive.spacingHeight),
                 const GoogleSignInButton(),
-                extraLargeHeight,
-                minHeight,
+                SizedBox(height: Responsive.spacingHeight * 2),
                 AuthPromptText(
                   prefixText: 'Don\'t have an account?',
                   suffixText: 'Sign Up',

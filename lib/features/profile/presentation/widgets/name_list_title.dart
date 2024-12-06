@@ -20,7 +20,9 @@ class NameListTile extends StatelessWidget {
       leading: Text(leading),
       trailing: const Icon(Icons.chevron_right),
       onTap: onTap,
-      tileColor: AppPalette.cardColor,
+      tileColor: Theme.of(context).brightness == Brightness.dark 
+                ? AppPalette.darkCard 
+                : AppPalette.lightCard,
       // shape: RoundedRectangleBorder(
       //   borderRadius: BorderRadius.circular(8),
       // ),

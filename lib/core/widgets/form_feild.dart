@@ -5,15 +5,15 @@ import 'package:flutter/material.dart';
 class AppFormField extends StatefulWidget {
   final Icon? icon;
   final String hint;
-  final bool isObscureText;
   final TextEditingController controller;
   final String? Function(String?)? validator;
+  final bool isPassword;
 
   const AppFormField({
     super.key,
     required this.hint,
     this.icon,
-    required this.isObscureText,
+    this.isPassword = false,
     required this.controller,
     this.validator,
   });
@@ -28,7 +28,7 @@ class _AppFormFieldState extends State<AppFormField> {
   @override
   void initState() {
     super.initState();
-    _obscureText = widget.isObscureText;
+    _obscureText = widget.isPassword;
   }
 
   @override
@@ -41,9 +41,14 @@ class _AppFormFieldState extends State<AppFormField> {
       validator: widget.validator,
       obscureText: _obscureText,
       decoration: InputDecoration(
-        hintStyle: const TextStyle(color: AppPalette.hintTextColor),
+        labelText: widget.hint,
+        hintStyle: TextStyle(
+          color: Theme.of(context).brightness == Brightness.dark 
+              ? AppPalette.darkHint 
+              : AppPalette.lightHint
+        ),
         filled: true,
-        fillColor: AppPalette.cardColor,
+        fillColor: Theme.of(context).cardColor,
         border: InputBorder.none,
         enabledBorder: const OutlineInputBorder(
           borderRadius: BorderRadius.all(
@@ -55,10 +60,17 @@ class _AppFormFieldState extends State<AppFormField> {
           borderSide: const BorderSide(color: AppPalette.gradient2, width: 2.0),
         ),
         contentPadding:
-            const EdgeInsets.symmetric(vertical: 23, horizontal: 23),
+              EdgeInsets.symmetric(vertical: 23, horizontal: 23),
         hintText: widget.hint,
-        prefixIcon: widget.icon,
-        suffixIcon: widget.isObscureText
+        prefixIcon: widget.icon != null
+            ? Icon(
+                widget.icon!.icon,
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? AppPalette.darkHint 
+                    : AppPalette.lightHint,
+              )
+            : null,
+        suffixIcon: widget.isPassword
             ? IconButton(
                 onPressed: () {
                   setState(() {
@@ -66,8 +78,10 @@ class _AppFormFieldState extends State<AppFormField> {
                   });
                 },
                 icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility),
+                tooltip: _obscureText ? 'Show password' : 'Hide password',
               )
             : null,
+        helperText: widget.isPassword ? 'Use a strong password' : null,
       ),
     );
   }

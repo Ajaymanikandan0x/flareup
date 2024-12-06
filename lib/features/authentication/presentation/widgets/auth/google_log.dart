@@ -137,11 +137,13 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
         ),
         label: Text(
           'Continue with Google',
-          style: AppTextStyles.primaryTextTheme(fontSize: 17),
+          style: AppTextStyles.primaryTextTheme(fontSize: 17).copyWith(
+            color: Colors.white,
+          ),
         ),
         style: ElevatedButton.styleFrom(
-          foregroundColor: AppPalette.white,
-          backgroundColor: AppPalette.cardColor,
+          foregroundColor: Colors.white,
+          backgroundColor: AppPalette.darkCard,
           minimumSize: const Size(340, 60),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),

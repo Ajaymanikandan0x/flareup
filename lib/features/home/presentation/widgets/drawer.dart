@@ -1,16 +1,17 @@
-import 'package:flareup/core/routes/routs.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../../../core/constants/constants.dart';
-import '../../../../core/theme/app_palette.dart';
-import '../../../../core/theme/text_theme.dart';
-import '../../../../core/widgets/circle_vatar.dart';
-import '../../../profile/presentation/bloc/user_profile_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../../../../core/routes/routs.dart';
 import '../../../../core/storage/secure_storage_service.dart';
-import '../../../../features/authentication/presentation/bloc/auth_event.dart';
+import '../../../../core/theme/app_palette.dart';
+import '../../../../core/theme/cubit/theme_cubit.dart';
+import '../../../../core/theme/text_theme.dart';
+import '../../../../core/utils/responsive_utils.dart';
+import '../../../../core/widgets/circle_vatar.dart';
 import '../../../../features/authentication/presentation/bloc/auth_bloc.dart';
+import '../../../../features/authentication/presentation/bloc/auth_event.dart';
+import '../../../profile/presentation/bloc/user_profile_bloc.dart';
+import 'drawer_list_tile.dart';
 
 class AppDrawerWrapper extends StatefulWidget {
   const AppDrawerWrapper({super.key});
@@ -46,173 +47,201 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Initialize responsive utilities
+    Responsive.init(context);
+
+    // Calculate responsive dimensions
+    final headerPaddingTop = Responsive.screenHeight * 0.07;
+    final headerPaddingHorizontal = Responsive.horizontalPadding;
+    final headerPaddingBottom = Responsive.verticalPadding;
+    final avatarRadius = Responsive.isTablet ? 65.0 : 55.0;
+    final nameTextSize = Responsive.isTablet ? 24.0 : 22.0;
+    final menuItemTextSize = Responsive.isTablet ? 18.0 : 16.0;
+    final iconSize = Responsive.isTablet ? 24.0 : 22.0;
+    final dividerHeight = Responsive.isTablet ? 40.0 : 32.0;
+
     return Drawer(
-      backgroundColor: AppPalette.cardColor,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark 
+                ? AppPalette.darkCard 
+                : AppPalette.lightCard,
       child: BlocBuilder<UserProfileBloc, UserProfileState>(
         builder: (context, state) {
           return ListView(
             padding: EdgeInsets.zero,
             children: [
-              SizedBox(
-                height: 260,
-                child: DrawerHeader(
-                  padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
-                  decoration: BoxDecoration(
-                    color: AppPalette.cardColor.withOpacity(0.5),
-                    border: Border(
-                      bottom: BorderSide(
-                        color: AppPalette.formIconColor.withOpacity(0.1),
-                        width: 1,
-                      ),
-                    ),
+              if (state is UserProfileLoaded) ...[
+                Container(
+                  padding: EdgeInsets.fromLTRB(
+                    headerPaddingHorizontal,
+                    headerPaddingTop,
+                    headerPaddingHorizontal,
+                    headerPaddingBottom,
+                  ),
+                  decoration: const BoxDecoration(
+                    gradient: AppPalette.myGradient,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (state is UserProfileLoaded) ...[
-                        Avatar(
-                          imgUrl: state.user.profileImage,
-                          radius: 57,
-                          iconSize: 50,
+                      Avatar(
+                        radius: avatarRadius,
+                        imgUrl: state.user.profileImage,
+                      ),
+                      SizedBox(height: Responsive.spacingHeight),
+                      Text(
+                        state.user.fullName,
+                        style: AppTextStyles.primaryTextTheme(
+                          fontSize: nameTextSize,
+                          fontWeight: FontWeight.w600,
                         ),
-                        minHeight,
-                        Text(
-                          state.user.username,
-                          style: AppTextStyles.primaryTextTheme(fontSize: 25),
-                        )
-                      ] else ...[
-                        const Avatar(
-                          imgUrl: null,
-                          radius: 57,
-                          iconSize: 50,
-                        ),
-                        minHeight,
-                        Text(
-                          'Loading...',
-                          style: AppTextStyles.primaryTextTheme(fontSize: 25),
-                        )
-                      ],
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ],
                   ),
                 ),
-              ),
+              ],
+              SizedBox(height: Responsive.spacingHeight),
+              // Rest of the drawer items with responsive dimensions
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
+                padding: EdgeInsets.symmetric(
+                  horizontal: Responsive.horizontalPadding,
+                ),
+                child: DrawerListTile(
+                  icon: FontAwesomeIcons.userPen,
+                  title: 'Edit Profile',
+                  onTap: () => Navigator.pushNamed(context, AppRouts.profile),
+                ),
+              ),
+              // Theme Toggle
+              BlocBuilder<ThemeCubit, bool>(
+                builder: (context, isDark) {
+                  return ListTile(
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: Responsive.horizontalPadding * 1.5,
+                    ),
+                    leading: Icon(
+                      isDark ? Icons.dark_mode : Icons.light_mode,
+                      color: Theme.of(context).brightness == Brightness.dark 
+                ? AppPalette.darkCard 
+                : AppPalette.lightCard,
+                      size: iconSize,
+                    ),
+                    title: Text(
+                      'Dark Mode',
+                      style: AppTextStyles.primaryTextTheme(
+                        fontSize: menuItemTextSize,
+                      ),
+                    ),
+                    trailing: Switch(
+                      value: isDark,
+                      onChanged: (_) => context.read<ThemeCubit>().toggleTheme(),
+                      activeColor: AppPalette.gradient2,
+                      activeTrackColor: AppPalette.gradient2.withOpacity(0.5),
+                    ),
+                  );
+                },
+              ),
+              // Rest of menu items
+              Padding(
+                  padding: EdgeInsets.symmetric(
+                  horizontal: Responsive.horizontalPadding,
+                ),
                 child: Column(
                   children: [
-                    ListTile(
-                      leading: const FaIcon(
-                        FontAwesomeIcons.user,
-                        color: AppPalette.formIconColor,
-                      ),
-                      title: Text(
-                        'Profile',
-                        style: AppTextStyles.primaryTextTheme(fontSize: 18),
-                      ),
-                      onTap: () {
-                        Navigator.pushNamed(context, AppRouts.profile);
-                      },
+                    DrawerListTile(
+                      icon: FontAwesomeIcons.bell,
+                      title: 'Notifications',
+                      onTap: () {},
                     ),
-                    ListTile(
-                      leading: const FaIcon(
-                        FontAwesomeIcons.userPlus,
-                        color: AppPalette.formIconColor,
-                      ),
-                      title: Text(
-                        'Invite a friend',
-                        style: AppTextStyles.primaryTextTheme(fontSize: 18),
-                      ),
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
+                    DrawerListTile(
+                      icon: FontAwesomeIcons.star,
+                      title: 'Rate App',
+                      onTap: () {},
                     ),
-                    ListTile(
-                      leading: const FaIcon(
-                        FontAwesomeIcons.ticket,
-                        color: AppPalette.formIconColor,
-                      ),
-                      title: Text(
-                        'Tickets',
-                        style: AppTextStyles.primaryTextTheme(fontSize: 18),
-                      ),
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
+                    DrawerListTile(
+                      icon: FontAwesomeIcons.share,
+                      title: 'Share App',
+                      onTap: () {},
                     ),
-                    ListTile(
-                      leading: const FaIcon(
-                        FontAwesomeIcons.bookmark,
-                        color: AppPalette.formIconColor,
-                      ),
-                      title: Text(
-                        'Bookmark',
-                        style: AppTextStyles.primaryTextTheme(fontSize: 18),
-                      ),
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
+                    Divider(
+                      color: Theme.of(context).brightness == Brightness.dark 
+                ? AppPalette.darkCard 
+                : AppPalette.lightCard,
+                      height: dividerHeight,
                     ),
-                    ListTile(
-                      leading: const Icon(
-                        Icons.email,
-                        color: AppPalette.formIconColor,
-                      ),
-                      title: Text(
-                        'Contact Us',
-                        style: AppTextStyles.primaryTextTheme(fontSize: 18),
-                      ),
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
+                    DrawerListTile(
+                      icon: FontAwesomeIcons.shield,
+                      title: 'Privacy Policy',
+                      onTap: () {},
                     ),
-                    ListTile(
-                      leading: const Icon(
-                        Icons.settings,
-                        color: AppPalette.formIconColor,
-                      ),
-                      title: Text(
-                        'Settings',
-                        style: AppTextStyles.primaryTextTheme(fontSize: 18),
-                      ),
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
+                    DrawerListTile(
+                      icon: FontAwesomeIcons.file,
+                      title: 'Terms and Conditions',
+                      onTap: () {},
                     ),
-                    ListTile(
-                      leading: const FaIcon(
-                        FontAwesomeIcons.circleQuestion,
-                        color: AppPalette.formIconColor,
-                      ),
-                      title: Text(
-                        'Helps & FAQs',
-                        style: AppTextStyles.primaryTextTheme(fontSize: 18),
-                      ),
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
+                    DrawerListTile(
+                      icon: FontAwesomeIcons.cookie,
+                      title: 'Cookies Policy',
+                      onTap: () {},
                     ),
-                    ListTile(
-                      leading: const FaIcon(
-                        FontAwesomeIcons.arrowRightFromBracket,
-                        color: AppPalette.formIconColor,
-                      ),
-                      title: Text(
-                        'Sign Out',
-                        style: AppTextStyles.primaryTextTheme(fontSize: 18),
-                      ),
-                      onTap: () async {
-                        try {
-                          context.read<AuthBloc>().add(LogoutEvent());
-                          await Navigator.pushNamedAndRemoveUntil(
-                            context,
-                            AppRouts.signIn,
-                            (route) => false,
-                          );
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Logout failed: $e')),
-                          );
-                        }
+                    DrawerListTile(
+                      icon: FontAwesomeIcons.envelope,
+                      title: 'Contact',
+                      onTap: () {},
+                    ),
+                    DrawerListTile(
+                      icon: FontAwesomeIcons.message,
+                      title: 'Feedback',
+                      onTap: () {},
+                    ),
+                    DrawerListTile(
+                      icon: FontAwesomeIcons.rightFromBracket,
+                      title: 'Logout',
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text(
+                              'Logout',
+                              style: AppTextStyles.primaryTextTheme(
+                                fontSize: Responsive.subtitleFontSize,
+                              ),
+                            ),
+                            content: Text(
+                              'Are you sure you want to logout?',
+                              style: AppTextStyles.primaryTextTheme(
+                                fontSize: Responsive.bodyFontSize,
+                              ),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: Text(
+                                  'Cancel',
+                                  style: AppTextStyles.primaryTextTheme(
+                                    fontSize: Responsive.bodyFontSize,
+                                  ),
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  context.read<AuthBloc>().add(LogoutEvent());
+                                  Navigator.pushNamedAndRemoveUntil(
+                                    context,
+                                    AppRouts.signIn,
+                                    (route) => false,
+                                  );
+                                },
+                                child: Text(
+                                  'Logout',
+                                  style: AppTextStyles.primaryTextTheme(
+                                    fontSize: Responsive.bodyFontSize,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
                       },
                     ),
                   ],

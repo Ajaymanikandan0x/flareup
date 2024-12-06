@@ -7,6 +7,7 @@ import '../../../../core/routes/routs.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/text_theme.dart';
 import '../../../../core/utils/countdown_timer.dart';
+import '../../../../core/utils/responsive_utils.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -16,10 +17,19 @@ class OtpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Initialize responsive utilities
+    Responsive.init(context);
+
     final Map<String, dynamic> args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final String email = args['email'] as String;
     final bool isPasswordReset = args['isPasswordReset'] ?? false;
+
+    // Calculate responsive dimensions
+    final iconSize = Responsive.isTablet ? 55.0 : 45.0;
+    final titleFontSize = Responsive.isTablet ? 32.0 : 28.0;
+    final bodyFontSize = Responsive.isTablet ? 18.0 : 16.0;
+    final containerPadding = Responsive.isTablet ? 24.0 : 20.0;
 
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
@@ -66,80 +76,100 @@ class OtpScreen extends StatelessWidget {
       },
       child: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
-          // Show OTP screen for all states except loading
           if (state is! AuthLoading) {
             return Scaffold(
-              backgroundColor: AppPalette.backGroundColor,
+              backgroundColor: Theme.of(context).brightness == Brightness.dark 
+                ? AppPalette.darkCard 
+                : AppPalette.lightCard,
               appBar: AppBar(
-                backgroundColor: AppPalette.backGroundColor,
+                backgroundColor: Theme.of(context).brightness == Brightness.dark 
+                ? AppPalette.darkCard 
+                : AppPalette.lightCard,
                 elevation: 0,
                 leading: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: AppPalette.white),
+                  icon: Icon(
+                    Icons.arrow_back,
+                    color: Theme.of(context).brightness == Brightness.dark 
+                    ? AppPalette.darkCard 
+                    : AppPalette.lightCard,
+                    size: Responsive.isTablet ? 28.0 : 24.0,
+                  ),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
                 title: Text(
                   "OTP Verification",
-                  style: AppTextStyles.primaryTextTheme(fontSize: 20),
+                  style: AppTextStyles.primaryTextTheme(
+                    fontSize: Responsive.titleFontSize,
+                  ),
                 ),
                 centerTitle: true,
               ),
               body: SafeArea(
                 child: SingleChildScrollView(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 16),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: Responsive.horizontalPadding,
+                      vertical: Responsive.verticalPadding,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const SizedBox(height: 40),
+                        SizedBox(height: Responsive.spacingHeight * 2),
                         Container(
-                          padding: const EdgeInsets.all(20),
+                          padding: EdgeInsets.all(containerPadding),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             gradient: AppPalette.myGradient,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.email_outlined,
-                            size: 45,
-                            color: AppPalette.white,
+                            size: iconSize,
+                            color: Theme.of(context).brightness == Brightness.dark 
+                    ? AppPalette.darkCard 
+                      : AppPalette.lightCard,
                           ),
                         ),
-                        const SizedBox(height: 32),
+                        SizedBox(height: Responsive.spacingHeight),
                         Text(
                           "OTP Verification",
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 28,
+                            fontSize: titleFontSize,
                             fontWeight: FontWeight.bold,
-                            color: AppPalette.white,
+                            color: Theme.of(context).brightness == Brightness.dark 
+                ? AppPalette.darkCard 
+                : AppPalette.lightCard,
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: Responsive.spacingHeight),
                         Text(
                           "We sent your code to",
-                          style: AppTextStyles.hindTextTheme(fontSize: 16),
+                          style: AppTextStyles.hindTextTheme(
+                            fontSize: bodyFontSize,
+                          ),
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: Responsive.spacingHeight * 0.5),
                         Text(
                           email,
-                          style: AppTextStyles.primaryTextTheme(fontSize: 16),
+                          style: AppTextStyles.primaryTextTheme(
+                            fontSize: bodyFontSize,
+                          ),
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: Responsive.spacingHeight * 0.5),
                         CountdownTimer(
                           duration: const Duration(seconds: 30),
                           onTimerComplete: () {
                             // Timer completed
                           },
                         ),
-                        const SizedBox(height: 40),
+                        SizedBox(height: Responsive.spacingHeight * 2),
                         OtpForm(
                           email: email,
                           isPasswordReset: isPasswordReset,
                         ),
-                        const SizedBox(height: 32),
+                        SizedBox(height: Responsive.spacingHeight),
                         BlocBuilder<AuthBloc, AuthState>(
                           builder: (context, state) {
                             final bool isLoading = state is AuthLoading;
-
                             final bool isSessionExpired =
                                 state is AuthFailure &&
                                     state.error.contains('Session expired');
@@ -162,7 +192,8 @@ class OtpScreen extends StatelessWidget {
                                         ? "Session Expired"
                                         : "Resend OTP Code",
                                 style: AppTextStyles.primaryTextTheme(
-                                    fontSize: 16),
+                                  fontSize: bodyFontSize,
+                                ),
                               ),
                             );
                           },
@@ -176,8 +207,10 @@ class OtpScreen extends StatelessWidget {
           }
 
           // Show loading indicator
-          return const Scaffold(
-            backgroundColor: AppPalette.backGroundColor,
+          return Scaffold(
+            backgroundColor: Theme.of(context).brightness == Brightness.dark 
+                ? AppPalette.darkCard 
+                : AppPalette.lightCard,
             body: Center(
               child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(AppPalette.gradient2),
