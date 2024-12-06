@@ -1,10 +1,10 @@
 import 'package:flareup/core/utils/validation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/constants/constants.dart';
 import '../../../../core/routes/routs.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/text_theme.dart';
+import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/widgets/form_feild.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../bloc/auth_bloc.dart';
@@ -24,16 +24,23 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Initialize responsive utilities
+    Responsive.init(context);
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppPalette.white),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).brightness == Brightness.dark 
+                ? AppPalette.darkCard 
+                : AppPalette.lightCard),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           'Forgot Password',
-          style: AppTextStyles.primaryTextTheme(fontSize: 20),
+          style: AppTextStyles.primaryTextTheme(
+            fontSize: Responsive.titleFontSize,
+          ),
         ),
         centerTitle: true,
       ),
@@ -55,31 +62,38 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           }
         },
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.symmetric(
+            horizontal: Responsive.horizontalPadding,
+            vertical: Responsive.verticalPadding,
+          ),
           child: Form(
             key: _formKey,
             child: Column(
               children: [
-                const SizedBox(height: 40),
+                SizedBox(height: Responsive.spacingHeight * 2),
                 Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: EdgeInsets.all(Responsive.isTablet ? 24 : 20),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: AppPalette.myGradient,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.lock_reset,
-                    size: 45,
-                    color: AppPalette.white,
+                    size: Responsive.isTablet ? 55 : 45,
+                    color: Theme.of(context).brightness == Brightness.dark 
+                ? AppPalette.darkCard 
+                : AppPalette.lightCard,
                   ),
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: Responsive.spacingHeight),
                 Text(
                   'Please Enter Your Email Address To\nReceive a Verification Code.',
                   textAlign: TextAlign.center,
-                  style: AppTextStyles.primaryTextTheme(fontSize: 16),
+                  style: AppTextStyles.primaryTextTheme(
+                    fontSize: Responsive.subtitleFontSize,
+                  ),
                 ),
-                largeHeight,
+                SizedBox(height: Responsive.spacingHeight * 2),
                 AppFormField(
                   hint: 'Email Address',
                   icon: const Icon(Icons.email),
@@ -91,7 +105,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     return FormValidator.validateEmail(value);
                   },
                 ),
-                const SizedBox(height: 40),
+                SizedBox(height: Responsive.spacingHeight * 2),
                 BlocBuilder<AuthBloc, AuthState>(
                   builder: (context, state) {
                     return PrimaryButton(
@@ -105,8 +119,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         }
                       },
                       text: state is AuthLoading ? 'Sending...' : 'Send',
-                      width: double.infinity,
-                      height: 55,
+                      width: Responsive.screenWidth * 0.85,
+                      height: Responsive.buttonHeight,
                     );
                   },
                 ),

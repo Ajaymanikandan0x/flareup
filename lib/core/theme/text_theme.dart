@@ -24,7 +24,7 @@ class AppTextStyles {
   }) {
     return _baseTextStyle(
       fontSize: fontSize ?? 15,
-      color: AppPalette.mainText,
+      color: null,
       fontStyle: fontStyle,
       fontWeight: fontWeight,
     );
@@ -36,7 +36,7 @@ class AppTextStyles {
   }) {
     return _baseTextStyle(
       fontSize: fontSize,
-      color: AppPalette.hintTextColor,
+      color: null,
       fontStyle: fontStyle,
     );
   }

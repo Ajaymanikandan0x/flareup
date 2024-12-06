@@ -32,7 +32,9 @@ class Avatar extends StatelessWidget {
       builder: (context, constraints) {
         return CircleAvatar(
           radius: responsiveRadius,
-          backgroundColor: backgroundColor ?? AppPalette.hintTextColor,
+          backgroundColor: backgroundColor ?? (Theme.of(context).brightness == Brightness.dark 
+                ? AppPalette.darkCard 
+                : AppPalette.lightCard),
           child: imgUrl != null && imgUrl!.isNotEmpty
               ? ClipOval(
                   child: CachedNetworkImage(
@@ -48,7 +50,9 @@ class Avatar extends StatelessWidget {
                       return FaIcon(
                         FontAwesomeIcons.userLarge,
                         size: responsiveIconSize,
-                        color: AppPalette.white,
+                        color: Theme.of(context).brightness == Brightness.dark 
+                ? AppPalette.darkCard 
+                : AppPalette.lightCard,
                       );
                     },
                   ),
@@ -56,7 +60,9 @@ class Avatar extends StatelessWidget {
               : FaIcon(
                   FontAwesomeIcons.userLarge,
                   size: responsiveIconSize,
-                  color: AppPalette.white,
+                  color: Theme.of(context).brightness == Brightness.dark 
+                ? AppPalette.darkCard 
+                : AppPalette.lightCard,
                 ),
         );
       },

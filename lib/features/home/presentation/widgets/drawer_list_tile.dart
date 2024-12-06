@@ -35,7 +35,9 @@ class DrawerListTile extends StatelessWidget {
       ),
       leading: FaIcon(
         icon,
-        color: AppPalette.formIconColor,
+        color: Theme.of(context).brightness == Brightness.dark 
+                ? AppPalette.darkCard 
+                : AppPalette.lightCard,
         size: iconSize,
       ),
       title: Text(

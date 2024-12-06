@@ -26,7 +26,7 @@ class OnboardingTextCard extends StatelessWidget {
             style: GoogleFonts.plusJakartaSans(
               fontSize: Responsive.titleFontSize,
               fontWeight: FontWeight.bold,
-              color: AppPalette.white,
+              color: AppPalette.darkText,
             ),
           ),
           SizedBox(
@@ -38,7 +38,7 @@ class OnboardingTextCard extends StatelessWidget {
             style: GoogleFonts.plusJakartaSans(
               fontSize: Responsive.bodyFontSize,
               fontWeight: FontWeight.w500,
-              color: AppPalette.white,
+              color: AppPalette.darkText,
             ),
           ),
         ],

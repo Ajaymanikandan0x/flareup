@@ -10,6 +10,7 @@ import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import '../../../../core/utils/responsive_utils.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({Key? key}) : super(key: key);
@@ -39,6 +40,15 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     // Initialize responsive utilities
     Responsive.init(context);
 
+    // Calculate responsive dimensions
+    final imageHeight = Responsive.screenHeight * 0.15;
+    final titleFontSize = Responsive.isTablet ? 24.0 : 20.0;
+    final subtitleFontSize = Responsive.isTablet ? 18.0 : 16.0;
+    final buttonHeight = Responsive.buttonHeight;
+    final horizontalPadding = Responsive.horizontalPadding;
+    final verticalPadding = Responsive.verticalPadding;
+    final spacingHeight = Responsive.spacingHeight;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         return BlocBuilder<AuthBloc, AuthState>(
@@ -49,7 +59,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 title: Text(
                   'Create New Password',
                   style: AppTextStyles.primaryTextTheme(
-                    fontSize: Responsive.titleFontSize
+                    fontSize: titleFontSize,
                   ),
                 ),
                 centerTitle: true,
@@ -81,34 +91,44 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 },
                 child: SingleChildScrollView(
                   padding: EdgeInsets.symmetric(
-                    horizontal: Responsive.horizontalPadding,
-                    vertical: Responsive.verticalPadding,
+                    horizontal: horizontalPadding,
+                    vertical: verticalPadding,
                   ),
                   child: Form(
                     key: _formKey,
                     child: Column(
                       children: [
-                        SizedBox(height: Responsive.spacingHeight),
-                        Image.asset(
-                          'assets/images/lock.png',
-                          height: Responsive.imageSize,
+                        SizedBox(height: spacingHeight),
+                        Container(
+                          padding: EdgeInsets.all(Responsive.isTablet ? 24 : 20),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: AppPalette.myGradient,
+                          ),
+                          child: FaIcon(
+                            FontAwesomeIcons.lock,
+                            size: Responsive.isTablet ? 55 : 45,
+                            color: Theme.of(context).brightness == Brightness.dark 
+                                ? AppPalette.darkCard 
+                                : AppPalette.lightCard,
+                          ),
                         ),
-                        SizedBox(height: Responsive.spacingHeight),
+                        SizedBox(height: spacingHeight),
                         Text(
                           'Your New Password Must Be Different\nfrom Previously Used Password.',
                           textAlign: TextAlign.center,
                           style: AppTextStyles.primaryTextTheme(
-                            fontSize: Responsive.subtitleFontSize,
+                            fontSize: subtitleFontSize,
                           ),
                         ),
-                        SizedBox(height: Responsive.spacingHeight * 2),
+                        SizedBox(height: spacingHeight * 2),
                         AppFormField(
                           hint: 'New Password',
                           controller: newPasswordController,
                           validator: FormValidator.validatePassword,
                           isPassword: true,
                         ),
-                        SizedBox(height: Responsive.spacingHeight),
+                        SizedBox(height: spacingHeight),
                         AppFormField(
                           hint: 'Confirm Password',
                           controller: confirmPasswordController,
@@ -120,7 +140,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                           },
                           isPassword: true,
                         ),
-                        SizedBox(height: Responsive.spacingHeight * 2),
+                        SizedBox(height: spacingHeight * 2),
                         BlocBuilder<AuthBloc, AuthState>(
                           builder: (context, state) {
                             return PrimaryButton(
@@ -138,8 +158,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                 }
                               },
                               text: state is AuthLoading ? 'Saving...' : 'Save',
-                              width: double.infinity,
-                              height: Responsive.buttonHeight,
+                              width: constraints.maxWidth,
+                              height: buttonHeight,
                             );
                           },
                         ),

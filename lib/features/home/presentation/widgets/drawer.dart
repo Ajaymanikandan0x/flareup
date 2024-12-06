@@ -61,7 +61,9 @@ class AppDrawer extends StatelessWidget {
     final dividerHeight = Responsive.isTablet ? 40.0 : 32.0;
 
     return Drawer(
-      backgroundColor: AppPalette.cardColor,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark 
+                ? AppPalette.darkCard 
+                : AppPalette.lightCard,
       child: BlocBuilder<UserProfileBloc, UserProfileState>(
         builder: (context, state) {
           return ListView(
@@ -119,7 +121,9 @@ class AppDrawer extends StatelessWidget {
                     ),
                     leading: Icon(
                       isDark ? Icons.dark_mode : Icons.light_mode,
-                      color: AppPalette.formIconColor,
+                      color: Theme.of(context).brightness == Brightness.dark 
+                ? AppPalette.darkCard 
+                : AppPalette.lightCard,
                       size: iconSize,
                     ),
                     title: Text(
@@ -160,7 +164,9 @@ class AppDrawer extends StatelessWidget {
                       onTap: () {},
                     ),
                     Divider(
-                      color: AppPalette.formIconColor,
+                      color: Theme.of(context).brightness == Brightness.dark 
+                ? AppPalette.darkCard 
+                : AppPalette.lightCard,
                       height: dividerHeight,
                     ),
                     DrawerListTile(

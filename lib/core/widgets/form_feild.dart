@@ -42,9 +42,13 @@ class _AppFormFieldState extends State<AppFormField> {
       obscureText: _obscureText,
       decoration: InputDecoration(
         labelText: widget.hint,
-        hintStyle: const TextStyle(color: AppPalette.hintTextColor),
+        hintStyle: TextStyle(
+          color: Theme.of(context).brightness == Brightness.dark 
+              ? AppPalette.darkHint 
+              : AppPalette.lightHint
+        ),
         filled: true,
-        fillColor: AppPalette.cardColor,
+        fillColor: Theme.of(context).cardColor,
         border: InputBorder.none,
         enabledBorder: const OutlineInputBorder(
           borderRadius: BorderRadius.all(
@@ -56,9 +60,16 @@ class _AppFormFieldState extends State<AppFormField> {
           borderSide: const BorderSide(color: AppPalette.gradient2, width: 2.0),
         ),
         contentPadding:
-            const EdgeInsets.symmetric(vertical: 23, horizontal: 23),
+              EdgeInsets.symmetric(vertical: 23, horizontal: 23),
         hintText: widget.hint,
-        prefixIcon: widget.icon,
+        prefixIcon: widget.icon != null
+            ? Icon(
+                widget.icon!.icon,
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? AppPalette.darkHint 
+                    : AppPalette.lightHint,
+              )
+            : null,
         suffixIcon: widget.isPassword
             ? IconButton(
                 onPressed: () {

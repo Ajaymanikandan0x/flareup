@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 
 import '../constants/constants.dart';
 import '../error/app_error.dart';
+import '../error/error_handler.dart';
 import '../storage/secure_storage_service.dart';
 
 enum UploadType { profile, event, video }
@@ -31,7 +32,7 @@ class CloudinaryService {
       }
 
       final fileSize = await file.length();
-      if (fileSize > 10 * 1024 * 1024) { // 10MB limit
+      if (fileSize > 10 * 1024 * 1024) {
         throw AppError(
           userMessage: 'File size too large',
           technicalMessage: 'File size: ${fileSize / (1024 * 1024)}MB exceeds 10MB limit',
@@ -39,32 +40,21 @@ class CloudinaryService {
         );
       }
 
-      // Check connectivity with proper error handling
+      // Check connectivity
       try {
         await InternetAddress.lookup('api.cloudinary.com')
             .timeout(Duration(seconds: _connectionTimeout));
-      } on SocketException {
-        throw AppError(
-          userMessage: ErrorMessages.networkError,
-          technicalMessage: 'No internet connection',
-          type: ErrorType.network,
-        );
-      } on TimeoutException {
-        throw AppError(
-          userMessage: 'Slow internet connection',
-          technicalMessage: 'Connection check timed out after $_connectionTimeout seconds',
-          type: ErrorType.network,
-        );
+      } catch (e) {
+        throw ErrorHandler.handle(e);
       }
 
-      // Prepare upload data
+      // Upload file
       final formData = FormData.fromMap({
         'file': await MultipartFile.fromFile(file.path),
         'upload_preset': cloudinaryUploadPreset,
         'folder': _getFolderName(type),
       });
 
-      // Upload with progress tracking
       final response = await _dio.post(
         _cloudinaryUrl,
         data: formData,
@@ -80,16 +70,13 @@ class CloudinaryService {
         },
       ).timeout(
         Duration(seconds: _uploadTimeout),
-        onTimeout: () {
-          throw AppError(
-            userMessage: 'Upload timed out',
-            technicalMessage: 'Upload exceeded $_uploadTimeout seconds',
-            type: ErrorType.network,
-          );
-        },
+        onTimeout: () => throw AppError(
+          userMessage: 'Upload timed out',
+          technicalMessage: 'Upload exceeded $_uploadTimeout seconds',
+          type: ErrorType.network,
+        ),
       );
 
-      // Handle response
       if (response.statusCode == 200) {
         final secureUrl = response.data['secure_url'] as String?;
         if (secureUrl != null) {
@@ -102,14 +89,95 @@ class CloudinaryService {
         technicalMessage: _parseErrorMessage(response.data),
         type: ErrorType.server,
       );
+    } catch (e) {
+      throw ErrorHandler.handle(e);
+    }
+  }
 
+  Future<String?> uploadVideo(File videoFile) async {
+    try {
+      // Video format validation
+      final extension = videoFile.path.split('.').last.toLowerCase();
+      final validFormats = ['mp4', 'mov', 'avi', 'mkv'];
+      
+      if (!validFormats.contains(extension)) {
+        throw AppError(
+          userMessage: 'Invalid video format',
+          technicalMessage: 'Supported formats: ${validFormats.join(", ")}',
+          type: ErrorType.validation,
+        );
+      }
+
+      // Video size limit (500MB for high quality)
+      final fileSize = await videoFile.length();
+      final maxSize = 500 * 1024 * 1024; // 500MB
+      
+      if (fileSize > maxSize) {
+        throw AppError(
+          userMessage: 'Video size too large',
+          technicalMessage: 
+              'Video size: ${fileSize / (1024 * 1024)}MB exceeds 500MB limit',
+          type: ErrorType.validation,
+        );
+      }
+
+      // Prepare upload data with video-specific settings
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(videoFile.path),
+        'upload_preset': cloudinaryUploadPreset,
+        'folder': _getFolderName(UploadType.video),
+        'resource_type': 'video',
+        'quality_analysis': true, // Enable quality analysis
+        'eager': [
+          {
+            'streaming_profile': 'hd', // HD streaming profile
+            'format': 'mp4'
+          }
+        ],
+      });
+
+      // Use extended timeout for large video uploads
+      final response = await _dio.post(
+        _cloudinaryUrl,
+        data: formData,
+        options: Options(
+          headers: {'Content-Type': 'multipart/form-data'},
+          validateStatus: (status) => true,
+          receiveTimeout: const Duration(minutes: 10),
+          sendTimeout: const Duration(minutes: 10),
+        ),
+        onSendProgress: (sent, total) {
+          final progress = (sent / total * 100).toStringAsFixed(2);
+          print('Video upload progress: $progress%');
+        },
+      ).timeout(
+        const Duration(minutes: 15),
+        onTimeout: () {
+          throw AppError(
+            userMessage: 'Upload timed out',
+            technicalMessage: 'Video upload exceeded 15 minutes',
+            type: ErrorType.network,
+          );
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final secureUrl = response.data['secure_url'] as String?;
+        if (secureUrl != null) {
+          return secureUrl;
+        }
+      }
+
+      throw AppError(
+        userMessage: 'Failed to upload video',
+        technicalMessage: _parseErrorMessage(response.data),
+        type: ErrorType.server,
+      );
     } on AppError {
       rethrow;
-    } on DioException catch (e) {
-      throw _handleDioError(e);
     } catch (e) {
       throw AppError(
-        userMessage: 'Unexpected error occurred',
+        userMessage: 'Failed to process video',
         technicalMessage: e.toString(),
         type: ErrorType.unknown,
       );
