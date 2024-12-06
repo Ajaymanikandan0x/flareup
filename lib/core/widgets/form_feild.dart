@@ -5,15 +5,15 @@ import 'package:flutter/material.dart';
 class AppFormField extends StatefulWidget {
   final Icon? icon;
   final String hint;
-  final bool isObscureText;
   final TextEditingController controller;
   final String? Function(String?)? validator;
+  final bool isPassword;
 
   const AppFormField({
     super.key,
     required this.hint,
     this.icon,
-    required this.isObscureText,
+    this.isPassword = false,
     required this.controller,
     this.validator,
   });
@@ -28,7 +28,7 @@ class _AppFormFieldState extends State<AppFormField> {
   @override
   void initState() {
     super.initState();
-    _obscureText = widget.isObscureText;
+    _obscureText = widget.isPassword;
   }
 
   @override
@@ -41,6 +41,7 @@ class _AppFormFieldState extends State<AppFormField> {
       validator: widget.validator,
       obscureText: _obscureText,
       decoration: InputDecoration(
+        labelText: widget.hint,
         hintStyle: const TextStyle(color: AppPalette.hintTextColor),
         filled: true,
         fillColor: AppPalette.cardColor,
@@ -58,7 +59,7 @@ class _AppFormFieldState extends State<AppFormField> {
             const EdgeInsets.symmetric(vertical: 23, horizontal: 23),
         hintText: widget.hint,
         prefixIcon: widget.icon,
-        suffixIcon: widget.isObscureText
+        suffixIcon: widget.isPassword
             ? IconButton(
                 onPressed: () {
                   setState(() {
@@ -66,8 +67,10 @@ class _AppFormFieldState extends State<AppFormField> {
                   });
                 },
                 icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility),
+                tooltip: _obscureText ? 'Show password' : 'Hide password',
               )
             : null,
+        helperText: widget.isPassword ? 'Use a strong password' : null,
       ),
     );
   }

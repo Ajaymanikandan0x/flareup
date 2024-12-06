@@ -6,6 +6,7 @@ class AppPalette {
   static const Color gradient2 = Color(0xFFF687FF);
   static const Color mainText = Color(0xFFFFFFFF);
   static const Color white = Color(0xFFFFFFFF);
+  static const Color black = Color(0xFF000000);
   static const Color hintTextColor = Color(0xFF747688);
   static const Color formIconColor = Color(0xFF747688);
   static const Color cardColor = Color(0xFF1D2026);

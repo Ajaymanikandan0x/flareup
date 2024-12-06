@@ -1,4 +1,4 @@
-import 'package:flareup/core/constants/constants.dart';
+
 import 'package:flareup/core/routes/routs.dart';
 import 'package:flareup/core/utils/validation.dart';
 import 'package:flareup/core/widgets/primary_button.dart';
@@ -13,6 +13,7 @@ import '../bloc/auth_bloc.dart';
 import '../bloc/auth_state.dart';
 import '../widgets/auth/google_log.dart';
 import '../widgets/auth/sign_up_text.dart';
+import '../../../../core/utils/responsive_utils.dart';
 
 class SignUp extends StatelessWidget {
   SignUp({super.key});
@@ -27,6 +28,8 @@ class SignUp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Initialize responsive utilities
+    Responsive.init(context);
     final authBloc = DependencyInjector().authBloc;
 
     return Scaffold(
@@ -53,59 +56,60 @@ class SignUp extends StatelessWidget {
         },
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(10.0),
+            padding: EdgeInsets.symmetric(
+              horizontal: Responsive.horizontalPadding,
+              vertical: Responsive.verticalPadding,
+            ),
             child: Form(
               key: _formKey,
               child: Column(
                 children: [
-                  const SizedBox(height: 40),
+                  SizedBox(height: Responsive.spacingHeight * 2),
                   Align(
                     alignment: const Alignment(-1, 0.0),
                     child: Text(
-                      style: AppTextStyles.primaryTextTheme(fontSize: 30),
                       'Sign in',
+                      style: AppTextStyles.primaryTextTheme(
+                        fontSize: Responsive.titleFontSize,
+                      ),
                     ),
                   ),
-                  largeHeight,
+                  SizedBox(height: Responsive.spacingHeight),
                   AppFormField(
                       hint: 'userName',
                       icon: const Icon(Icons.person),
-                      isObscureText: false,
                       controller: nameController,
                       validator: FormValidator.validateUserName),
-                  largeHeight,
+                  SizedBox(height: Responsive.spacingHeight),
                   AppFormField(
                     hint: 'fullName',
                     icon: const Icon(Icons.person_2),
-                    isObscureText: false,
                     controller: fullNameController,
                     validator: FormValidator.validateName,
                   ),
-                  largeHeight,
+                  SizedBox(height: Responsive.spacingHeight),
                   AppFormField(
                       hint: 'abc@Gmail.com',
                       icon: const Icon(Icons.email),
-                      isObscureText: false,
                       controller: emailController,
                       validator: FormValidator.validateEmail),
-                  largeHeight,
+                  SizedBox(height: Responsive.spacingHeight),
                   AppFormField(
                     hint: 'your password',
                     icon: const Icon(Icons.lock),
-                    isObscureText: true,
+                    isPassword: true,
                     controller: passwordController,
                     validator: FormValidator.validatePassword,
                   ),
-                  largeHeight,
+                  SizedBox(height: Responsive.spacingHeight),
                   AppFormField(
                     hint: 'Conform password',
                     icon: const Icon(Icons.lock),
-                    isObscureText: true,
+                    isPassword: true,
                     controller: passwordConformController,
                     validator: FormValidator.validatePassword,
                   ),
-                  largeHeight,
-                  minHeight,
+                  SizedBox(height: Responsive.spacingHeight),
                   PrimaryButton(
                     onTap: () {
                       if (_formKey.currentState!.validate()) {
@@ -135,19 +139,19 @@ class SignUp extends StatelessWidget {
                       }
                     },
                     text: 'Sign up',
-                    height: 65,
-                    width: 350,
+                    height: Responsive.buttonHeight,
+                    width: Responsive.screenWidth * 0.85,
                   ),
-                  largeHeight,
-                  minHeight,
+                  SizedBox(height: Responsive.spacingHeight),
                   Text(
                     'or',
-                    style: AppTextStyles.hindTextTheme(fontSize: 20),
+                    style: AppTextStyles.hindTextTheme(
+                      fontSize: Responsive.subtitleFontSize,
+                    ),
                   ),
-                  formHeight,
+                  SizedBox(height: Responsive.spacingHeight),
                   const GoogleSignInButton(),
-                  largeHeight,
-                  minHeight,
+                  SizedBox(height: Responsive.spacingHeight),
                   AuthPromptText(
                     prefixText: 'Already have an account? ',
                     suffixText: 'Sign In',

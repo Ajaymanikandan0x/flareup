@@ -131,15 +131,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onLogoutEvent(
-      LogoutEvent event, Emitter<AuthState> emit) async {
+  Future<void> _onLogoutEvent(LogoutEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
       await logoutUseCase.call();
       await storageService.clearAll();
       emit(AuthInitial());
     } catch (e) {
-      emit(AuthFailure(error: 'Logout failed: ${e.toString()}'));
+      await storageService.clearAll();
+      emit(AuthInitial());
     }
   }
 

@@ -90,7 +90,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     }
                     return FormValidator.validateEmail(value);
                   },
-                  isObscureText: false,
                 ),
                 const SizedBox(height: 40),
                 BlocBuilder<AuthBloc, AuthState>(

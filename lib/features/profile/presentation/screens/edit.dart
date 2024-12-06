@@ -2,11 +2,13 @@ import 'package:flareup/core/constants/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/utils/validation.dart';
 import '../../../../core/widgets/custome_text.dart';
 import '../../../../core/widgets/form_feild.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../../../profile/presentation/bloc/user_profile_bloc.dart';
+
 
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
@@ -35,10 +37,15 @@ class _EditProfileState extends State<EditProfile> {
 
   @override
   Widget build(BuildContext context) {
+    Responsive.init(context);
+
     return Scaffold(
       appBar: AppBar(),
       body: Padding(
-        padding: const EdgeInsets.all(9.0),
+        padding: EdgeInsets.symmetric(
+          horizontal: Responsive.horizontalPadding,
+          vertical: Responsive.verticalPadding,
+        ),
         child: Form(
           key: _formKey,
           child: Column(
@@ -47,13 +54,12 @@ class _EditProfileState extends State<EditProfile> {
                 alignment: Alignment.centerLeft,
                 child: AppText(
                   data: fieldType,
-                  fontsSize: 30,
+                  fontsSize: Responsive.titleFontSize,
                 ),
               ),
-              largeHeight,
+              SizedBox(height: Responsive.spacingHeight),
               AppFormField(
                 hint: '',
-                isObscureText: false,
                 controller: controller,
                 validator: (value) {
                   return _validateInput(value, fieldType);
@@ -83,12 +89,12 @@ class _EditProfileState extends State<EditProfile> {
                       }
                     },
                     text: state is UserProfileLoading ? 'Saving...' : 'Save',
-                    width: 300,
-                    height: 55,
+                    width: Responsive.screenWidth * 0.85,
+                    height: Responsive.buttonHeight,
                   );
                 },
               ),
-              largeHeight,
+              SizedBox(height: Responsive.spacingHeight),
             ],
           ),
         ),

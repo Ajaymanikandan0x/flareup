@@ -8,19 +8,26 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/routes/routs.dart';
 import '../../../../core/utils/image_picker_service.dart';
+import '../../../../core/utils/responsive_utils.dart';
 import '../bloc/user_profile_bloc.dart';
+
 
 class Profile extends StatelessWidget {
   const Profile({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Initialize responsive utilities
+    Responsive.init(context);
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: Text(
           'Edit Profile',
-          style: AppTextStyles.primaryTextTheme(fontSize: 20),
+          style: AppTextStyles.primaryTextTheme(
+            fontSize: Responsive.titleFontSize,
+          ),
         ),
         actions: [
           TextButton(
@@ -30,12 +37,20 @@ class Profile extends StatelessWidget {
                 Navigator.pop(context);
               }
             },
-            child: const Text('Done'),
+            child: Text(
+              'Done',
+              style: AppTextStyles.primaryTextTheme(
+                fontSize: Responsive.bodyFontSize,
+              ),
+            ),
           )
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(9),
+        padding: EdgeInsets.symmetric(
+          horizontal: Responsive.horizontalPadding,
+          vertical: Responsive.verticalPadding,
+        ),
         child: BlocConsumer<UserProfileBloc, UserProfileState>(
           listener: (context, state) {
             if (state is UserProfileError) {
@@ -52,10 +67,10 @@ class Profile extends StatelessWidget {
               return Column(
                 children: [
                   Avatar(
-                    radius: MediaQuery.of(context).size.width * 0.16,
+                    radius: Responsive.imageSize,
                     imgUrl: user.profileImage,
                   ),
-                  minHeight,
+                  SizedBox(height: Responsive.spacingHeight),
                   TextButton(
                     onPressed: () async {
                       File? imageFile = await ImagePickerService.pickImageFromGallery();
@@ -63,9 +78,14 @@ class Profile extends StatelessWidget {
                         context.read<UserProfileBloc>().add(UploadProfileImage(imageFile));
                       }
                     },
-                    child: Text('Change Profile Photo', style: AppTextStyles.primaryTextTheme(fontSize: 16),)
+                    child: Text(
+                      'Change Profile Photo',
+                      style: AppTextStyles.primaryTextTheme(
+                        fontSize: Responsive.subtitleFontSize,
+                      ),
+                    )
                   ),
-                  largeHeight,
+                  SizedBox(height: Responsive.spacingHeight * 2),
                   NameListTile(
                     leading: 'UserName',
                     title: user.username,
@@ -90,9 +110,11 @@ class Profile extends StatelessWidget {
                   minHeight,
                   Text(
                     'Private Information',
-                    style: AppTextStyles.primaryTextTheme(),
+                    style: AppTextStyles.primaryTextTheme(
+                      fontSize: Responsive.subtitleFontSize,
+                    ),
                   ),
-                  mediumHeight,
+                  SizedBox(height: Responsive.spacingHeight),
                   NameListTile(
                     leading: 'Email',
                     title: user.email,

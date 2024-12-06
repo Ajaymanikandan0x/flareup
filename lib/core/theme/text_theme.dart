@@ -20,11 +20,13 @@ class AppTextStyles {
   static TextStyle primaryTextTheme({
     double? fontSize,
     FontStyle? fontStyle,
+    FontWeight fontWeight = FontWeight.w600,
   }) {
     return _baseTextStyle(
       fontSize: fontSize ?? 15,
       color: AppPalette.mainText,
       fontStyle: fontStyle,
+      fontWeight: fontWeight,
     );
   }
 
