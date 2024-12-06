@@ -10,6 +10,7 @@ import '../../../../core/routes/routs.dart';
 import '../../../../core/utils/image_picker_service.dart';
 import '../../../../core/utils/responsive_utils.dart';
 import '../bloc/user_profile_bloc.dart';
+import '../widgets/profile_shimmer.dart';
 
 
 class Profile extends StatelessWidget {
@@ -57,18 +58,33 @@ class Profile extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(state.message)),
               );
+            } else if (state is ProfileImageUploadSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Profile image updated successfully')),
+              );
             }
           },
           builder: (context, state) {
-            if (state is UserProfileLoading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state is UserProfileLoaded) {
+            if (state is UserProfileLoading || 
+                state is UserProfileInitial || 
+                state is ProfileImageUploading) {
+              return const ProfileShimmer();
+            }
+            
+            if (state is UserProfileLoaded) {
               final user = state.user;
               return Column(
                 children: [
-                  Avatar(
-                    radius: Responsive.imageSize,
-                    imgUrl: user.profileImage,
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Avatar(
+                        radius: Responsive.imageSize,
+                        imgUrl: user.profileImage,
+                      ),
+                      if (state is ProfileImageUploading)
+                        const CircularProgressIndicator(),
+                    ],
                   ),
                   SizedBox(height: Responsive.spacingHeight),
                   TextButton(

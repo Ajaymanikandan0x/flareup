@@ -37,7 +37,6 @@ class UserProfileModel {
   Map<String, dynamic> toJson({bool onlyProfileImage = false}) {
     if (onlyProfileImage) {
       return {
-        'id': id,
         'profile_publicId': profileImage,
       };
     } else {

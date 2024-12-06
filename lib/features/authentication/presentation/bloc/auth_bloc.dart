@@ -149,12 +149,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthLoading());
     try {
-      print('Attempting Google Sign In...');
+      Logger.debug('Attempting Google Sign In...');
       try {
         final userEntity = await authRepository.googleSignIn(
           accessToken: event.accessToken,
         );
-        print('Google Sign In successful');
+        Logger.debug('Google Sign In successful');
         await storageService.saveTokens(
           accessToken: userEntity.accessToken,
           refreshToken: userEntity.refreshToken,
@@ -163,14 +163,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(AuthSuccess(
             userEntity: userEntity, message: 'Google login successful!'));
       } catch (signInError) {
-        print('Sign In Error: $signInError');
+        Logger.error('Sign In Error:', signInError);
         if (signInError.toString().contains('REGISTRATION_REQUIRED')) {
-          print('Registration required, attempting signup...');
+          Logger.debug('Registration required, attempting signup...');
           final userEntity = await authRepository.googleSignUp(
             accessToken: event.accessToken,
             role: 'user',
           );
-          print('Registration successful');
+          Logger.debug('Registration successful');
           await storageService.saveTokens(
             accessToken: userEntity.accessToken,
             refreshToken: userEntity.refreshToken,
@@ -188,7 +188,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
       }
     } catch (e) {
-      print('Google Auth Error: $e');
+      Logger.error('Google Auth Error:', e);
       final errorMessage = e
           .toString()
           .replaceAll('Exception: ', '')

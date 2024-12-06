@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 import '../../../../core/routes/routs.dart';
 import '../../../../core/storage/secure_storage_service.dart';
 import '../../../../core/theme/app_palette.dart';
@@ -61,9 +62,9 @@ class AppDrawer extends StatelessWidget {
     final dividerHeight = Responsive.isTablet ? 40.0 : 32.0;
 
     return Drawer(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark 
-                ? AppPalette.darkCard 
-                : AppPalette.lightCard,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? AppPalette.darkCard
+          : AppPalette.lightCard,
       child: BlocBuilder<UserProfileBloc, UserProfileState>(
         builder: (context, state) {
           return ListView(
@@ -78,7 +79,7 @@ class AppDrawer extends StatelessWidget {
                     headerPaddingBottom,
                   ),
                   decoration: const BoxDecoration(
-                    gradient: AppPalette.myGradient,
+                    gradient: AppPalette.primaryGradient,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,9 +122,9 @@ class AppDrawer extends StatelessWidget {
                     ),
                     leading: Icon(
                       isDark ? Icons.dark_mode : Icons.light_mode,
-                      color: Theme.of(context).brightness == Brightness.dark 
-                ? AppPalette.darkCard 
-                : AppPalette.lightCard,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? AppPalette.darkText
+                          : AppPalette.lightText,
                       size: iconSize,
                     ),
                     title: Text(
@@ -134,7 +135,8 @@ class AppDrawer extends StatelessWidget {
                     ),
                     trailing: Switch(
                       value: isDark,
-                      onChanged: (_) => context.read<ThemeCubit>().toggleTheme(),
+                      onChanged: (_) =>
+                          context.read<ThemeCubit>().toggleTheme(),
                       activeColor: AppPalette.gradient2,
                       activeTrackColor: AppPalette.gradient2.withOpacity(0.5),
                     ),
@@ -143,7 +145,7 @@ class AppDrawer extends StatelessWidget {
               ),
               // Rest of menu items
               Padding(
-                  padding: EdgeInsets.symmetric(
+                padding: EdgeInsets.symmetric(
                   horizontal: Responsive.horizontalPadding,
                 ),
                 child: Column(
@@ -164,9 +166,9 @@ class AppDrawer extends StatelessWidget {
                       onTap: () {},
                     ),
                     Divider(
-                      color: Theme.of(context).brightness == Brightness.dark 
-                ? AppPalette.darkCard 
-                : AppPalette.lightCard,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? AppPalette.darkText.withOpacity(0.2)
+                          : AppPalette.lightText.withOpacity(0.2),
                       height: dividerHeight,
                     ),
                     DrawerListTile(

@@ -39,18 +39,14 @@ class OtpBox extends StatelessWidget {
           FilteringTextInputFormatter.digitsOnly,
         ],
         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: Theme.of(context).brightness == Brightness.dark 
-                ? AppPalette.darkCard 
-                : AppPalette.lightCard,
+              color: AppPalette.lightCard,
               fontSize: fontSize,
             ),
         textAlign: TextAlign.center,
         decoration: InputDecoration(
           hintText: "0",
           hintStyle: TextStyle(
-            color: Theme.of(context).brightness == Brightness.dark 
-                ? AppPalette.darkCard 
-                : AppPalette.lightCard,
+            color: AppPalette.lightCard,
             fontSize: fontSize,
           ),
           border: _buildBorder(borderRadius),

@@ -3,12 +3,12 @@ import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../domain/entities/user_profile_entity.dart';
 import '../../domain/usecases/get_user_profile_usecase.dart';
 import '../../domain/usecases/update_user_profile_usecase.dart';
 import '../../domain/usecases/upload_profile_image_usecase.dart';
 import '../../../../core/storage/secure_storage_service.dart';
+import '../../../../core/utils/logger.dart';
 
 part 'user_profile_event.dart';
 part 'user_profile_state.dart';
@@ -66,65 +66,48 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
       final updatedUser = await getUserProfile(event.updatedProfile.id);
       emit(UserProfileLoaded(updatedUser));
     } catch (e) {
-      print('Profile update failed: $e');
+      Logger.error('Profile update failed:', e);
       emit(UserProfileError('Failed to update user profile: $e'));
     }
   }
 
   Future<void> _onUploadProfileImage(
       UploadProfileImage event, Emitter<UserProfileState> emit) async {
-    print('\n=== UserProfileBloc._onUploadProfileImage ===');
-    
-    // Store current user data before changing state
-    UserProfileEntity? currentUser;
-    if (state is UserProfileLoaded) {
-      currentUser = (state as UserProfileLoaded).user;
-    } else {
+    if (state is! UserProfileLoaded) {
       emit(const ProfileImageUploadFailure('Invalid state for profile update'));
       return;
     }
-    
+
+    final currentUser = (state as UserProfileLoaded).user;
     emit(ProfileImageUploading());
-    
+
     try {
-      print('Input image file:');
-      print('Path: ${event.image.path}');
-      print('Exists: ${await event.image.exists()}');
-      print('Size: ${await event.image.length()} bytes');
-
-      print('\nStarting image upload...');
       final imageUrl = await uploadProfileImage(event.image);
-      print('Received image URL: $imageUrl');
-
-      if (imageUrl != null) {
-        final updatedUser = UserProfileEntity(
-          id: currentUser.id,
-          username: currentUser.username,
-          fullName: currentUser.fullName,
-          email: currentUser.email,
-          role: currentUser.role,
-          profileImage: imageUrl,
-          phoneNumber: currentUser.phoneNumber,
-          password: currentUser.password,
-        );
-
-        print('\nUpdating profile with new image...');
-        print('New image URL: $imageUrl');
-        await updateUserProfile.call(updatedUser, onlyProfileImage: true);
-        print('Profile update successful');
-
-        emit(ProfileImageUploadSuccess(imageUrl));
-        print('Reloading user profile...');
-        add(LoadUserProfile(currentUser.id));
-      } else {
-        print('\nError: Null image URL received');
+      
+      if (imageUrl == null) {
         emit(const ProfileImageUploadFailure('Failed to upload image'));
+        return;
       }
-    } catch (e, stackTrace) {
-      print('\nError in profile image upload:');
-      print('Error type: ${e.runtimeType}');
-      print('Error message: $e');
-      print('Stack trace: $stackTrace');
+
+      final updatedUser = UserProfileEntity(
+        id: currentUser.id,
+        username: currentUser.username,
+        fullName: currentUser.fullName,
+        email: currentUser.email,
+        role: currentUser.role,
+        profileImage: imageUrl,
+        phoneNumber: currentUser.phoneNumber,
+        password: currentUser.password,
+      );
+
+      await updateUserProfile(updatedUser, onlyProfileImage: true);
+      
+      // Fetch updated profile
+      final refreshedUser = await getUserProfile(currentUser.id);
+      emit(UserProfileLoaded(refreshedUser));
+      
+    } catch (e) {
+      Logger.error('Error in profile image upload:', e);
       emit(ProfileImageUploadFailure(e.toString()));
     }
   }
@@ -149,7 +132,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
 
       emit(UserProfileLoading());
       try {
-        print('Updating field: ${event.fieldType} with value: ${event.newValue}');
+        Logger.debug('Updating field: ${event.fieldType} with value: ${event.newValue}');
         await updateUserProfile(updatedUser, onlyProfileImage: false);
         
         // Add a small delay before fetching updated profile
@@ -158,7 +141,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
         final refreshedUser = await getUserProfile(updatedUser.id);
         emit(UserProfileLoaded(refreshedUser));
       } catch (e) {
-        print('Error updating profile field: $e');
+        Logger.error('Error updating profile field:', e);
         final errorMessage = e.toString().contains('Exception:') 
             ? e.toString().split('Exception:').last.trim()
             : 'Failed to update ${event.fieldType}';

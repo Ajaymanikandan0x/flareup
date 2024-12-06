@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/error/app_error.dart';
 import '../../../../core/storage/secure_storage_service.dart';
+import '../../../../core/utils/logger.dart';
 import '../models/user_profile_model.dart';
 
 abstract class UserProfileRemoteDataSource {
@@ -26,12 +28,12 @@ class UserProfileRemoteDataSourceImpl implements UserProfileRemoteDataSource {
       final endpoint = ApiEndpoints.baseUrl +
           ApiEndpoints.user.replaceAll('user_id', numericId.toString());
 
-      print('Fetching user profile from: $endpoint');
+      Logger.debug('Fetching user profile from: $endpoint');
       final response = await dio.get(endpoint);
 
       if (response.statusCode == 200) {
         final data = response.data;
-        print('Received user data: $data');
+        Logger.debug('Received user data: $data');
 
         return UserProfileModel.fromJson(data);
       } else {
@@ -41,7 +43,7 @@ class UserProfileRemoteDataSourceImpl implements UserProfileRemoteDataSource {
     } on FormatException {
       throw Exception('Invalid user ID format');
     } catch (e) {
-      print('Error fetching user profile: $e');
+      Logger.error('Error fetching user profile:', e);
       rethrow;
     }
   }
@@ -56,36 +58,35 @@ class UserProfileRemoteDataSourceImpl implements UserProfileRemoteDataSource {
               .replaceAll('user_id', userProfile.id.toString());
 
       final data = userProfile.toJson(onlyProfileImage: onlyProfileImage);
-      print('Profile update endpoint: $endpoint');
-      print('Profile update data: $data');
+      Logger.debug('Profile update endpoint: $endpoint');
+      Logger.debug('Profile update data: $data');
 
       final response = await dio.patch(
         endpoint,
         data: data,
         options: Options(
-          validateStatus: (status) {
-            return status! < 500; // Don't throw on 4xx errors
+          headers: {
+            'Content-Type': 'application/json',
           },
+          validateStatus: (status) => status! < 500,
         ),
       );
 
-      print('Profile update response status: ${response.statusCode}');
-      print('Profile update response data: ${response.data}');
+      Logger.debug('Response status code: ${response.statusCode}');
+      Logger.debug('Response data: ${response.data}');
 
-      if (response.statusCode != 200 && response.statusCode != 202) {
-        final errorMessage = response.data is Map
-            ? response.data['message'] ?? 'Unknown error'
-            : 'Server error: ${response.statusCode}';
-        throw Exception(errorMessage);
+      if (response.statusCode == 200 || response.statusCode == 202) {
+        return;
+      } else {
+        throw AppError(
+          userMessage: 'Failed to update profile image',
+          technicalMessage:
+              'Status: ${response.statusCode}, Data: ${response.data}',
+          type: ErrorType.server,
+        );
       }
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 500) {
-        throw Exception('Server error. Please try again later.');
-      }
-      throw Exception(e.message ?? 'Failed to update profile');
     } catch (e) {
-      print('Error type: ${e.runtimeType}');
-      print('Error message: $e');
+      Logger.error('Detailed error in updateUserProfile:', e);
       rethrow;
     }
   }

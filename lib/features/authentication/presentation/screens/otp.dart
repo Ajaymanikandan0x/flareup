@@ -58,7 +58,7 @@ class OtpScreen extends StatelessWidget {
               duration: const Duration(seconds: 2),
             ),
           );
-          
+
           Navigator.pushNamedAndRemoveUntil(
             context,
             AppRouts.signIn,
@@ -78,20 +78,20 @@ class OtpScreen extends StatelessWidget {
         builder: (context, state) {
           if (state is! AuthLoading) {
             return Scaffold(
-              backgroundColor: Theme.of(context).brightness == Brightness.dark 
-                ? AppPalette.darkCard 
-                : AppPalette.lightCard,
+              backgroundColor: Theme.of(context).brightness == Brightness.dark
+                  ? AppPalette.darkCard
+                  : AppPalette.lightCard,
               appBar: AppBar(
-                backgroundColor: Theme.of(context).brightness == Brightness.dark 
-                ? AppPalette.darkCard 
-                : AppPalette.lightCard,
+                backgroundColor: Theme.of(context).brightness == Brightness.dark
+                    ? AppPalette.darkCard
+                    : AppPalette.lightCard,
                 elevation: 0,
                 leading: IconButton(
                   icon: Icon(
                     Icons.arrow_back,
-                    color: Theme.of(context).brightness == Brightness.dark 
-                    ? AppPalette.darkCard 
-                    : AppPalette.lightCard,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppPalette.darkCard
+                        : AppPalette.lightCard,
                     size: Responsive.isTablet ? 28.0 : 24.0,
                   ),
                   onPressed: () => Navigator.of(context).pop(),
@@ -119,14 +119,15 @@ class OtpScreen extends StatelessWidget {
                           padding: EdgeInsets.all(containerPadding),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            gradient: AppPalette.myGradient,
+                            gradient: AppPalette.primaryGradient,
                           ),
                           child: Icon(
                             Icons.email_outlined,
                             size: iconSize,
-                            color: Theme.of(context).brightness == Brightness.dark 
-                    ? AppPalette.darkCard 
-                      : AppPalette.lightCard,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? AppPalette.darkCard
+                                    : AppPalette.lightCard,
                           ),
                         ),
                         SizedBox(height: Responsive.spacingHeight),
@@ -135,9 +136,10 @@ class OtpScreen extends StatelessWidget {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: titleFontSize,
                             fontWeight: FontWeight.bold,
-                            color: Theme.of(context).brightness == Brightness.dark 
-                ? AppPalette.darkCard 
-                : AppPalette.lightCard,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? AppPalette.darkCard
+                                    : AppPalette.lightCard,
                           ),
                         ),
                         SizedBox(height: Responsive.spacingHeight),
@@ -208,8 +210,8 @@ class OtpScreen extends StatelessWidget {
 
           // Show loading indicator
           return Scaffold(
-            backgroundColor: Theme.of(context).brightness == Brightness.dark 
-                ? AppPalette.darkCard 
+            backgroundColor: Theme.of(context).brightness == Brightness.dark
+                ? AppPalette.darkCard
                 : AppPalette.lightCard,
             body: Center(
               child: CircularProgressIndicator(

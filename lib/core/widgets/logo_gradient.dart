@@ -16,7 +16,7 @@ class LogoGradientText extends StatelessWidget {
   Widget build(BuildContext context) {
     return ShaderMask(
       shaderCallback: (bounds) {
-        return AppPalette.myGradient.createShader(
+        return AppPalette.primaryGradient.createShader(
           Rect.fromLTWH(0, 0, bounds.width, bounds.height),
         );
       },

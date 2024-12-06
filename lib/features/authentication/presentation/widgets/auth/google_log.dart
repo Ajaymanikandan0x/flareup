@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import '../../../../../core/utils/logger.dart';
 import '../../bloc/auth_bloc.dart';
 import '../../bloc/auth_event.dart';
 import '../../bloc/auth_state.dart';
@@ -32,63 +33,59 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
 
   Future<void> _handleSignIn() async {
     try {
-      print('\n=== Starting Google Sign In Process ===');
+      Logger.debug('\n=== Starting Google Sign In Process ===');
 
-      print('1. Initiating sign out to ensure fresh sign-in...');
+      Logger.debug('1. Initiating sign out to ensure fresh sign-in...');
       await _googleSignIn.signOut();
 
-      print('2. Attempting to sign in...');
+      Logger.debug('2. Attempting to sign in...');
       final GoogleSignInAccount? account = await _googleSignIn.signIn();
 
       if (account == null) {
-        print('Sign in cancelled by user');
+        Logger.debug('Sign in cancelled by user');
         return;
 
       }
 
-      print('\n3. Account Details:');
-      print('Email: ${account.email}');
-      print('Display Name: ${account.displayName}');
-      print('ID: ${account.id}');
+      Logger.debug('\n3. Account Details:');
+      Logger.debug('Email: ${account.email}');
+      Logger.debug('Display Name: ${account.displayName}');
+      Logger.debug('ID: ${account.id}');
 
-      print('\n4. Requesting authentication...');
+      Logger.debug('\n4. Requesting authentication...');
       final GoogleSignInAuthentication auth = await account.authentication;
 
-      print('\n5. Authentication tokens:');
-      print('Access Token present: ${auth.accessToken != null}');
-      print('ID Token present: ${auth.idToken != null}');
+      Logger.debug('\n5. Authentication tokens:');
+      Logger.debug('Access Token present: ${auth.accessToken != null}');
+      Logger.debug('ID Token present: ${auth.idToken != null}');
 
       // Always use ID token for backend authentication
       final String? token = auth.idToken;
-
       if (token == null) {
-        print('\nERROR: Failed to obtain ID token');
-        print('Access Token: ${auth.accessToken}');
+        Logger.error('\nERROR: Failed to obtain ID token', 'Access Token: ${auth.accessToken}');
         throw Exception('Failed to obtain ID token');
       }
 
-      print('\n6. ID Token obtained successfully');
-      print('Token length: ${token.length}');
-      print('Token prefix: ${token.substring(0, 10)}...');
+      Logger.debug('\n6. ID Token obtained successfully');
+      Logger.debug('Token length: ${token.length}');
+      Logger.debug('Token prefix: ${token.substring(0, 10)}...');
 
       if (!mounted) return;
       context.read<AuthBloc>().add(GoogleAuthEvent(accessToken: token));
     } catch (error) {
-      print('\n=== Error Details ===');
+      Logger.error('\n=== Error Details ===', error, StackTrace.current);
 
-      print('Error type: ${error.runtimeType}');
-      print('Full error details: $error');
-      print('Stack trace:');
-      print(StackTrace.current);
+      Logger.debug('Error type: ${error.runtimeType}');
+      Logger.debug('Full error details: $error');
 
       if (!mounted) return;
 
       String message = 'Authentication failed';
       if (error is PlatformException) {
-        print('\nPlatform Exception Details:');
-        print('Error code: ${error.code}');
-        print('Error message: ${error.message}');
-        print('Error details: ${error.details}');
+        Logger.debug('\nPlatform Exception Details:');
+        Logger.debug('Error code: ${error.code}');
+        Logger.debug('Error message: ${error.message}');
+        Logger.debug('Error details: ${error.details}');
 
         if (error.code == 'sign_in_failed') {
           message =

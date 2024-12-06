@@ -40,35 +40,35 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     final buttonBottom = Responsive.screenHeight * 0.03;
     final buttonWidth = Responsive.screenWidth * 0.85;
     final buttonHeight = Responsive.buttonHeight * 0.8;
-    
+
     return Scaffold(
       backgroundColor: AppPalette.darkCard,
       body: Stack(
         children: [
           PageView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: onBoardingList.length,
-            physics: const BouncingScrollPhysics(),
-            controller: _pageController,
-            onPageChanged: (index) {
-              setState(() {
-                _currentIndex = index;
-              });
-            },
-            itemBuilder: (context, index) {
-              return Container(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage(onBoardingList[index].image),
-                    fit: BoxFit.cover,
-                    colorFilter: ColorFilter.mode(
-                      Colors.black.withOpacity(0.3),
-                      BlendMode.darken,
+              scrollDirection: Axis.horizontal,
+              itemCount: onBoardingList.length,
+              physics: const BouncingScrollPhysics(),
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
+              itemBuilder: (context, index) {
+                return Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage(onBoardingList[index].image),
+                      fit: BoxFit.cover,
+                      colorFilter: ColorFilter.mode(
+                        Colors.black.withOpacity(0.3),
+                        BlendMode.darken,
+                      ),
                     ),
                   ),
-                ),
-              );
-            }),
+                );
+              }),
           Positioned(
             bottom: textCardBottom,
             left: 0,
@@ -86,10 +86,9 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                 controller: _pageController,
                 count: onBoardingList.length,
                 effect: ExpandingDotsEffect(
-                  dotWidth: Responsive.screenWidth * 0.025,
-                  dotHeight: Responsive.screenWidth * 0.025,
-                  activeDotColor: AppPalette.gradient2
-                ),
+                    dotWidth: Responsive.screenWidth * 0.025,
+                    dotHeight: Responsive.screenWidth * 0.025,
+                    activeDotColor: AppPalette.gradient2),
               ),
             ),
           ),
@@ -108,7 +107,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                 ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(skipButtonHeight * 0.5),
-                  gradient: AppPalette.myGradient,
+                  gradient: AppPalette.primaryGradient,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.1),

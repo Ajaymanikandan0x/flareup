@@ -47,7 +47,7 @@ class AppTextStyles {
   }) {
     return _baseTextStyle(
       fontSize: fontSize,
-      color: AppPalette.paymentColor,
+      color: AppPalette.payment,
       fontStyle: fontStyle,
     );
   }

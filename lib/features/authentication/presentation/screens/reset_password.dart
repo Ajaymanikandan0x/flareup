@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 import '../../../../core/routes/routs.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/text_theme.dart';
+import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/utils/validation.dart';
 import '../../../../core/widgets/form_feild.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
-import '../../../../core/utils/responsive_utils.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({Key? key}) : super(key: key);
@@ -100,17 +101,19 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       children: [
                         SizedBox(height: spacingHeight),
                         Container(
-                          padding: EdgeInsets.all(Responsive.isTablet ? 24 : 20),
+                          padding:
+                              EdgeInsets.all(Responsive.isTablet ? 24 : 20),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            gradient: AppPalette.myGradient,
+                            gradient: AppPalette.primaryGradient,
                           ),
                           child: FaIcon(
                             FontAwesomeIcons.lock,
                             size: Responsive.isTablet ? 55 : 45,
-                            color: Theme.of(context).brightness == Brightness.dark 
-                                ? AppPalette.darkCard 
-                                : AppPalette.lightCard,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? AppPalette.darkCard
+                                    : AppPalette.lightCard,
                           ),
                         ),
                         SizedBox(height: spacingHeight),
@@ -151,7 +154,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                   context.read<AuthBloc>().add(
                                         ResetPasswordEvent(
                                           email: email!,
-                                          newPassword: newPasswordController.text,
+                                          newPassword:
+                                              newPasswordController.text,
                                           otp: otp!,
                                         ),
                                       );

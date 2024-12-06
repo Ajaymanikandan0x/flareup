@@ -1,6 +1,7 @@
 import 'package:flareup/core/utils/validation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../../core/routes/routs.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/text_theme.dart';
@@ -31,9 +32,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Theme.of(context).brightness == Brightness.dark 
-                ? AppPalette.darkCard 
-                : AppPalette.lightCard),
+          icon: Icon(Icons.arrow_back,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppPalette.darkCard
+                  : AppPalette.lightCard),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
@@ -75,14 +77,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   padding: EdgeInsets.all(Responsive.isTablet ? 24 : 20),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: AppPalette.myGradient,
+                    gradient: AppPalette.primaryGradient,
                   ),
                   child: Icon(
                     Icons.lock_reset,
                     size: Responsive.isTablet ? 55 : 45,
-                    color: Theme.of(context).brightness == Brightness.dark 
-                ? AppPalette.darkCard 
-                : AppPalette.lightCard,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppPalette.darkCard
+                        : AppPalette.lightCard,
                   ),
                 ),
                 SizedBox(height: Responsive.spacingHeight),

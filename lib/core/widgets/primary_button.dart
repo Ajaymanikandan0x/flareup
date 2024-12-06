@@ -12,7 +12,7 @@ class PrimaryButton extends StatelessWidget {
   final double? borderRadius, elevation;
   final double? fontSize;
   final IconData? iconData;
-  
+
   const PrimaryButton({
     super.key,
     required this.onTap,
@@ -29,12 +29,12 @@ class PrimaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     // Get screen size for responsive calculations
     final size = MediaQuery.of(context).size;
-    
+
     final responsiveWidth = width ?? Responsive.screenWidth * 0.85;
     final responsiveHeight = height ?? Responsive.buttonHeight;
     final responsiveFontSize = fontSize ?? Responsive.bodyFontSize;
     final responsiveBorderRadius = borderRadius ?? Responsive.borderRadius;
-    
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -42,7 +42,7 @@ class PrimaryButton extends StatelessWidget {
         width: responsiveWidth,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(responsiveBorderRadius),
-          gradient: AppPalette.myGradient,
+          gradient: AppPalette.primaryGradient,
           boxShadow: [
             BoxShadow(
               color: Colors.blue.withOpacity(0.3),
@@ -59,8 +59,8 @@ class PrimaryButton extends StatelessWidget {
               if (iconData != null) ...[
                 Icon(
                   iconData,
-                  color: Theme.of(context).brightness == Brightness.dark 
-                      ? AppPalette.darkCard 
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? AppPalette.darkCard
                       : AppPalette.lightCard,
                   size: responsiveFontSize,
                 ),

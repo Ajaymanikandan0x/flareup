@@ -61,8 +61,8 @@ class Avatar extends StatelessWidget {
                   FontAwesomeIcons.userLarge,
                   size: responsiveIconSize,
                   color: Theme.of(context).brightness == Brightness.dark 
-                ? AppPalette.darkCard 
-                : AppPalette.lightCard,
+                ? AppPalette.lightCard 
+                : AppPalette.darkCard,
                 ),
         );
       },

@@ -59,6 +59,14 @@ class _AppFormFieldState extends State<AppFormField> {
           borderRadius: BorderRadius.circular(15.0),
           borderSide: const BorderSide(color: AppPalette.gradient2, width: 2.0),
         ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15.0),
+          borderSide: const BorderSide(color: Colors.red, width: 1.0),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15.0),
+          borderSide: const BorderSide(color: Colors.red, width: 2.0),
+        ),
         contentPadding:
               EdgeInsets.symmetric(vertical: 23, horizontal: 23),
         hintText: widget.hint,
