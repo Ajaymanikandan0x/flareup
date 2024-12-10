@@ -12,6 +12,7 @@ import '../../domain/usecases/signup_usecase.dart';
 import '../../domain/usecases/verify_reset_password_otp_usecase.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
+import '../../../../core/error/error_handler_service.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase loginUseCase;
@@ -23,6 +24,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepositoryDomain authRepository;
 
   final VerifyResetPasswordOtpUseCase verifyResetPasswordOtpUseCase;
+  final ErrorHandlerService errorHandler;
 
   AuthBloc({
     required this.loginUseCase,
@@ -33,6 +35,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.storageService,
     required this.authRepository,
     required this.verifyResetPasswordOtpUseCase,
+    required this.errorHandler,
   }) : super(AuthInitial()) {
     on<LoginEvent>(_onLoginEvent);
     on<SignupEvent>(_onSignupEvent);
@@ -53,6 +56,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         password: event.password,
       );
 
+      if (userEntity.role != 'user') {
+        throw AppError(
+          userMessage: 'Access denied. Invalid user role.',
+          type: ErrorType.authentication
+        );
+      }
+
       await storageService.saveTokens(
         accessToken: userEntity.accessToken,
         refreshToken: userEntity.refreshToken,
@@ -61,7 +71,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       emit(AuthSuccess(userEntity: userEntity, message: 'Login successful!'));
     } catch (e) {
-      emit(AuthFailure(error: 'Login failed: ${e.toString()}'));
+      errorHandler.logError(e as Exception, StackTrace.current);
+      final userMessage = errorHandler.getReadableError(e as Exception);
+      emit(AuthFailure(error: userMessage));
     }
   }
 
@@ -131,7 +143,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onLogoutEvent(LogoutEvent event, Emitter<AuthState> emit) async {
+  Future<void> _onLogoutEvent(
+      LogoutEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
       await logoutUseCase.call();
@@ -154,14 +167,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         final userEntity = await authRepository.googleSignIn(
           accessToken: event.accessToken,
         );
-        Logger.debug('Google Sign In successful');
+
+        if (userEntity.role != 'user') {
+          throw AppError(
+            userMessage: 'Access denied. Invalid user role.',
+            type: ErrorType.authentication
+          );
+        }
+
         await storageService.saveTokens(
           accessToken: userEntity.accessToken,
           refreshToken: userEntity.refreshToken,
           userId: userEntity.id.toString(),
         );
-        emit(AuthSuccess(
-            userEntity: userEntity, message: 'Google login successful!'));
+        emit(AuthSuccess(userEntity: userEntity, message: 'Google login successful!'));
       } catch (signInError) {
         Logger.error('Sign In Error:', signInError);
         if (signInError.toString().contains('REGISTRATION_REQUIRED')) {
@@ -170,18 +189,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             accessToken: event.accessToken,
             role: 'user',
           );
-          Logger.debug('Registration successful');
+
+          if (userEntity.role != 'user') {
+            throw AppError(
+              userMessage: 'Access denied. Invalid user role.',
+              type: ErrorType.authentication
+            );
+          }
+
           await storageService.saveTokens(
             accessToken: userEntity.accessToken,
             refreshToken: userEntity.refreshToken,
             userId: userEntity.id.toString(),
           );
-          emit(AuthSuccess(
-              userEntity: userEntity,
-              message: 'Google registration successful!'));
+          emit(AuthSuccess(userEntity: userEntity, message: 'Google registration successful!'));
         } else {
-          final errorMessage = signInError
-              .toString()
+          final errorMessage = signInError.toString()
               .replaceAll('Exception: ', '')
               .replaceAll('Google sign in failed: ', '');
           throw Exception(errorMessage);
@@ -189,8 +212,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     } catch (e) {
       Logger.error('Google Auth Error:', e);
-      final errorMessage = e
-          .toString()
+      final errorMessage = e.toString()
           .replaceAll('Exception: ', '')
           .replaceAll('Google Oauth Failed: ', '');
       emit(AuthFailure(error: errorMessage));

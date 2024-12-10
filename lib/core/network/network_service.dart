@@ -14,30 +14,55 @@ class NetworkService {
   }) async {
     try {
       final response = await apiCall();
-
-      if (response.statusCode! >= 200 && response.statusCode! < 300) {
+      
+      if (response.statusCode == 200 || response.statusCode == 201) {
         return ApiResponse.success(
           data: transform(response.data),
-          message: response.data['message'],
+          message: response.data['message'] ?? 'Success',
           statusCode: response.statusCode,
         );
       }
 
-      final errorMessage = response.data['message'] ?? 'Operation failed';
-      return ApiResponse.error(
-        message: errorMessage,
-        statusCode: response.statusCode,
-      );
-    } on DioException catch (e) {
-      if (e.response?.data != null && e.response?.data['message'] != null) {
-        return ApiResponse.error(
-          message: e.response?.data['message'],
-          statusCode: e.response?.statusCode,
+      // Handle specific error cases
+      if (response.statusCode == 401) {
+        throw AppError(
+          userMessage: 'Invalid username or password',
+          type: ErrorType.authentication,
         );
       }
+
+      if (response.statusCode == 400) {
+        final message = response.data['message'] ?? 'Invalid request';
+        throw AppError(
+          userMessage: message,
+          type: ErrorType.validation,
+        );
+      }
+
       throw AppError(
-        userMessage: 'Operation failed',
-        technicalMessage: e.toString(),
+        userMessage: response.data['message'] ?? 'Operation failed',
+        type: ErrorType.server,
+      );
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.connectionTimeout) {
+        throw AppError(
+          userMessage: 'Please check your internet connection',
+          type: ErrorType.network,
+        );
+      }
+      
+      // Handle response errors
+      if (e.response?.data != null) {
+        final message = e.response?.data['message'] ?? 'Authentication failed';
+        throw AppError(
+          userMessage: message,
+          type: ErrorType.authentication,
+        );
+      }
+      
+      throw AppError(
+        userMessage: 'Unable to connect to server',
         type: ErrorType.network,
       );
     }

@@ -22,15 +22,47 @@ class UserRepositoryImpl implements AuthRepositoryDomain {
       );
 
       if (response.success) {
-        return response.data!.toEntity();
+        final user = response.data!.toEntity();
+        
+        // Add role validation
+        if (user.role != 'user') {
+          throw AppError(
+            userMessage: 'Access denied. Invalid user role.',
+            type: ErrorType.authentication
+          );
+        }
+        
+        return user;
       }
 
+      Logger.error('Login failed', {
+        'statusCode': response.statusCode,
+        'message': response.message,
+        'data': response.data
+      });
+
       throw AppError(
-          userMessage: response.message ?? ErrorMessages.invalidCredentials,
-          type: ErrorType.authentication);
+        userMessage: 'Incorrect username or password',
+        technicalMessage: 'API Response: ${response.message}',
+        type: ErrorType.authentication
+      );
     } catch (e) {
-      Logger.error('Login failed', e);
-      rethrow;
+      Logger.error('Login error', e);
+
+      if (e is AppError) {
+        Logger.error('AppError details', {
+          'type': e.type,
+          'technicalMessage': e.technicalMessage,
+          'metadata': e.metadata
+        });
+        rethrow;
+      }
+
+      // For any other errors, show generic message but log full details
+      throw AppError(
+          userMessage: 'Unable to sign in. Please try again.',
+          technicalMessage: e.toString(),
+          type: ErrorType.authentication);
     }
   }
 
@@ -67,7 +99,8 @@ class UserRepositoryImpl implements AuthRepositoryDomain {
       );
     } catch (e) {
       Logger.error('Repository signup error', e);
-      throw ErrorHandler.handle(e, customUserMessage: 'Failed to create account');
+      throw ErrorHandler.handle(e,
+          customUserMessage: 'Failed to create account');
     }
   }
 

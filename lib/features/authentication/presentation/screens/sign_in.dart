@@ -15,13 +15,26 @@ import '../bloc/auth_state.dart';
 import '../widgets/auth/google_log.dart';
 import '../widgets/auth/sign_up_text.dart';
 import 'package:flareup/core/utils/responsive_utils.dart';
+import 'package:flareup/core/presentation/helpers/snackbar_helper.dart';
 
-class SignIn extends StatelessWidget {
-  SignIn({super.key});
+class SignIn extends StatefulWidget {
+  const SignIn({super.key});
 
+  @override
+  State<SignIn> createState() => _SignInState();
+}
+
+class _SignInState extends State<SignIn> {
   final nameController = TextEditingController();
   final passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,19 +50,14 @@ class SignIn extends StatelessWidget {
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.error)),
-            );
+            SnackbarHelper.showError(context, state.error);
           } else if (state is AuthSuccess) {
-
-            final userId = state.userEntity.id.toString();
-            context.read<UserProfileBloc>().add(LoadUserProfile(userId));
-
-            // Handle success (navigate to home page)
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
-
+            final role = state.userEntity.role;
+            if (role == 'user') {
+              final userId = state.userEntity.id.toString();
+              context.read<UserProfileBloc>().add(LoadUserProfile(userId));
+            }
+            SnackbarHelper.showSuccess(context, state.message);
             Navigator.pushReplacementNamed(context, AppRouts.home);
           }
         },

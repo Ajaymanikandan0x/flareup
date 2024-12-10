@@ -10,11 +10,11 @@ class ErrorHandler {
     if (error is AppError) {
       return error;
     }
-    
+
     if (error is DioException) {
       return _handleDioError(error);
     }
-    
+
     if (error is SocketException) {
       return AppError(
         userMessage: ErrorMessages.networkError,
@@ -22,7 +22,7 @@ class ErrorHandler {
         type: ErrorType.network,
       );
     }
-    
+
     if (error is TimeoutException) {
       return AppError(
         userMessage: 'Request timed out',
@@ -66,4 +66,4 @@ class ErrorHandler {
         );
     }
   }
-} 
+}
