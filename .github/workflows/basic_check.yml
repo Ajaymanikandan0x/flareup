@@ -13,7 +13,6 @@ env:
   ANDROID_PACKAGE_NAME: 'com.flareup.com'
 
 jobs:
-  # Job 1: Code Analysis and Testing
   code-analysis-and-testing:
     name: Code Analysis and Testing
     runs-on: ubuntu-latest
@@ -27,11 +26,6 @@ jobs:
           channel: ${{ env.FLUTTER_CHANNEL }}
           flutter-version: ${{ env.FLUTTER_VERSION }}
 
-      - name: Load environment variables
-        run: |
-          echo "Loading environment variables from .env"
-          set -o allexport; source .env; set +o allexport
-
       - name: Install dependencies
         run: flutter pub get --verbose
 
@@ -40,4 +34,16 @@ jobs:
 
 #      - name: Run Flutter tests
 #        run: flutter test
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+      - name: Build
+        env:
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+        run: |
+          flutter build apk --dart-define=CLOUDINARY_API_KEY=$CLOUDINARY_API_KEY --dart-define=CLOUDINARY_API_SECRET=$CLOUDINARY_API_SECRET
 

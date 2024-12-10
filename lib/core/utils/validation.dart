@@ -4,7 +4,9 @@ class FormValidator {
     if (value == null || value.isEmpty) {
       return 'Email is required';
     }
-    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+    final emailRegex =
+        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+
     if (!emailRegex.hasMatch(value)) {
       return 'Please enter a valid email';
     }
@@ -84,11 +86,6 @@ class FormValidator {
     if (value.length < 3) {
       return 'Name must be at least 3 characters long';
     }
-
-    // final nameRegex = RegExp(r'^[a-zA-Z][a-zA-Z0-9_\s]*\$');
-    // if (!nameRegex.hasMatch(value)) {
-    //   return 'Please enter a valid name (letters, numbers, underscores allowed)';
-    // }
 
     return null;
   }

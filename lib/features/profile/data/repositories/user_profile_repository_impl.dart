@@ -15,16 +15,16 @@ class UserProfileRepositoryImpl implements UserProfileRepositoryDomain {
   }
 
   @override
-  Future<void> updateUserProfile(UserProfileEntity userProfile) async {
+  Future<void> updateUserProfile(UserProfileEntity userProfile, {bool onlyProfileImage = false}) async {
     final model = UserProfileModel(
-        id: userProfile.id,
-        profileImage:userProfile.profileImage,
-        username: userProfile.username,
-        email: userProfile.email,
-        role: userProfile.role,
-        fullName: userProfile.fullName,
-        phoneNumber: userProfile.phoneNumber,
-        gender: userProfile.gender);
-    await remoteDatasource.updateUserProfile(model);
+      id: int.parse(userProfile.id),
+      profileImage: userProfile.profileImage,
+      username: userProfile.username,
+      email: userProfile.email,
+      role: userProfile.role,
+      fullName: userProfile.fullName,
+      phoneNumber: userProfile.phoneNumber,
+    );
+    await remoteDatasource.updateUserProfile(model, onlyProfileImage: onlyProfileImage);
   }
 }

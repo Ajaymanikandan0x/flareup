@@ -1,10 +1,9 @@
 import 'package:flareup/core/utils/validation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../../../core/constants/constants.dart';
 import '../../../../core/routes/routs.dart';
 import '../../../../core/theme/text_theme.dart';
+import '../../../../core/widgets/form_feild.dart';
 import '../../../../core/widgets/logo_gradient.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../../../../dependency_injector.dart';
@@ -12,37 +11,53 @@ import '../../../profile/presentation/bloc/user_profile_bloc.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
-import '../widgets/auth/form_feild.dart';
+
 import '../widgets/auth/google_log.dart';
 import '../widgets/auth/sign_up_text.dart';
+import 'package:flareup/core/utils/responsive_utils.dart';
+import 'package:flareup/core/presentation/helpers/snackbar_helper.dart';
 
-class SignIn extends StatelessWidget {
-  SignIn({super.key});
+class SignIn extends StatefulWidget {
+  const SignIn({super.key});
 
+  @override
+  State<SignIn> createState() => _SignInState();
+}
+
+class _SignInState extends State<SignIn> {
   final nameController = TextEditingController();
   final passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   @override
+  void dispose() {
+    nameController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    Responsive.init(context);
+    
     final authBloc = DependencyInjector().authBloc;
     return Scaffold(
         body: Padding(
-      padding: const EdgeInsets.all(10.0),
+      padding: EdgeInsets.symmetric(
+        horizontal: Responsive.horizontalPadding,
+        vertical: Responsive.verticalPadding,
+      ),
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.error)),
-            );
+            SnackbarHelper.showError(context, state.error);
           } else if (state is AuthSuccess) {
-                     final userId = state.userEntity.id.toString(); // Adjust this based on your state
-          context.read<UserProfileBloc>().add(LoadUserProfile(userId));
-            // Handle success (navigate to home page)
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
-
+            final role = state.userEntity.role;
+            if (role == 'user') {
+              final userId = state.userEntity.id.toString();
+              context.read<UserProfileBloc>().add(LoadUserProfile(userId));
+            }
+            SnackbarHelper.showSuccess(context, state.message);
             Navigator.pushReplacementNamed(context, AppRouts.home);
           }
         },
@@ -51,45 +66,52 @@ class SignIn extends StatelessWidget {
             key: _formKey,
             child: Column(
               children: [
-                const SizedBox(height: 120),
-                const LogoGradientText(fontSize: 50),
-                const SizedBox(height: 40),
+                SizedBox(height: Responsive.screenHeight * 0.15),
+                LogoGradientText(fontSize: Responsive.titleFontSize * 2.5),
+                SizedBox(height: Responsive.spacingHeight * 1.6),
                 Align(
                   alignment: const Alignment(-1, 0.0),
                   child: Text(
-                    style: AppTextStyles.primaryTextTheme(fontSize: 30),
                     'Sign in',
+                    style: AppTextStyles.primaryTextTheme(
+                      fontSize: Responsive.titleFontSize,
+                    ),
                   ),
                 ),
-                formHeight,
+                SizedBox(height: Responsive.spacingHeight),
                 AppFormField(
                   hint: 'name',
                   icon: const Icon(Icons.person),
-                  isObscureText: false,
                   controller: nameController,
                   validator: FormValidator.validateUserName,
                 ),
-                largeHeight,
+                SizedBox(height: Responsive.spacingHeight),
                 AppFormField(
                   hint: 'password',
-                  icon: const Icon(Icons.person_2),
-                  isObscureText: true,
+                  icon: const Icon(Icons.lock),
+                  isPassword: true,
                   controller: passwordController,
                   validator: FormValidator.validatePassword,
                 ),
-                largeHeight,
+                SizedBox(height: Responsive.spacingHeight),
                 Align(
                   alignment: const Alignment(1.0, 0.0),
-                  child: Text(
-                    'Forgot Password ',
-                    style: AppTextStyles.hindTextTheme(),
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, AppRouts.forgotPassword);
+                    },
+                    child: Text(
+                      'Forgot Password',
+                      style: AppTextStyles.hindTextTheme(
+                        fontSize: Responsive.bodyFontSize,
+                      ),
+                    ),
                   ),
                 ),
-                largeHeight,
-                largeHeight,
+                SizedBox(height: Responsive.spacingHeight * 2),
                 PrimaryButton(
-                  width: 320,
-                  height: 60,
+                  width: Responsive.screenWidth * 0.85,
+                  height: Responsive.buttonHeight,
                   onTap: () {
                     if (_formKey.currentState!.validate()) {
                       if (nameController.text.isEmpty ||
@@ -105,18 +127,19 @@ class SignIn extends StatelessWidget {
                       }
                     }
                   },
-                  fontSize: 20,
+                  fontSize: Responsive.titleFontSize,
                   text: 'Sign in',
                 ),
-                largeHeight,
+                SizedBox(height: Responsive.spacingHeight),
                 Text(
                   'or',
-                  style: AppTextStyles.hindTextTheme(fontSize: 20),
+                  style: AppTextStyles.hindTextTheme(
+                    fontSize: Responsive.subtitleFontSize,
+                  ),
                 ),
-                formHeight,
+                SizedBox(height: Responsive.spacingHeight),
                 const GoogleSignInButton(),
-                extraLargeHeight,
-                minHeight,
+                SizedBox(height: Responsive.spacingHeight * 2),
                 AuthPromptText(
                   prefixText: 'Don\'t have an account?',
                   suffixText: 'Sign Up',

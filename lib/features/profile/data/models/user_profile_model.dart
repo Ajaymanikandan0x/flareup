@@ -1,58 +1,62 @@
 import '../../domain/entities/user_profile_entity.dart';
 
 class UserProfileModel {
-  final String id;
+  final int id;
   final String username;
   final String? profileImage;
   final String fullName;
   final String? phoneNumber;
   final String email;
   final String role;
-  final String? gender;
+  final String? password;
 
   UserProfileModel({
-    required this.fullName,
-    this.profileImage,
-    this.phoneNumber,
-    this.gender,
     required this.id,
     required this.username,
+    this.profileImage,
+    required this.fullName,
+    this.phoneNumber,
+    this.password,
     required this.email,
     required this.role,
   });
 
   factory UserProfileModel.fromJson(Map<String, dynamic> json) {
     return UserProfileModel(
-        id: json['id'],
-        username: json['username'],
-        profileImage: json['profileImage'],
-        fullName: json['fullName'],
-        email: json['email'],
-        role: json['role'],
-        gender: json['gender'],
-        phoneNumber: json['phoneNumber']);
+      id: int.parse(json['id'].toString()),
+      username: json['username'] ?? '',
+      profileImage: json['profile_picture'],
+      fullName: json['fullname'] ?? '',
+      email: json['email'] ?? '',
+      role: json['role'] ?? '',
+      phoneNumber: json['phone_number'],
+      password: null,
+    );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'username': username,
-      'profileImage':profileImage,
-      'fullName': fullName,
-      'email': email,
-      'gender': gender,
-      'phoneNumber': phoneNumber,
-      'role': role,
-    };
+  Map<String, dynamic> toJson({bool onlyProfileImage = false}) {
+    if (onlyProfileImage) {
+      return {
+        'profile_publicId': profileImage,
+      };
+    } else {
+      return {
+        'id': id,
+        'username': username,
+        'fullname': fullName,
+        'email': email,
+        'phone_number': phoneNumber,
+      };
+    }
   }
 
   UserProfileEntity toEntity() {
     return UserProfileEntity(
-      id: id,
+      id: id.toString(),
       profileImage: profileImage,
       username: username,
       fullName: fullName,
-      gender: gender,
+      password: password,
       phoneNumber: phoneNumber,
       email: email,
       role: role,

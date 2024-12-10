@@ -1,9 +1,8 @@
-import 'package:flareup/core/constants/constants.dart';
 import 'package:flareup/core/routes/routs.dart';
 import 'package:flareup/core/utils/validation.dart';
 import 'package:flareup/core/widgets/primary_button.dart';
 import 'package:flareup/features/authentication/presentation/bloc/auth_event.dart';
-import 'package:flareup/features/authentication/presentation/widgets/auth/form_feild.dart';
+import 'package:flareup/core/widgets/form_feild.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -13,6 +12,7 @@ import '../bloc/auth_bloc.dart';
 import '../bloc/auth_state.dart';
 import '../widgets/auth/google_log.dart';
 import '../widgets/auth/sign_up_text.dart';
+import '../../../../core/utils/responsive_utils.dart';
 
 class SignUp extends StatelessWidget {
   SignUp({super.key});
@@ -27,6 +27,8 @@ class SignUp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Initialize responsive utilities
+    Responsive.init(context);
     final authBloc = DependencyInjector().authBloc;
 
     return Scaffold(
@@ -37,103 +39,125 @@ class SignUp extends StatelessWidget {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.error)),
             );
-          } else if (state is AuthSuccess) {
+          } else if (state is SignupSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
             );
-
-            Navigator.pushReplacementNamed(context, AppRouts.home);
+            Navigator.pushReplacementNamed(
+              context, 
+              AppRouts.otpScreen,
+              arguments: {
+                'email': state.email,
+                'isPasswordReset': false,
+              },
+            );
           }
         },
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(10.0),
+            padding: EdgeInsets.symmetric(
+              horizontal: Responsive.horizontalPadding,
+              vertical: Responsive.verticalPadding,
+            ),
             child: Form(
               key: _formKey,
               child: Column(
                 children: [
-                  const SizedBox(height: 40),
+                  SizedBox(height: Responsive.spacingHeight * 2),
                   Align(
                     alignment: const Alignment(-1, 0.0),
                     child: Text(
-                      style: AppTextStyles.primaryTextTheme(fontSize: 30),
                       'Sign in',
+                      style: AppTextStyles.primaryTextTheme(
+                        fontSize: Responsive.titleFontSize,
+                      ),
                     ),
                   ),
-                  largeHeight,
+                  SizedBox(height: Responsive.spacingHeight),
                   AppFormField(
                       hint: 'userName',
                       icon: const Icon(Icons.person),
-                      isObscureText: false,
                       controller: nameController,
                       validator: FormValidator.validateUserName),
-                  largeHeight,
+                  SizedBox(height: Responsive.spacingHeight),
                   AppFormField(
                     hint: 'fullName',
                     icon: const Icon(Icons.person_2),
-                    isObscureText: false,
                     controller: fullNameController,
                     validator: FormValidator.validateName,
                   ),
-                  largeHeight,
+                  SizedBox(height: Responsive.spacingHeight),
                   AppFormField(
                       hint: 'abc@Gmail.com',
                       icon: const Icon(Icons.email),
-                      isObscureText: false,
                       controller: emailController,
                       validator: FormValidator.validateEmail),
-                  largeHeight,
+                  SizedBox(height: Responsive.spacingHeight),
                   AppFormField(
                     hint: 'your password',
                     icon: const Icon(Icons.lock),
-                    isObscureText: true,
+                    isPassword: true,
                     controller: passwordController,
                     validator: FormValidator.validatePassword,
                   ),
-                  largeHeight,
+                  SizedBox(height: Responsive.spacingHeight),
                   AppFormField(
                     hint: 'Conform password',
                     icon: const Icon(Icons.lock),
-                    isObscureText: true,
+                    isPassword: true,
                     controller: passwordConformController,
                     validator: FormValidator.validatePassword,
                   ),
-                  largeHeight,
-                  minHeight,
-                  PrimaryButton(
-                    onTap: () {
-                      if (_formKey.currentState!.validate()) {
-                        if (passwordController.text ==
-                            passwordConformController.text) {
-                          authBloc.add(SignupEvent(
-                              username: nameController.text,
-                              role: 'user',
-                              email: emailController.text,
-                              password: passwordConformController.text,
-                              fullName: fullNameController.text));
-                          print('call');
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text("Passwords do not match")),
-                          );
-                        }
-                      }
+                  SizedBox(height: Responsive.spacingHeight),
+                  BlocBuilder<AuthBloc, AuthState>(
+                    builder: (context, state) {
+                      final bool isLoading = state is AuthLoading;
+                      return PrimaryButton(
+                        onTap: () {
+                          if (_formKey.currentState!.validate()) {
+                            if (passwordController.text ==
+                                passwordConformController.text) {
+                            
+                              // Ensure correct mapping
+                              final email = emailController.text.trim();
+                              final fullName = fullNameController.text.trim();
+                              final username = nameController.text.trim();
+                              final password =
+                                  passwordConformController.text.trim();
+
+                              authBloc.add(SignupEvent(
+                                username: username,
+                                role: 'user',
+                                email: email,
+                                password: password,
+                                fullName: fullName,
+                              ));
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text("Passwords do not match")),
+                              );
+                            }
+                          }
+                        },
+                        text: 'Sign up',
+                        height: Responsive.buttonHeight,
+                        width: Responsive.screenWidth * 0.85,
+                        isLoading: isLoading,
+                        isEnabled: !isLoading,
+                      );
                     },
-                    text: 'Sign up',
-                    height: 65,
-                    width: 350,
                   ),
-                  largeHeight,
-                  minHeight,
+                  SizedBox(height: Responsive.spacingHeight),
                   Text(
                     'or',
-                    style: AppTextStyles.hindTextTheme(fontSize: 20),
+                    style: AppTextStyles.hindTextTheme(
+                      fontSize: Responsive.subtitleFontSize,
+                    ),
                   ),
-                  formHeight,
+                  SizedBox(height: Responsive.spacingHeight),
                   const GoogleSignInButton(),
-                  largeHeight,
-                  minHeight,
+                  SizedBox(height: Responsive.spacingHeight),
                   AuthPromptText(
                     prefixText: 'Already have an account? ',
                     suffixText: 'Sign In',

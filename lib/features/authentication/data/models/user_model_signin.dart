@@ -19,20 +19,20 @@ class UserModelSignIn {
 
   factory UserModelSignIn.fromJson(Map<String, dynamic> json) {
     return UserModelSignIn(
-      id: json['id'],
-      accessToken:json['accessToken'],
-      refreshToken:json['refreshToken'],
-      username: json['username'],
-      email: json['email'],
-      role: json['role'],
+      id: json['id'] ?? 0,
+      accessToken: json['accessToken'] ?? '',
+      refreshToken: json['refreshToken'] ?? '',
+      username: json['username'] ?? '',
+      email: json['email'] ?? '',
+      role: json['role'] ?? '',
     );
   }
 
   UserEntitySignIn toEntity() {
     return UserEntitySignIn(
       id: id,
-      accessToken:'accessToken',
-      refreshToken:'refreshToken',
+      accessToken: accessToken,
+      refreshToken: refreshToken,
       username: username,
       email: email,
       role: role,

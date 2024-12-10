@@ -27,7 +27,7 @@ migrate_working_dir/
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
-lib/core/config/secure_storage.dart
+lib/core/storage/secure_storage.dart
 .pub-cache/
 .pub/
 /build/
@@ -42,3 +42,4 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+/android/app/debug.keystore

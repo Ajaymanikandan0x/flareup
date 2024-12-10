@@ -7,8 +7,12 @@ class SignupUseCase {
 
   SignupUseCase(this.authRepository);
 
-  Future<UserEntitiesSignup> call(String username, String fullName,
-      String email, String password, String role) {
-    return authRepository.signup(username, fullName, role, email, password);
+  Future<UserEntitiesSignup> call(
+      {required String username,
+      required String fullName,
+      required String email,
+      required String password,
+    required  String role}) {
+    return authRepository.signup(username: username, fullName: fullName, email: email, password: password, role: role);
   }
 }
