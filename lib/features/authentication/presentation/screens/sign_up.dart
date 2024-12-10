@@ -1,4 +1,3 @@
-
 import 'package:flareup/core/routes/routs.dart';
 import 'package:flareup/core/utils/validation.dart';
 import 'package:flareup/core/widgets/primary_button.dart';
@@ -110,37 +109,44 @@ class SignUp extends StatelessWidget {
                     validator: FormValidator.validatePassword,
                   ),
                   SizedBox(height: Responsive.spacingHeight),
-                  PrimaryButton(
-                    onTap: () {
-                      if (_formKey.currentState!.validate()) {
-                        if (passwordController.text ==
-                            passwordConformController.text) {
-                        
-                          // Ensure correct mapping
-                          final email = emailController.text.trim();
-                          final fullName = fullNameController.text.trim();
-                          final username = nameController.text.trim();
-                          final password =
-                              passwordConformController.text.trim();
+                  BlocBuilder<AuthBloc, AuthState>(
+                    builder: (context, state) {
+                      final bool isLoading = state is AuthLoading;
+                      return PrimaryButton(
+                        onTap: () {
+                          if (_formKey.currentState!.validate()) {
+                            if (passwordController.text ==
+                                passwordConformController.text) {
+                            
+                              // Ensure correct mapping
+                              final email = emailController.text.trim();
+                              final fullName = fullNameController.text.trim();
+                              final username = nameController.text.trim();
+                              final password =
+                                  passwordConformController.text.trim();
 
-                          authBloc.add(SignupEvent(
-                            username: username,
-                            role: 'user',
-                            email: email,
-                            password: password,
-                            fullName: fullName,
-                          ));
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text("Passwords do not match")),
-                          );
-                        }
-                      }
+                              authBloc.add(SignupEvent(
+                                username: username,
+                                role: 'user',
+                                email: email,
+                                password: password,
+                                fullName: fullName,
+                              ));
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text("Passwords do not match")),
+                              );
+                            }
+                          }
+                        },
+                        text: 'Sign up',
+                        height: Responsive.buttonHeight,
+                        width: Responsive.screenWidth * 0.85,
+                        isLoading: isLoading,
+                        isEnabled: !isLoading,
+                      );
                     },
-                    text: 'Sign up',
-                    height: Responsive.buttonHeight,
-                    width: Responsive.screenWidth * 0.85,
                   ),
                   SizedBox(height: Responsive.spacingHeight),
                   Text(

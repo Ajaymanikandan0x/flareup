@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../../core/theme/app_palette.dart';
-import '../../../../../core/utils/responsive_utils.dart';
 
 class OtpBox extends StatelessWidget {
   final TextEditingController controller;
@@ -14,44 +13,33 @@ class OtpBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Initialize responsive utilities
-    Responsive.init(context);
-
-    // Calculate responsive dimensions
-    final boxSize = Responsive.isTablet ? 72.0 : 64.0;
-    final fontSize = Responsive.isTablet ? 24.0 : 20.0;
-    final borderRadius = Responsive.isTablet ? 16.0 : 12.0;
-
     return SizedBox(
-      height: boxSize,
-      width: boxSize,
+      height: 64.0,
+      width: 64.0,
       child: TextFormField(
         controller: controller,
-        onChanged: (pin) {
-          if (pin.isNotEmpty) {
+        onChanged: (value) {
+          if (value.isNotEmpty) {
+         
             FocusScope.of(context).nextFocus();
+          } else {
+            
+            FocusScope.of(context).previousFocus();
           }
         },
-        textInputAction: TextInputAction.next,
         keyboardType: TextInputType.number,
+        textInputAction: TextInputAction.next,
         inputFormatters: [
           LengthLimitingTextInputFormatter(1),
           FilteringTextInputFormatter.digitsOnly,
         ],
-        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: AppPalette.lightCard,
-              fontSize: fontSize,
-            ),
+        style: Theme.of(context).textTheme.titleLarge,
         textAlign: TextAlign.center,
         decoration: InputDecoration(
           hintText: "0",
-          hintStyle: TextStyle(
-            color: AppPalette.lightCard,
-            fontSize: fontSize,
-          ),
-          border: _buildBorder(borderRadius),
-          enabledBorder: _buildBorder(borderRadius),
-          focusedBorder: _buildBorder(borderRadius, focused: true),
+          border: _buildBorder(12.0),
+          enabledBorder: _buildBorder(12.0),
+          focusedBorder: _buildBorder(12.0, focused: true),
         ),
       ),
     );
