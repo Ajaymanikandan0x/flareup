@@ -219,12 +219,22 @@ class UserRepositoryImpl implements AuthRepositoryDomain {
     required String otp,
   }) async {
     try {
-      await _remoteDatasource.resetPassword(
+      final response = await _remoteDatasource.resetPassword(
         email: email,
         newPassword: newPassword,
       );
+
+      if (!response.success && !response.message!.toLowerCase().contains('successfully')) {
+        throw AppError(
+          userMessage: response.message ?? 'Failed to reset password',
+          type: ErrorType.server,
+        );
+      }
     } catch (e) {
-      throw Exception('Reset password failed: $e');
+      if (e is AppError && e.userMessage.toLowerCase().contains('successfully')) {
+        return;
+      }
+      rethrow;
     }
   }
 

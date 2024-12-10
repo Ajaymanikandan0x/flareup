@@ -98,7 +98,7 @@ class UserRemoteDatasource {
     required String otp,
   }) async {
     Logger.debug('Verifying OTP for email: $email');
-    
+
     try {
       final response = await dio.post(
         ApiEndpoints.baseUrl + ApiEndpoints.otpVerification,
@@ -125,7 +125,8 @@ class UserRemoteDatasource {
         if (data is Map) {
           if (data['error']?.contains('cache') == true) {
             throw AppError(
-              userMessage: 'Session expired. Please restart the signup process.',
+              userMessage:
+                  'Session expired. Please restart the signup process.',
               type: ErrorType.validation,
             );
           }
@@ -158,7 +159,7 @@ class UserRemoteDatasource {
 
   Future<ApiResponse<void>> resendOtp({required String email}) async {
     Logger.debug('Resending OTP for email: $email');
-    
+
     try {
       final response = await dio.post(
         ApiEndpoints.baseUrl + ApiEndpoints.resendOtp,
@@ -170,11 +171,13 @@ class UserRemoteDatasource {
       );
 
       Logger.debug('Resend OTP Response status: ${response.statusCode}');
-      
+
       // Handle HTML error response
-      if (response.data is String && response.data.toString().contains('<!DOCTYPE html>')) {
+      if (response.data is String &&
+          response.data.toString().contains('<!DOCTYPE html>')) {
         throw AppError(
-          userMessage: 'Service temporarily unavailable. Please try again later.',
+          userMessage:
+              'Service temporarily unavailable. Please try again later.',
           type: ErrorType.server,
           technicalMessage: 'Server returned HTML instead of JSON',
         );
@@ -202,7 +205,8 @@ class UserRemoteDatasource {
 
       if (response.statusCode != null && response.statusCode! >= 500) {
         throw AppError(
-          userMessage: 'Service temporarily unavailable. Please try again later.',
+          userMessage:
+              'Service temporarily unavailable. Please try again later.',
           type: ErrorType.server,
           technicalMessage: 'Server error: ${response.statusCode}',
         );

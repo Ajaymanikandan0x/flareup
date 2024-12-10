@@ -2,6 +2,7 @@ import 'package:flareup/features/authentication/domain/usecases/otp_send_usecase
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/error/app_error.dart';
+import '../../../../core/error/error_handler_service.dart';
 import '../../../../core/storage/secure_storage_service.dart';
 import '../../../../core/utils/logger.dart';
 import '../../domain/repositories/auth_repo_domain.dart';
@@ -12,7 +13,6 @@ import '../../domain/usecases/signup_usecase.dart';
 import '../../domain/usecases/verify_reset_password_otp_usecase.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
-import '../../../../core/error/error_handler_service.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase loginUseCase;
@@ -58,9 +58,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       if (userEntity.role != 'user') {
         throw AppError(
-          userMessage: 'Access denied. Invalid user role.',
-          type: ErrorType.authentication
-        );
+            userMessage: 'Access denied. Invalid user role.',
+            type: ErrorType.authentication);
       }
 
       await storageService.saveTokens(
@@ -72,7 +71,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthSuccess(userEntity: userEntity, message: 'Login successful!'));
     } catch (e) {
       errorHandler.logError(e as Exception, StackTrace.current);
-      final userMessage = errorHandler.getReadableError(e as Exception);
+      final userMessage = errorHandler.getReadableError(e);
       emit(AuthFailure(error: userMessage));
     }
   }
@@ -170,9 +169,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
         if (userEntity.role != 'user') {
           throw AppError(
-            userMessage: 'Access denied. Invalid user role.',
-            type: ErrorType.authentication
-          );
+              userMessage: 'Access denied. Invalid user role.',
+              type: ErrorType.authentication);
         }
 
         await storageService.saveTokens(
@@ -180,7 +178,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           refreshToken: userEntity.refreshToken,
           userId: userEntity.id.toString(),
         );
-        emit(AuthSuccess(userEntity: userEntity, message: 'Google login successful!'));
+        emit(AuthSuccess(
+            userEntity: userEntity, message: 'Google login successful!'));
       } catch (signInError) {
         Logger.error('Sign In Error:', signInError);
         if (signInError.toString().contains('REGISTRATION_REQUIRED')) {
@@ -192,9 +191,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
           if (userEntity.role != 'user') {
             throw AppError(
-              userMessage: 'Access denied. Invalid user role.',
-              type: ErrorType.authentication
-            );
+                userMessage: 'Access denied. Invalid user role.',
+                type: ErrorType.authentication);
           }
 
           await storageService.saveTokens(
@@ -202,9 +200,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             refreshToken: userEntity.refreshToken,
             userId: userEntity.id.toString(),
           );
-          emit(AuthSuccess(userEntity: userEntity, message: 'Google registration successful!'));
+          emit(AuthSuccess(
+              userEntity: userEntity,
+              message: 'Google registration successful!'));
         } else {
-          final errorMessage = signInError.toString()
+          final errorMessage = signInError
+              .toString()
               .replaceAll('Exception: ', '')
               .replaceAll('Google sign in failed: ', '');
           throw Exception(errorMessage);
@@ -212,7 +213,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     } catch (e) {
       Logger.error('Google Auth Error:', e);
-      final errorMessage = e.toString()
+      final errorMessage = e
+          .toString()
           .replaceAll('Exception: ', '')
           .replaceAll('Google Oauth Failed: ', '');
       emit(AuthFailure(error: errorMessage));
@@ -225,8 +227,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthLoading());
     try {
-      print('\n=== Forgot Password Request ===');
-      print('Attempting to send reset password email to: ${event.email}');
+      Logger.debug(
+          'Attempting to send reset password email to: ${event.email}');
 
       await authRepository.forgotPassword(email: event.email);
 
@@ -235,7 +237,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         message: 'An OTP has been sent to your email',
       ));
     } catch (e) {
-      print('\nError in forgot password: $e');
+      Logger.debug('\nError in forgot password: $e');
       String errorMessage = e.toString().replaceAll('Exception:', '').trim();
       emit(AuthFailure(error: errorMessage));
     }
@@ -252,6 +254,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         newPassword: event.newPassword,
         otp: event.otp,
       );
+
       emit(const ResetPasswordSuccess(
         message:
             'Password reset successful! Please login with your new password.',
@@ -270,6 +273,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       Logger.debug('Processing Verify Reset Password OTP');
       Logger.debug('Email: ${event.email}');
+      Logger.debug('OTP: ${event.otp}');
 
       await verifyResetPasswordOtpUseCase.call(
         email: event.email,
@@ -282,13 +286,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         message: 'OTP verified successfully',
         otp: event.otp,
       ));
+    } on AppError catch (e) {
+      Logger.error('Error in verify reset password OTP', e);
+      if (e.userMessage.toLowerCase().contains('verified')) {
+        emit(PasswordResetOtpSuccess(
+          email: event.email,
+          message: e.userMessage,
+          otp: event.otp,
+        ));
+      } else {
+        emit(AuthFailure(error: e.userMessage));
+      }
     } catch (e) {
       Logger.error('Error in verify reset password OTP', e);
-      String errorMessage = e.toString();
-      if (errorMessage.contains('Exception:')) {
-        errorMessage = errorMessage.replaceAll('Exception:', '').trim();
-      }
-      emit(AuthFailure(error: errorMessage));
+      emit(AuthFailure(error: 'Failed to verify OTP'));
     }
   }
 }

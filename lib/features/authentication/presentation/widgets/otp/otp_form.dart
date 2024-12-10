@@ -94,8 +94,9 @@ class OtpForm extends StatelessWidget {
                 return PrimaryButton(
                   width: 250,
                   height: 60,
-                  onTap: state is AuthLoading ? () {} : verifyOtp,
-                  text: state is AuthLoading ? 'Verifying...' : 'Verify',
+                  onTap: verifyOtp,
+                  text: 'Verify',
+                  isLoading: state is AuthLoading,
                 );
               },
             ),
