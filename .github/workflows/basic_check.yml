@@ -1,4 +1,5 @@
-name: check_basic
+name: Flutter CI/CD
+
 on:
   push:
     branches: [ master ]
@@ -9,41 +10,48 @@ on:
 env:
   FLUTTER_CHANNEL: 'stable'
   FLUTTER_VERSION: '3.24.4'
-  PATH_TO_AAB: 'build/app/outputs/bundle/release/app-release.aab'
-  ANDROID_PACKAGE_NAME: 'com.flareup.com'
+  JAVA_VERSION: '17'
 
 jobs:
-  code-analysis-and-testing:
-    name: Code Analysis and Testing
+  build:
+    name: Build and Analyze
+
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: ${{ env.JAVA_VERSION }}
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: ${{ env.FLUTTER_CHANNEL }}
           flutter-version: ${{ env.FLUTTER_VERSION }}
 
-      - name: Install dependencies
-        run: flutter pub get --verbose
+          cache: true
 
-      - name: Run Flutter analyze
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Check formatting
+        run: dart format --set-exit-if-changed .
+
+      - name: Analyze project
         run: flutter analyze
 
-#      - name: Run Flutter tests
-#        run: flutter test
+      - name: Build Android APK
+        run: flutter build apk --release
 
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: subosito/flutter-action@v2
-      - name: Build
-        env:
-          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
-          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
-        run: |
-          flutter build apk --dart-define=CLOUDINARY_API_KEY=$CLOUDINARY_API_KEY --dart-define=CLOUDINARY_API_SECRET=$CLOUDINARY_API_SECRET
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
 
