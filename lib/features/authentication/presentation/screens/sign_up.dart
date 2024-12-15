@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/theme/text_theme.dart';
+import '../../../../core/widgets/password_field.dart';
 import '../../../../dependency_injector.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_state.dart';
@@ -93,19 +94,17 @@ class SignUp extends StatelessWidget {
                       controller: emailController,
                       validator: FormValidator.validateEmail),
                   SizedBox(height: Responsive.spacingHeight),
-                  AppFormField(
+                  PasswordField(
                     hint: 'your password',
                     icon: const Icon(Icons.lock),
-                    isPassword: true,
                     controller: passwordController,
                     validator: FormValidator.validatePassword,
                   ),
                   SizedBox(height: Responsive.spacingHeight),
-                  AppFormField(
+                  PasswordField(
                     hint: 'Conform password',
-                    icon: const Icon(Icons.lock),
-                    isPassword: true,
                     controller: passwordConformController,
+                    icon: const Icon(Icons.lock),
                     validator: FormValidator.validatePassword,
                   ),
                   SizedBox(height: Responsive.spacingHeight),

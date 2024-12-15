@@ -5,6 +5,7 @@ import '../../../../core/routes/routs.dart';
 import '../../../../core/theme/text_theme.dart';
 import '../../../../core/widgets/form_feild.dart';
 import '../../../../core/widgets/logo_gradient.dart';
+import '../../../../core/widgets/password_field.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../../../../dependency_injector.dart';
 import '../../../profile/presentation/bloc/user_profile_bloc.dart';
@@ -86,10 +87,8 @@ class _SignInState extends State<SignIn> {
                   validator: FormValidator.validateUserName,
                 ),
                 SizedBox(height: Responsive.spacingHeight),
-                AppFormField(
+                PasswordField(
                   hint: 'password',
-                  icon: const Icon(Icons.lock),
-                  isPassword: true,
                   controller: passwordController,
                   validator: FormValidator.validatePassword,
                 ),

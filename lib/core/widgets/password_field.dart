@@ -1,58 +1,63 @@
 import 'package:flutter/material.dart';
-
 import '../theme/app_palette.dart';
 import '../theme/text_theme.dart';
 
+import '../utils/validation.dart';
 
-class AppFormField extends StatelessWidget {
-  final Icon? icon;
-  final String hint;
+class PasswordField extends StatefulWidget {
   final TextEditingController controller;
-  final String? Function(String?)? validator;
-  final TextInputAction? textInputAction;
-  final bool autofocus;
-  final TextInputType? keyboardType;
-  final int? maxLines;
+  final String hint;
+  final FormFieldValidator<String>? validator;
+  final Icon? icon;
 
-  const AppFormField({
+  const PasswordField({
     super.key,
-    required this.hint,
-    this.icon,
     required this.controller,
+    required this.hint,
     this.validator,
-    this.textInputAction,
-    this.autofocus = false,
-    this.keyboardType,
-    this.maxLines = 1,
+    this.icon,
   });
+
+  @override
+  State<PasswordField> createState() => _PasswordFieldState();
+}
+
+class _PasswordFieldState extends State<PasswordField> {
+  late bool _obscureText = true;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
     return TextFormField(
+      controller: widget.controller,
+      obscureText: _obscureText,
+      validator: widget.validator ?? FormValidator.validatePassword,
       style: AppTextStyles.primaryTextTheme(),
-      controller: controller,
-      validator: validator,
-      autofocus: autofocus,
-      keyboardType: keyboardType,
-      textInputAction: textInputAction,
-      maxLines: maxLines,
-
       autovalidateMode: AutovalidateMode.onUserInteraction,
       decoration: InputDecoration(
-        labelText: hint,
-        hintText: hint,
-        prefixIcon: icon != null 
-          ? Icon(
-              icon!.icon,
-              color: theme.brightness == Brightness.dark
-                  ? AppPalette.darkHint
-                  : AppPalette.lightHint,
-            )
-          : null,
+        labelText: widget.hint,
+        hintText: widget.hint,
         filled: true,
         fillColor: theme.cardColor,
+        prefixIcon: widget.icon != null
+            ? Icon(
+                widget.icon!.icon,
+                color: theme.brightness == Brightness.dark
+                    ? AppPalette.darkHint
+                    : AppPalette.lightHint,
+              )
+            : null,
+        suffixIcon: IconButton(
+          icon: Icon(
+            _obscureText ? Icons.visibility_off : Icons.visibility,
+            color: theme.brightness == Brightness.dark
+                ? AppPalette.darkHint
+                : AppPalette.lightHint,
+          ),
+          onPressed: () => setState(() => _obscureText = !_obscureText),
+          tooltip: _obscureText ? 'Show password' : 'Hide password',
+        ),
         border: InputBorder.none,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
@@ -78,7 +83,8 @@ class AppFormField extends StatelessWidget {
           vertical: 23,
           horizontal: 23,
         ),
+        helperText: 'Use a strong password',
       ),
     );
   }
-}
+} 
