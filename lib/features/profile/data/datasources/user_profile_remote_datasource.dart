@@ -25,26 +25,58 @@ class UserProfileRemoteDataSourceImpl implements UserProfileRemoteDataSource {
   Future<UserProfileModel> fetchUserProfile(String userId) async {
     try {
       final int numericId = int.parse(userId);
+      Logger.debug('Converting user ID to numeric: $numericId');
+
       final endpoint = ApiEndpoints.baseUrl +
           ApiEndpoints.user.replaceAll('user_id', numericId.toString());
 
       Logger.debug('Fetching user profile from: $endpoint');
-      final response = await dio.get(endpoint);
 
-      if (response.statusCode == 200) {
-        final data = response.data;
-        Logger.debug('Received user data: $data');
+      // Get the access token
+      final token = await storageService.getAccessToken();
+      Logger.debug('Access token available: ${token != null}');
 
-        return UserProfileModel.fromJson(data);
-      } else {
-        throw Exception(
-            'Failed to load user profile: Status ${response.statusCode}');
+      final response = await dio.get(
+        endpoint,
+        options: Options(
+          validateStatus: (status) => status! < 500,
+          headers: {
+            'Content-Type': 'application/json',
+            if (token != null) 'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      if (response.statusCode == 404) {
+        throw AppError(
+            userMessage: 'User profile not found',
+            technicalMessage: 'User ID $numericId not found in the system',
+            type: ErrorType.businessLogic);
       }
+
+      if (response.statusCode != 200) {
+        throw AppError(
+            userMessage: 'Failed to load profile',
+            technicalMessage: 'Status ${response.statusCode}: ${response.data}',
+            type: ErrorType.server);
+      }
+
+      final data = response.data;
+      Logger.debug('Received user data: $data');
+
+      return UserProfileModel.fromJson(data);
     } on FormatException {
-      throw Exception('Invalid user ID format');
+      throw AppError(
+          userMessage: 'Invalid user ID format',
+          technicalMessage: 'Failed to parse user ID: $userId',
+          type: ErrorType.validation);
     } catch (e) {
       Logger.error('Error fetching user profile:', e);
-      rethrow;
+      if (e is AppError) rethrow;
+      throw AppError(
+          userMessage: 'Failed to load profile',
+          technicalMessage: e.toString(),
+          type: ErrorType.unknown);
     }
   }
 

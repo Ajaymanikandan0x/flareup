@@ -5,7 +5,7 @@ class ApiEndpoints {
   static const otpVerification = 'otp_verification/'; //(post) email, enteredOtp
   static const login = 'login/'; // (post)username, password
   static const resendOtp = 'resend_otp/'; //(post) email
-  static const user = 'user/user_id/'; //(get) all user id
+  static const user = 'user-profile/user_id/'; //(get) all user id
   static const refreshToken = 'token_refresh/'; //(post) refresh_token
   static const logout = 'logout/'; //(post)  just send a request
   static const updateUserProfile =
@@ -19,5 +19,4 @@ class ApiEndpoints {
       'verify-otp-forgot-password/'; //(post) email, enteredOtp
   static const setNewPassword =
       'set-new-password/'; //(post) new_password, confirm_password, email
-
 }

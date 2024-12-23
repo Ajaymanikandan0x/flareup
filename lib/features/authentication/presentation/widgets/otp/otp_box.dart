@@ -5,10 +5,12 @@ import '../../../../../core/theme/app_palette.dart';
 
 class OtpBox extends StatelessWidget {
   final TextEditingController controller;
+  final bool isLastBox;
 
   const OtpBox({
     super.key,
     required this.controller,
+    this.isLastBox = false,
   });
 
   @override
@@ -19,16 +21,14 @@ class OtpBox extends StatelessWidget {
       child: TextFormField(
         controller: controller,
         onChanged: (value) {
-          if (value.isNotEmpty) {
-         
+          if (value.isNotEmpty && !isLastBox) {
             FocusScope.of(context).nextFocus();
-          } else {
-            
+          } else if (value.isEmpty) {
             FocusScope.of(context).previousFocus();
           }
         },
         keyboardType: TextInputType.number,
-        textInputAction: TextInputAction.next,
+        textInputAction: isLastBox ? TextInputAction.done : TextInputAction.next,
         inputFormatters: [
           LengthLimitingTextInputFormatter(1),
           FilteringTextInputFormatter.digitsOnly,
