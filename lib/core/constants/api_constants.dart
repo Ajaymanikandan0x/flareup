@@ -19,4 +19,9 @@ class ApiEndpoints {
       'verify-otp-forgot-password/'; //(post) email, enteredOtp
   static const setNewPassword =
       'set-new-password/'; //(post) new_password, confirm_password, email
+// events
+  static const eventBaseUrl = 'http://10.0.2.2:8082/';
+  static const getAllEvents = 'events/'; // (get) get all events
+  static const eventCategory = 'events/event-types-and-categories/'; //(get) [
+//  'name', 'description', 'event_types=[‘name’,’description’,’image’,]’  , ’image’]
 }

@@ -5,7 +5,6 @@ import 'core/network/dio_interceptor.dart';
 import 'core/network/network_service.dart';
 import 'core/storage/secure_storage_service.dart';
 import 'core/utils/cloudinary_service.dart';
-
 import 'features/authentication/data/datasources/remote_data.dart';
 import 'features/authentication/data/repositories/auth_repo_data.dart';
 import 'features/authentication/domain/repositories/auth_repo_domain.dart';
@@ -16,6 +15,16 @@ import 'features/authentication/domain/usecases/resend_otp_usecase.dart';
 import 'features/authentication/domain/usecases/signup_usecase.dart';
 import 'features/authentication/domain/usecases/verify_reset_password_otp_usecase.dart';
 import 'features/authentication/presentation/bloc/auth_bloc.dart';
+import 'features/home/data/datasources/event_remote_datasource.dart';
+import 'features/home/data/datasources/event_remote_datasource_impl.dart';
+import 'features/home/data/repositories/event_repository_impl.dart';
+import 'features/home/domain/repositories/event_repository.dart';
+import 'features/home/domain/usecases/GetNearbyEventsUseCase.dart';
+import 'features/home/domain/usecases/GetTrendingEventsUseCase .dart';
+import 'features/home/domain/usecases/category_usecase.dart';
+import 'features/home/domain/usecases/get_event_usecase.dart';
+import 'features/home/domain/usecases/get_eventby_category_usecase.dart';
+import 'features/home/presentation/bloc/event_bloc.dart';
 import 'features/profile/data/datasources/user_profile_remote_datasource.dart';
 import 'features/profile/data/repositories/profile_image_repository_impl.dart';
 import 'features/profile/data/repositories/user_profile_repository_impl.dart';
@@ -24,6 +33,7 @@ import 'features/profile/domain/usecases/get_user_profile_usecase.dart';
 import 'features/profile/domain/usecases/update_user_profile_usecase.dart';
 import 'features/profile/domain/usecases/upload_profile_image_usecase.dart';
 import 'features/profile/presentation/bloc/user_profile_bloc.dart';
+import 'features/events/presentation/bloc/single_event_bloc.dart';
 
 class DependencyInjector {
   static final DependencyInjector _instance = DependencyInjector._internal();
@@ -50,9 +60,28 @@ class DependencyInjector {
   late UpdateUserProfileUseCase _updateUserProfileUseCase;
   late UserProfileBloc _userProfileBloc;
 
+  // Event dependencies
+  late EventRemoteDataSource _eventRemoteDataSource;
+  late EventRepositoryDomain _eventRepository;
+  late GetAllEventsUseCase _getAllEventsUseCase;
+  late CategoriesUseCase _categoriesUseCase;
+  late GetTrendingEventsUseCase _getTrendingEventsUseCase;
+  late GetNearbyEventsUseCase _getNearbyEventsUseCase;
+  late GetEventsByCategoryUseCase _getEventsByCategoryUseCase;
+  late EventBloc _eventBloc;
+
+  late SingleEventBloc _singleEventBloc;
+
   void setup() {
     _setupAuthenticationDependencies();
     _setupUserProfileDependencies();
+    _setupEventDependencies();
+
+    _setupSingleEventDependencies();
+  }
+
+  void _setupSingleEventDependencies() {
+    _singleEventBloc = SingleEventBloc();
   }
 
   void _setupAuthenticationDependencies() {
@@ -114,7 +143,32 @@ class DependencyInjector {
     );
   }
 
+  void _setupEventDependencies() {
+    final storageService = SecureStorageService();
+    final dio = Dio()..interceptors.add(AuthInterceptor(storageService, Dio()));
+    final networkService = NetworkService(dio);
+
+    _eventRemoteDataSource =
+        EventRemoteDataSourceImpl(networkService, storageService);
+    _eventRepository = EventRepositoryImpl(_eventRemoteDataSource);
+    _getAllEventsUseCase = GetAllEventsUseCase(_eventRepository);
+    _categoriesUseCase = CategoriesUseCase(_eventRepository);
+    _getTrendingEventsUseCase = GetTrendingEventsUseCase(_eventRepository);
+    _getNearbyEventsUseCase = GetNearbyEventsUseCase(_eventRepository);
+    _getEventsByCategoryUseCase = GetEventsByCategoryUseCase(_eventRepository);
+
+    _eventBloc = EventBloc(
+      getAllEventsUseCase: _getAllEventsUseCase,
+      categoriesUseCase: _categoriesUseCase,
+      getTrendingEventsUseCase: _getTrendingEventsUseCase,
+      getNearbyEventsUseCase: _getNearbyEventsUseCase,
+      getEventsByCategoryUseCase: _getEventsByCategoryUseCase,
+    );
+  }
+
   // Getters
   AuthBloc get authBloc => _authBloc;
   UserProfileBloc get userProfileBloc => _userProfileBloc;
+  EventBloc get eventBloc => _eventBloc;
+  SingleEventBloc get singleEventBloc => _singleEventBloc;
 }

@@ -21,6 +21,7 @@ class AppTextStyles {
     double? fontSize,
     FontStyle? fontStyle,
     FontWeight fontWeight = FontWeight.w600,
+    Color? color,
   }) {
     return _baseTextStyle(
       fontSize: fontSize ?? 15,

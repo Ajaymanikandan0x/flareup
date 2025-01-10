@@ -40,4 +40,6 @@ class AppPalette {
   static const Color shimmerDarkHighlight = Color(0xFF3D3D3D);
   static const Color shimmerLightBase = Color(0xFFE0E0E0);
   static const Color shimmerLightHighlight = Color(0xFFF5F5F5);
+
+  static var white;
 }

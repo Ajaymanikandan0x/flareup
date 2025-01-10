@@ -1,24 +1,28 @@
 import 'package:flareup/core/routes/routs.dart';
 import 'package:flareup/core/theme/theme.dart';
+import 'package:flareup/features/events/presentation/screens/event_logo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'core/config/app_config.dart';
-import 'dependency_injector.dart';
 import 'core/theme/cubit/theme_cubit.dart';
+import 'dependency_injector.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final prefs = await SharedPreferences.getInstance();
+  final pref = await SharedPreferences.getInstance();
   await AppConfig.initialize();
   final injector = DependencyInjector();
   injector.setup();
-  
+
   runApp(MultiBlocProvider(
     providers: [
       BlocProvider(create: (context) => DependencyInjector().authBloc),
       BlocProvider(create: (context) => DependencyInjector().userProfileBloc),
-      BlocProvider(create: (context) => ThemeCubit(prefs)),
+      BlocProvider(create: (context) => DependencyInjector().eventBloc),
+      BlocProvider(create: (context) => DependencyInjector().singleEventBloc),
+      BlocProvider(create: (context) => ThemeCubit(pref)),
     ],
     child: const MyApp(),
   ));
@@ -36,7 +40,8 @@ class MyApp extends StatelessWidget {
           title: 'FlareUp',
           theme: isDark ? AppTheme.darkTheme : AppTheme.lightTheme,
           onGenerateRoute: AppRouts.generateRoute,
-          initialRoute: AppRouts.logo,
+          // initialRoute: AppRouts.logo,
+          home: EventLogoScreen(),
         );
       },
     );
