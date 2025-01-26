@@ -1,5 +1,3 @@
-
-
 import '../../domain/entities/get_event_entite.dart';
 
 class GetAllEventModel extends GetAllEventEntities {
@@ -33,41 +31,49 @@ class GetAllEventModel extends GetAllEventEntities {
     required super.approvalComments,
     required super.approvalUpdatedAt,
     required super.keyParticipants,
+    required super.currentParticipants,
+
   });
 
   factory GetAllEventModel.fromJson(Map<String, dynamic> json) {
-    return GetAllEventModel(
-      id: int.parse(json['id'].toString()),
-      title: json['title']?.toString() ?? '',
-      description: json['description']?.toString() ?? '',
-      category: json['category']?.toString() ?? '',
-      type: json['type']?.toString() ?? '',
-      hostId: int.parse(json['host_id'].toString()),
-      organizationId: json['organization_id'] != null ? int.parse(json['organization_id'].toString()) : 0,
-      latitude: double.parse(json['latitude'].toString()),
-      longitude: double.parse(json['longitude'].toString()),
-      addressLine1: json['address_line_1']?.toString() ?? '',
-      city: json['city']?.toString() ?? '',
-      state: json['state']?.toString() ?? '',
-      country: json['country']?.toString() ?? '',
-      paymentRequired: json['payment_required'] == true,
-      ticketPrice: double.parse(json['ticket_price'].toString()),
-      participantCapacity: int.parse(json['participant_capacity'].toString()),
-      bannerImage: json['banner_image']?.toString() ?? '',
-      promoVideo: json['promo_video']?.toString() ?? '',
-      startDateTime: DateTime.parse(json['start_date_time'].toString()),
-      endDateTime: DateTime.parse(json['end_date_time'].toString()),
-      registrationDeadline: DateTime.parse(json['registration_deadline'].toString()),
-      createdAt: DateTime.parse(json['created_at'].toString()),
-      updatedAt: DateTime.parse(json['updated_at'].toString()),
-      status: json['status']?.toString() ?? '',
-      statusRequest: json['status_request']?.toString() ?? '',
-      approvalStatus: json['approval_status']?.toString() ?? '',
-      approvalComments: json['approval_comments']?.toString() ?? '',
-      approvalUpdatedAt: json['approval_updated_at'] != null ? 
-        DateTime.parse(json['approval_updated_at'].toString()) : DateTime.now(),
-      keyParticipants: (json['key_participants'] as List?)?.map((e) => e.toString()).toList() ?? [],
-    );
+    try {
+      return GetAllEventModel(
+        id: int.tryParse(json['id']?.toString() ?? '') ?? 0,
+        title: json['title']?.toString() ?? '',
+        description: json['description']?.toString() ?? '',
+        category: json['category']?.toString() ?? '',
+        type: json['type']?.toString() ?? '',
+        hostId: int.tryParse(json['host_id']?.toString() ?? '') ?? 0,
+        organizationId: int.tryParse(json['organization_id']?.toString() ?? '') ?? 0,
+        latitude: double.tryParse(json['latitude']?.toString() ?? '') ?? 0.0,
+        longitude: double.tryParse(json['longitude']?.toString() ?? '') ?? 0.0,
+        addressLine1: json['address_line_1']?.toString() ?? '',
+        city: json['city']?.toString() ?? '',
+        state: json['state']?.toString() ?? '',
+        country: json['country']?.toString() ?? '',
+        paymentRequired: json['payment_required'] == true,
+        ticketPrice: double.parse(json['ticket_price'].toString()),
+        participantCapacity: int.parse(json['participant_capacity'].toString()),
+        bannerImage: json['banner_image']?.toString() ?? '',
+        promoVideo: json['promo_video']?.toString() ?? '',
+        startDateTime: DateTime.parse(json['start_date_time'].toString()),
+        endDateTime: DateTime.parse(json['end_date_time'].toString()),
+        registrationDeadline: DateTime.parse(json['registration_deadline'].toString()),
+        createdAt: DateTime.parse(json['created_at'].toString()),
+        updatedAt: DateTime.parse(json['updated_at'].toString()),
+        status: json['status']?.toString() ?? '',
+        statusRequest: (json['status_request'] ?? '').toString(),
+        approvalStatus: json['approval_status']?.toString() ?? '',
+        approvalComments: json['approval_comments']?.toString() ?? '',
+        approvalUpdatedAt: json['approval_updated_at'] != null ? 
+          DateTime.parse(json['approval_updated_at'].toString()) : DateTime.now(),
+        keyParticipants: (json['key_participants'] as List?)?.map((e) => e.toString()).toList() ?? [],
+        currentParticipants: int.parse(json['current_participants_count'].toString()),
+      );
+    } catch (e) {
+      print('Error parsing JSON: $e');
+      throw FormatException('Failed to parse event data: $e');
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -101,6 +107,7 @@ class GetAllEventModel extends GetAllEventEntities {
       'approval_comments': approvalComments,
       'approval_updated_at': approvalUpdatedAt.toIso8601String(),
       'key_participants': keyParticipants,
+      'current_participants_count': currentParticipants,
     };
   }
 

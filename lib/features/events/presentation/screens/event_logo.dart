@@ -1,13 +1,13 @@
+import 'package:flareup/core/routes/routs.dart';
+import 'package:flareup/core/theme/text_theme.dart';
+import 'package:flareup/core/widgets/primary_button.dart';
+import 'package:flareup/features/events/presentation/widgets/loading/image_shimmer_loading.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/theme/app_palette.dart';
 import '../../../../core/utils/responsive_utils.dart';
-import '../bloc/single_event_bloc.dart';
-
-import '../widgets/loading/logo_screen_shimmer.dart';
-import '../widgets/logo_error.dart';
+import '../../../../core/widgets/custom_image_wid.dart';
 import '../widgets/member_avatar_group.dart';
+import 'dummy_logo.dart';
 
 class EventLogoScreen extends StatelessWidget {
   const EventLogoScreen({super.key});
@@ -16,173 +16,179 @@ class EventLogoScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     Responsive.init(context);
 
+    // Calculate responsive dimensions
+    final contentPadding = EdgeInsets.symmetric(
+      horizontal: Responsive.horizontalPadding,
+      vertical: Responsive.verticalPadding,
+    );
+    final dateSize =
+        Responsive.bodyFontSize * (Responsive.isTablet ? 2.0 : 1.7);
+    final titleSize =
+        Responsive.titleFontSize * (Responsive.isTablet ? 3.5 : 3.0);
+    final locationSize =
+        Responsive.bodyFontSize * (Responsive.isTablet ? 2.5 : 2.0);
+    final locationIconSize = Responsive.isTablet ? 36.0 : 30.0;
+    final memberTextSize =
+        Responsive.bodyFontSize * (Responsive.isTablet ? 1.8 : 1.6);
+
+    // Using dummy data for now
+    final event = DummyEvent.sampleEvent;
+
+    /* Commented bloc implementation for future use
     return BlocBuilder<SingleEventBloc, SingleEventState>(
       builder: (context, state) {
         if (state is SingleEventLoading) {
           return const EventLogoShimmer();
         }
+        // ... rest of the bloc implementation
+    });
+    */
 
-        if (state is SingleEventLoaded) {
-          final event = state.event;
-          if (event.bannerImage.isEmpty) {
-            return const EventLogoErrorWidget(
-              message: 'Event image not available',
-            );
-          }
+    return Scaffold(
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background Image with Gradient Overlay
+          CustomImageWidget(
+            imageUrl: event.bannerImage,
+            placeholder: ImageShimmerLoading(),
+          ),
 
-          return Scaffold(
-            body: Stack(
-              children: [
-                // Background Image with Gradient Overlay
-                Container(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: NetworkImage(event.bannerImage),
-                      fit: BoxFit.cover,
-                      colorFilter: ColorFilter.mode(
-                        Colors.black,
-                        BlendMode.darken,
+          // Enhanced gradient overlay
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color.fromRGBO(0, 0, 0, 0.5),
+                  Color.fromRGBO(0, 0, 0, 0.8),
+                  Color.fromRGBO(0, 0, 0, 0.95)
+                ],
+                stops: const [0.2, 0.7, 1.0],
+              ),
+            ),
+          ),
+
+          // Content
+          SafeArea(
+            child: Padding(
+              padding: contentPadding,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
                       ),
-                    ),
-                  ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black,
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Content
-                SafeArea(
-                  child: Padding(
-                    padding: EdgeInsets.all(Responsive.horizontalPadding),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Back Button
-                        IconButton(
-                          icon:
-                              const Icon(Icons.arrow_back, color: Colors.white),
-                          onPressed: () => Navigator.pop(context),
-                        ),
-
-                        // Date
-                        Text(
-                          _formatDate(event.startDateTime),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: Responsive.bodyFontSize,
-                          ),
-                        ),
-
-                        const Spacer(),
-
-                        // Event Title
-                        Text(
-                          event.title,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: Responsive.titleFontSize * 1.5,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-
-                        SizedBox(height: Responsive.spacingHeight),
-
-                        // Location
-                        Row(
+                      child: IntrinsicHeight(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(
-                              Icons.location_on,
-                              color: Colors.white,
-                            ),
-                            SizedBox(width: Responsive.spacingWidth * 0.5),
+                            // Spacer with responsive height
+                            SizedBox(height: constraints.maxHeight * 0.3),
+
+                            // Event Date
                             Text(
-                              '${event.addressLine1}, ${event.city}',
+                              _formatDate(event.startDateTime),
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: Responsive.bodyFontSize,
+                                fontSize: dateSize,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                          ],
-                        ),
 
-                        SizedBox(height: Responsive.spacingHeight * 2),
+                            SizedBox(height: Responsive.spacingHeight * 0.5),
 
-                        // Members Going
-                        Row(
-                          children: [
-                            const MemberAvatarGroup(),
-                            SizedBox(width: Responsive.spacingWidth),
-                            Text(
-                              'Going',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: Responsive.bodyFontSize,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        SizedBox(height: Responsive.spacingHeight * 2),
-
-                        // Buy Ticket Button
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              // TODO: Implement ticket purchase
-                            },
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(
-                                vertical: Responsive.buttonHeight * 0.3,
-                              ),
-                              backgroundColor: AppPalette.gradient2,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                  Responsive.borderRadius,
+                            // Event Title with Hero animation
+                            Hero(
+                              tag: 'event_title_${event.id}',
+                              child: Text(
+                                event.title,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: titleSize,
+                                  fontWeight: FontWeight.bold,
+                                  height: 1.2,
                                 ),
                               ),
                             ),
-                            child: Text(
-                              'BUY TICKET',
-                              style: TextStyle(
-                                fontSize: Responsive.screenWidth,
-                                fontWeight: FontWeight.bold,
+
+                            SizedBox(height: Responsive.spacingHeight),
+
+                            // Location with responsive layout
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.location_on,
+                                  color: Colors.white,
+                                  size: locationIconSize,
+                                ),
+                                SizedBox(width: Responsive.spacingWidth * 0.5),
+                                Expanded(
+                                  child: Text(
+                                    '${event.addressLine1}, ${event.city}',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: locationSize,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            SizedBox(height: Responsive.spacingHeight * 1.5),
+
+                            // Members section with enhanced layout
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Members',
+                                  style:
+                                      AppTextStyles.primaryTextTheme().copyWith(
+                                    color: Colors.white,
+                                    fontSize: memberTextSize,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                SizedBox(
+                                    height: Responsive.spacingHeight * 0.5),
+                                MemberAvatarGroup(
+                                  memberCount: event.participantCount,
+                                  maxDisplayed: Responsive.isTablet ? 4 : 3,
+                                ),
+                              ],
+                            ),
+
+                            const Spacer(),
+
+                            // Buy Ticket Button with responsive size
+                            Align(
+                              alignment: Alignment.bottomCenter,
+                              child: PrimaryButton(
+                                onTap: () {
+                                  Navigator.pushNamed(
+                                      context, AppRouts.eventHome);
+                                },
+                                text: 'BUY TICKET',
+                                width: Responsive.screenWidth * 0.85,
+                                height: Responsive.buttonHeight * 1.1,
                               ),
                             ),
-                          ),
+                            SizedBox(height: Responsive.spacingHeight),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-              ],
+                  );
+                },
+              ),
             ),
-          );
-        }
-
-        if (state is SingleEventError) {
-          return EventLogoErrorWidget(
-            message: state.message,
-            onRetry: () {
-              // Add retry functionality if needed
-              // context.read<SingleEventBloc>().add(LoadEventEvent(eventId));
-            },
-          );
-        }
-
-        return const EventLogoErrorWidget(
-          message: 'No event selected. Please select an event to view details.',
-        );
-      },
+          ),
+        ],
+      ),
     );
   }
 

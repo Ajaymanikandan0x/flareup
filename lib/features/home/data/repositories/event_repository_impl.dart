@@ -40,22 +40,9 @@ class EventRepositoryImpl implements EventRepositoryDomain {
         return [];
       }
 
-      // Filter out events with invalid banner images
+      // Modified validation to accept any non-empty banner image
       final events = response.data!
-          .where((model) {
-            final validExtensions = [
-              '.jpg',
-              '.jpeg',
-              '.png',
-              '.gif',
-              '.webp',
-              '.mp4',
-              '.mov'
-            ];
-            return model.bannerImage.isNotEmpty &&
-                validExtensions.any(
-                    (ext) => model.bannerImage.toLowerCase().endsWith(ext));
-          })
+          .where((model) => model.bannerImage.isNotEmpty)
           .map((model) => model.toEntity())
           .toList();
 
@@ -77,20 +64,7 @@ class EventRepositoryImpl implements EventRepositoryDomain {
       }
 
       final events = response.data!
-          .where((model) {
-            final validExtensions = [
-              '.jpg',
-              '.jpeg',
-              '.png',
-              '.gif',
-              '.webp',
-              '.mp4',
-              '.mov'
-            ];
-            return model.bannerImage.isNotEmpty &&
-                validExtensions.any(
-                    (ext) => model.bannerImage.toLowerCase().endsWith(ext));
-          })
+          .where((model) => model.bannerImage.isNotEmpty)
           .map((model) => model.toEntity())
           .toList();
 
@@ -117,20 +91,7 @@ class EventRepositoryImpl implements EventRepositoryDomain {
       }
 
       final events = response.data!
-          .where((model) {
-            final validExtensions = [
-              '.jpg',
-              '.jpeg',
-              '.png',
-              '.gif',
-              '.webp',
-              '.mp4',
-              '.mov'
-            ];
-            return model.bannerImage.isNotEmpty &&
-                validExtensions.any(
-                    (ext) => model.bannerImage.toLowerCase().endsWith(ext));
-          })
+          .where((model) => model.bannerImage.isNotEmpty)
           .map((model) => model.toEntity())
           .toList();
 
@@ -153,20 +114,7 @@ class EventRepositoryImpl implements EventRepositoryDomain {
       }
 
       final events = response.data!
-          .where((model) {
-            final validExtensions = [
-              '.jpg',
-              '.jpeg',
-              '.png',
-              '.gif',
-              '.webp',
-              '.mp4',
-              '.mov'
-            ];
-            return model.bannerImage.isNotEmpty &&
-                validExtensions.any(
-                    (ext) => model.bannerImage.toLowerCase().endsWith(ext));
-          })
+          .where((model) => model.bannerImage.isNotEmpty)
           .map((model) => model.toEntity())
           .toList();
 
@@ -188,20 +136,7 @@ class EventRepositoryImpl implements EventRepositoryDomain {
       }
 
       final events = response.data!
-          .where((model) {
-            final validExtensions = [
-              '.jpg',
-              '.jpeg',
-              '.png',
-              '.gif',
-              '.webp',
-              '.mp4',
-              '.mov'
-            ];
-            return model.bannerImage.isNotEmpty &&
-                validExtensions.any(
-                    (ext) => model.bannerImage.toLowerCase().endsWith(ext));
-          })
+          .where((model) => model.bannerImage.isNotEmpty)
           .map((model) => model.toEntity())
           .toList();
 

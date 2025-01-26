@@ -28,6 +28,7 @@ class GetAllEventEntities {
   final String approvalComments;
   final DateTime approvalUpdatedAt;
   final List<String> keyParticipants;
+  final int currentParticipants;
 
   GetAllEventEntities({
     required this.id, 
@@ -59,5 +60,6 @@ class GetAllEventEntities {
     required this.approvalComments,
     required this.approvalUpdatedAt,
     required this.keyParticipants,
+    required this.currentParticipants,
   });
 }

@@ -3,6 +3,7 @@ class CategoryEntity {
   final String name;
   final String description;
   final String status;
+  final String image;
   final DateTime updatedAt;
   final List<EventTypeEntity> eventTypes;
   final String? parentId;
@@ -13,6 +14,7 @@ class CategoryEntity {
     required this.description,
     required this.status,
     required this.updatedAt,
+    required this.image,
     required this.eventTypes,
     this.parentId,
   });

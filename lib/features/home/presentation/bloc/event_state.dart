@@ -53,21 +53,6 @@ class EventsLoaded extends EventBlocState {
     String? selectedSubCategoryId,
   }) : super(selectedSubCategoryId: selectedSubCategoryId);
 
-  @override
-  List<Object?> get props => [
-        allEvents,
-        trendingEvents,
-        nearbyEvents,
-        categories,
-        searchResults,
-        searchQuery,
-        isSearching,
-        searchError,
-        selectedEvent,
-        selectedCategoryId,
-        isSubcategoryView,
-      ];
-
   EventsLoaded copyWith({
     List<GetAllEventEntities>? allEvents,
     List<GetAllEventEntities>? trendingEvents,
@@ -98,4 +83,19 @@ class EventsLoaded extends EventBlocState {
           selectedSubCategoryId ?? this.selectedSubCategoryId,
     );
   }
+
+  @override
+  List<Object?> get props => [
+        allEvents,
+        trendingEvents,
+        nearbyEvents,
+        categories,
+        searchResults,
+        searchQuery,
+        isSearching,
+        searchError,
+        selectedEvent,
+        selectedCategoryId,
+        isSubcategoryView,
+      ];
 }

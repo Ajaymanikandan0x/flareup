@@ -1,8 +1,8 @@
 import 'package:flareup/core/routes/routs.dart';
 import 'package:flareup/core/theme/theme.dart';
-import 'package:flareup/features/events/presentation/screens/event_logo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/config/app_config.dart';
@@ -11,6 +11,7 @@ import 'dependency_injector.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   final pref = await SharedPreferences.getInstance();
   await AppConfig.initialize();
   final injector = DependencyInjector();
@@ -40,8 +41,8 @@ class MyApp extends StatelessWidget {
           title: 'FlareUp',
           theme: isDark ? AppTheme.darkTheme : AppTheme.lightTheme,
           onGenerateRoute: AppRouts.generateRoute,
-          // initialRoute: AppRouts.logo,
-          home: EventLogoScreen(),
+          initialRoute: AppRouts.logo,
+          // home: EventLogoScreen(),
         );
       },
     );

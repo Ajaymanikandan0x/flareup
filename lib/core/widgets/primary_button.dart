@@ -66,22 +66,23 @@ class PrimaryButton extends StatelessWidget {
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      if (iconData != null) ...[
-                        Icon(
-                          iconData,
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? AppPalette.darkCard
-                              : AppPalette.lightCard,
-                          size: responsiveFontSize,
-                        ),
-                        SizedBox(width: size.width * 0.02),
-                      ],
                       Text(
                         text,
                         style: AppTextStyles.primaryTextTheme(
                           fontSize: responsiveFontSize,
                         ),
                       ),
+                      SizedBox(width: 10),
+                      if (iconData != null) ...[
+                        Icon(
+                          iconData,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? AppPalette.lightCard
+                              : AppPalette.darkCard,
+                          size: responsiveFontSize,
+                        ),
+                        SizedBox(width: size.width * 0.02),
+                      ],
                     ],
                   ),
           ),

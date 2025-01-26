@@ -20,8 +20,7 @@ class EventRemoteDataSourceImpl extends BaseApiClient
   @override
   Future<ApiResponse<List<GetAllEventModel>>> getAllEvents() async {
     try {
-      final endpoint =
-          '${ApiEndpoints.eventBaseUrl}${ApiEndpoints.getAllEvents}';
+      final endpoint = '${ApiEndpoints.baseUrl}${ApiEndpoints.getAllEvents}';
       Logger.debug('Fetching events from endpoint: $endpoint');
 
       final options = await getRequestOptions();
@@ -83,8 +82,8 @@ class EventRemoteDataSourceImpl extends BaseApiClient
   @override
   Future<ApiResponse<List<CategoryModel>>> getEventCategories() async {
     try {
-      final endpoint =
-          '${ApiEndpoints.eventBaseUrl}${ApiEndpoints.eventCategory}';
+      final endpoint = '${ApiEndpoints.baseUrl}${ApiEndpoints.eventCategory}';
+      Logger.debug('Fetching categories from endpoint: $endpoint');
 
       final response = await networkService.dio.get(
         endpoint,
@@ -102,8 +101,7 @@ class EventRemoteDataSourceImpl extends BaseApiClient
         );
       }
 
-      if (response.data == null ||
-          (response.data is List && response.data.isEmpty)) {
+      if (response.data == null) {
         return ApiResponse(
           success: true,
           message: 'No categories available',
@@ -111,15 +109,47 @@ class EventRemoteDataSourceImpl extends BaseApiClient
         );
       }
 
-      final categories = (response.data as List)
-          .map((json) => CategoryModel.fromJson(json))
-          .toList();
+      // Handle the case where response.data is a Map
+      if (response.data is Map) {
+        final categoriesData = response.data['categories'] as List?; // Adjust this key based on your API response
+        if (categoriesData == null || categoriesData.isEmpty) {
+          return ApiResponse(
+            success: true,
+            message: 'No categories available',
+            data: [],
+          );
+        }
 
-      return ApiResponse(
-        success: true,
-        message: 'Categories fetched successfully',
-        data: categories,
+        final categories = categoriesData
+            .map((json) => CategoryModel.fromJson(json))
+            .toList();
+
+        return ApiResponse(
+          success: true,
+          message: 'Categories fetched successfully',
+          data: categories,
+        );
+      }
+
+      // If it's already a List (fallback)
+      if (response.data is List) {
+        final categories = (response.data as List)
+            .map((json) => CategoryModel.fromJson(json))
+            .toList();
+
+        return ApiResponse(
+          success: true,
+          message: 'Categories fetched successfully',
+          data: categories,
+        );
+      }
+
+      throw AppError(
+        userMessage: 'Invalid category data format',
+        technicalMessage: 'Unexpected response format: ${response.data.runtimeType}',
+        type: ErrorType.server,
       );
+
     } catch (e) {
       Logger.error('Get categories error:', e);
       return ApiResponse(
@@ -135,7 +165,7 @@ class EventRemoteDataSourceImpl extends BaseApiClient
       String category) async {
     try {
       final endpoint =
-          '${ApiEndpoints.eventBaseUrl}${ApiEndpoints.getAllEvents}?category=$category';
+          '${ApiEndpoints.baseUrl}${ApiEndpoints.getAllEvents}?category=$category';
 
       final response = await networkService.dio
           .get(
@@ -243,8 +273,7 @@ class EventRemoteDataSourceImpl extends BaseApiClient
   @override
   Future<ApiResponse<List<GetAllEventModel>>> getTrendingEvents() async {
     try {
-      final endpoint =
-          '${ApiEndpoints.eventBaseUrl}${ApiEndpoints.getAllEvents}';
+      final endpoint = '${ApiEndpoints.baseUrl}${ApiEndpoints.getAllEvents}';
 
       final response = await networkService.dio
           .get(

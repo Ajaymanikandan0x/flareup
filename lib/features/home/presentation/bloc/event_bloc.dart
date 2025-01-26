@@ -2,6 +2,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/error/app_error.dart';
 import '../../../../core/utils/current_location.dart';
 import '../../../../core/utils/logger.dart';
+import '../../domain/entities/category_entity.dart';
+import '../../domain/entities/get_event_entite.dart';
 import '../../domain/usecases/GetNearbyEventsUseCase.dart';
 import '../../domain/usecases/GetTrendingEventsUseCase .dart';
 import '../../domain/usecases/get_event_usecase.dart';
@@ -23,6 +25,10 @@ class EventBloc extends Bloc<EventBlocEvent, EventBlocState> {
   final GetEventsByCategoryUseCase getEventsByCategoryUseCase;
   final CategoriesUseCase categoriesUseCase;
   final Debouncer _searchDebouncer = Debouncer();
+
+  // Add cache variables
+  List<GetAllEventEntities> _cachedEvents = [];
+  List<CategoryEntity> _cachedCategories = [];
 
   EventBloc({
     required this.getAllEventsUseCase,
@@ -51,6 +57,17 @@ class EventBloc extends Bloc<EventBlocEvent, EventBlocState> {
     FetchAllEventsEvent event,
     Emitter<EventBlocState> emit,
   ) async {
+    if (_cachedEvents.isNotEmpty) {
+      emit(EventsLoaded(
+        allEvents: _cachedEvents,
+        trendingEvents: await getTrendingEventsUseCase(),
+        nearbyEvents: const [],
+        categories: await categoriesUseCase(),
+        searchResults: const [],
+        searchQuery: '',
+      ));
+      return;
+    }
     try {
       emit(EventLoading());
       Logger.debug('Fetching all events...');
@@ -65,6 +82,8 @@ class EventBloc extends Bloc<EventBlocEvent, EventBlocState> {
         final categories = await categoriesUseCase();
         Logger.debug('Fetched ${categories.length} categories');
         
+        Logger.debug('Emitting EventsLoaded state with: ${events.length} events, ${trending.length} trending events');
+        _cachedEvents = events; // Cache after fetch
         emit(EventsLoaded(
           allEvents: events,
           trendingEvents: trending,
@@ -226,28 +245,23 @@ class EventBloc extends Bloc<EventBlocEvent, EventBlocState> {
     Emitter<EventBlocState> emit,
   ) async {
     try {
-      emit(EventLoading());
-      Logger.debug('Filtering events for category: ${event.category}');
-      
-      final filteredEvents = await getEventsByCategoryUseCase(event.category);
-      
       if (state is EventsLoaded) {
         final currentState = state as EventsLoaded;
+        
+        // If selecting the same category, clear the filter
+        if (currentState.selectedCategoryId == event.category) {
+          emit(currentState.copyWith(
+            selectedCategoryId: null,
+            allEvents: await getAllEventsUseCase(), // Reset to all events
+          ));
+          return;
+        }
+        
+        // Filter events by new category
+        final filteredEvents = await getEventsByCategoryUseCase(event.category);
         emit(currentState.copyWith(
           allEvents: filteredEvents,
           selectedCategoryId: event.category,
-          selectedSubCategoryId: event.category,
-        ));
-      } else {
-        emit(EventsLoaded(
-          allEvents: filteredEvents,
-          trendingEvents: const [],
-          nearbyEvents: const [],
-          categories: const [],
-          searchResults: const [],
-          searchQuery: '',
-          selectedCategoryId: event.category,
-          selectedSubCategoryId: event.category,
         ));
       }
     } catch (e) {

@@ -32,6 +32,10 @@ lib/core/storage/secure_storage.dart
 .pub/
 /build/
 .env
+.env.*
+android/local.properties
+android/key.properties
+android/app/debug.keystore
 # Symbolication related
 app.*.symbols
 

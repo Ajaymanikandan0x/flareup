@@ -7,6 +7,7 @@ class CategoryModel extends CategoryEntity {
     required super.description,
     required super.status,
     required super.updatedAt,
+    required super.image,
     required List<EventTypeModel> super.eventTypes,
     super.parentId,
   });
@@ -17,6 +18,7 @@ class CategoryModel extends CategoryEntity {
       name: json['name'],
       description: json['description'],
       status: json['status'],
+      image: json['category_image']?.toString() ?? '',
       updatedAt: DateTime.parse(json['updated_at']),
       eventTypes: (json['event_types'] as List)
           .map((item) => EventTypeModel.fromJson(item))
@@ -32,6 +34,7 @@ class CategoryModel extends CategoryEntity {
       description: description,
       status: status,
       updatedAt: updatedAt,
+      image: image,
       eventTypes: eventTypes,
       parentId: parentId,
     );
@@ -55,7 +58,7 @@ class EventTypeModel extends EventTypeEntity {
       description: json['description'],
       status: json['status'],
       updatedAt: DateTime.parse(json['updated_at']),
-      image: json['image']?.toString(),
+      image: json['type_image']?.toString() ?? '',
     );
   }
 }

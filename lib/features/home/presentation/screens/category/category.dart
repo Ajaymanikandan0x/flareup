@@ -2,6 +2,7 @@ import 'package:flareup/core/routes/routs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../core/constants/constants.dart';
 import '../../../../../core/theme/app_palette.dart';
 import '../../../../../core/utils/responsive_utils.dart';
 import '../../../../../core/widgets/shimmer_loading.dart';
@@ -9,8 +10,6 @@ import '../../bloc/event_bloc.dart';
 import '../../bloc/event_event.dart';
 import '../../bloc/event_state.dart';
 import '../../widgets/category_widget/category_card.dart';
-
-
 import '../../widgets/category_widget/empty_caregory.dart';
 
 class CategoryScreen extends StatefulWidget {
@@ -24,7 +23,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch categories when screen loads
     context.read<EventBloc>().add(const FetchCategoriesEvent());
   }
 
@@ -108,7 +106,11 @@ class _CategoryScreenState extends State<CategoryScreen> {
   }
 
   Widget _buildContent(EventsLoaded state) {
+    // Debug log for categories state
+    debugPrint('Categories count: ${state.categories.length}');
+
     if (state.categories.isEmpty) {
+      debugPrint('No categories available');
       return CategoryEmptyState(
         message: state.searchError ?? 'No categories available at the moment',
         onRetry: () {
@@ -116,6 +118,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
         },
       );
     }
+
     return GridView.builder(
       padding: EdgeInsets.all(Responsive.horizontalPadding),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -127,9 +130,15 @@ class _CategoryScreenState extends State<CategoryScreen> {
       itemCount: state.categories.length,
       itemBuilder: (context, index) {
         final category = state.categories[index];
-        final image = category.eventTypes.isNotEmpty
-            ? category.eventTypes.first.image ?? ""
+
+        final image = category.eventTypes.isNotEmpty &&
+                category.eventTypes.first.image != null
+            ? '$cloudinaryBaseUrl${category.eventTypes.first.image}'
             : "";
+
+        // Debug log for final image URL
+        debugPrint('Final Image URL: $image');
+        debugPrint('Cloudinary Base URL: $cloudinaryBaseUrl');
 
         return CategoryCard(
           title: category.name,
@@ -137,7 +146,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
           imagePath: image,
           categoryId: category.id.toString(),
           onTap: () {
-            // Navigate to subcategories screen
+            debugPrint('Category tapped: ${category.id}');
             Navigator.pushNamed(context, AppRouts.subCategories,
                 arguments: category.id.toString());
           },

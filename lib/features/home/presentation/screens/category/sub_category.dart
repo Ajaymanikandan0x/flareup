@@ -39,24 +39,26 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
       appBar: AppBar(
         title: const Text('Subcategories'),
       ),
-      body: RefreshIndicator(
-        onRefresh: () async => _loadSubCategories(),
-        child: BlocBuilder<EventBloc, EventBlocState>(
-          builder: (context, state) {
-            if (state is EventLoading) {
-              return _buildLoadingGrid();
-            }
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () async => _loadSubCategories(),
+          child: BlocBuilder<EventBloc, EventBlocState>(
+            builder: (context, state) {
+              if (state is EventLoading) {
+                return _buildLoadingGrid();
+              }
 
-            if (state is EventError) {
-              return _buildErrorState(state.message);
-            }
+              if (state is EventError) {
+                return _buildErrorState(state.message);
+              }
 
-            if (state is EventsLoaded) {
-              return _buildContent(state);
-            }
+              if (state is EventsLoaded) {
+                return _buildContent(state);
+              }
 
-            return const SizedBox.shrink();
-          },
+              return _buildEmptyState();
+            },
+          ),
         ),
       ),
     );
@@ -67,51 +69,77 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
       return _buildEmptyState();
     }
 
-    return MasonryGridView.builder(
-      padding: EdgeInsets.all(Responsive.horizontalPadding),
-      gridDelegate: const SliverSimpleGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-      ),
-      itemCount: state.categories.length,
-      itemBuilder: (context, index) {
-        final category = state.categories[index];
-        final image = category.eventTypes.isNotEmpty 
-            ? category.eventTypes.first.image 
-            : null;
+    return SingleChildScrollView(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: MediaQuery.of(context).size.height - 
+                    AppBar().preferredSize.height - 
+                    MediaQuery.of(context).padding.top,
+        ),
+        child: MasonryGridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.all(Responsive.horizontalPadding),
+          gridDelegate: const SliverSimpleGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+          ),
+          itemCount: state.categories.length,
+          itemBuilder: (context, index) {
+            final category = state.categories[index];
+            final image = category.eventTypes.isNotEmpty == true 
+                ? category.eventTypes.first.image 
+                : null;
 
-        return CategoryCard(
-          title: category.name,
-          description: category.description,
-          imagePath: image ?? '',
-          categoryId: category.id.toString(),
-          onTap: () => _onCategorySelected(category.id.toString()),
-        );
-      },
+            return SizedBox(
+              height: 200,  // Fixed height for each card
+              child: CategoryCard(
+                title: category.name,
+                description: category.description,
+                imagePath: image ?? '',
+                categoryId: category.id.toString(),
+                onTap: () => _onCategorySelected(category.id.toString()),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 
   Widget _buildLoadingGrid() {
-    return MasonryGridView.builder(
-      padding: EdgeInsets.all(Responsive.horizontalPadding),
-      gridDelegate: const SliverSimpleGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-      ),
-      itemCount: 6,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ShimmerLoading(
-            isLoading: true,
-            child: Container(
-              height: 200,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                color: Colors.white,
-              ),
-            ),
+    return SingleChildScrollView(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: MediaQuery.of(context).size.height - 
+                    AppBar().preferredSize.height - 
+                    MediaQuery.of(context).padding.top,
+        ),
+        child: MasonryGridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.all(Responsive.horizontalPadding),
+          gridDelegate: const SliverSimpleGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
           ),
-        );
-      },
+          itemCount: 6,
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ShimmerLoading(
+                isLoading: true,
+                child: Container(
+                  width: double.infinity,
+                  height: 200,  // Match the height of content cards
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 

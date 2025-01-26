@@ -1,5 +1,5 @@
 class ApiEndpoints {
-  static const baseUrl = 'http://10.0.2.2:8081/';
+  static const baseUrl = 'https://dhinu.site/api/';
   static const signUp =
       'register/'; //(post) username, fullname, email, phone_number, role, password
   static const otpVerification = 'otp_verification/'; //(post) email, enteredOtp
@@ -20,7 +20,6 @@ class ApiEndpoints {
   static const setNewPassword =
       'set-new-password/'; //(post) new_password, confirm_password, email
 // events
-  static const eventBaseUrl = 'http://10.0.2.2:8082/';
   static const getAllEvents = 'events/'; // (get) get all events
   static const eventCategory = 'events/event-types-and-categories/'; //(get) [
 //  'name', 'description', 'event_types=[‘name’,’description’,’image’,]’  , ’image’]

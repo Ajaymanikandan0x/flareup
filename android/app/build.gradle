@@ -5,6 +5,28 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.withReader('UTF-8') { reader ->
+        keystoreProperties.load(reader)
+    }
+}
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def secretsFile = rootProject.file("secrets.properties")
+def secretsProperties = new Properties()
+if (secretsFile.exists()) {
+    secretsProperties.load(new FileInputStream(secretsFile))
+}
+
 android {
     namespace = "com.example.flareup"
     compileSdk = flutter.compileSdkVersion
@@ -22,11 +44,19 @@ android {
     defaultConfig {
         applicationId = "com.example.flareup"
 
-        minSdk = flutter.minSdkVersion
+        minSdk = 21
 
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        manifestPlaceholders = [
+            MAPS_API_KEY: secretsProperties.getProperty('MAPS_API_KEY', ''),
+            applicationName: "androidx.multidex.MultiDexApplication",
+            OAUTH_CLIENT_ID: secretsProperties.getProperty('OAUTH_CLIENT_ID', '')
+        ]
+        
+        multiDexEnabled true
     }
 
     signingConfigs {
@@ -59,7 +89,7 @@ flutter {
 }
 
 dependencies {
-
-    implementation 'com.google.android.gms:play-services-auth:21.2.0'
-
+    implementation "androidx.multidex:multidex:2.0.1"
 }
+
+

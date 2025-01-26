@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../../core/theme/app_palette.dart';
 import '../../../../../core/theme/text_theme.dart';
@@ -37,13 +38,20 @@ class CategoryCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Category Image with Shimmer Loading
             if (imagePath.isNotEmpty)
               CachedNetworkImage(
                 imageUrl: imagePath,
                 fit: BoxFit.cover,
+                cacheKey: 'category_$categoryId',
+                maxHeightDiskCache: 1000,
+                maxWidthDiskCache: 1000,
+                memCacheHeight: 800,
+                memCacheWidth: 800,
                 placeholder: (context, url) => _buildShimmerLoading(),
-                errorWidget: (context, url, error) => _buildErrorWidget(),
+                errorWidget: (context, url, error) {
+                  debugPrint('Image loading error: $error for URL: $url');
+                  return _buildErrorWidget();
+                },
               )
             else
               _buildErrorWidget(),

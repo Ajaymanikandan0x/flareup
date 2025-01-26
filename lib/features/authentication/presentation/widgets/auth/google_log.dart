@@ -19,16 +19,12 @@ class GoogleSignInButton extends StatefulWidget {
 
 class _GoogleSignInButtonState extends State<GoogleSignInButton> {
   final GoogleSignIn _googleSignIn = GoogleSignIn(
-
     scopes: [
       'email',
       'profile',
       'openid',
     ],
     signInOption: SignInOption.standard,
-    serverClientId:
-        '837006381197-ntpeojnppdcu0g5j01enk4gm8spaimfm.apps.googleusercontent.com',
-
   );
 
   Future<void> _handleSignIn() async {

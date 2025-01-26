@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/constants.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/utils/responsive_utils.dart';
@@ -209,13 +210,13 @@ class EventCard extends StatelessWidget {
   }
 
   Widget _buildBannerImage() {
-    if (!_isValidImageUrl(event.bannerImage)) {
+    if (!_isValidImageUrl("$cloudinaryBaseUrl${event.bannerImage}.png")) {
       return _buildPlaceholderImage();
     }
     return AspectRatio(
       aspectRatio: 16 / 9,
       child: Image.network(
-        event.bannerImage,
+        "$cloudinaryBaseUrl${event.bannerImage}.png",
         fit: BoxFit.cover,
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
