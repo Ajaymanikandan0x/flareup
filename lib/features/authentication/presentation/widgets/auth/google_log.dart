@@ -25,6 +25,8 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
       'openid',
     ],
     signInOption: SignInOption.standard,
+    serverClientId:
+        '837006381197-ntpeojnppdcu0g5j01enk4gm8spaimfm.apps.googleusercontent.com',
   );
 
   Future<void> _handleSignIn() async {
@@ -40,7 +42,6 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
       if (account == null) {
         Logger.debug('Sign in cancelled by user');
         return;
-
       }
 
       Logger.debug('\n3. Account Details:');
@@ -56,13 +57,13 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
       Logger.debug('ID Token present: ${auth.idToken != null}');
 
       // Always use ID token for backend authentication
-      final String? token = auth.idToken;
+      final String? token = auth.accessToken;
       if (token == null) {
-        Logger.error('\nERROR: Failed to obtain ID token', 'Access Token: ${auth.accessToken}');
-        throw Exception('Failed to obtain ID token');
+        Logger.debug('\nERROR: Failed to obtain access token');
+        throw Exception('Failed to obtain access token');
       }
 
-      Logger.debug('\n6. ID Token obtained successfully');
+      Logger.debug('\n6. Access Token obtained successfully');
       Logger.debug('Token length: ${token.length}');
       Logger.debug('Token prefix: ${token.substring(0, 10)}...');
 
@@ -94,7 +95,6 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
-
           backgroundColor: Colors.red,
         ),
       );
@@ -105,18 +105,14 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-
         if (state is AuthSuccess) {
           Navigator.pushReplacementNamed(context, '/home');
-
         } else if (state is AuthFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.error),
               backgroundColor: Colors.red,
-
               duration: const Duration(seconds: 3),
-
             ),
           );
         }

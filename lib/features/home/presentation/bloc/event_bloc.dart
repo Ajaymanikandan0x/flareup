@@ -45,6 +45,14 @@ class EventBloc extends Bloc<EventBlocEvent, EventBlocState> {
     on<ShowAllEventsEvent>(_onShowAllEvents);
     on<FetchCategoriesEvent>(_onFetchCategories);
     on<FetchSubCategoriesEvent>(_onFetchSubCategories);
+    on<SelectEventEvent>((event, emit) {
+      if (state is EventsLoaded) {
+        final currentState = state as EventsLoaded;
+        emit(currentState.copyWith(
+          selectedEvent: event.event,
+        ));
+      }
+    });
   }
 
   @override
@@ -245,28 +253,55 @@ class EventBloc extends Bloc<EventBlocEvent, EventBlocState> {
     Emitter<EventBlocState> emit,
   ) async {
     try {
+      emit(EventLoading());
+      Logger.debug('Filtering events for category ID: ${event.categoryId}, subcategory ID: ${event.subcategoryId}');
+      
+      // Find the category name from cached categories
+      final category = _cachedCategories.firstWhere(
+        (cat) => cat.id.toString() == event.categoryId,
+        orElse: () => throw Exception('Category not found'),
+      );
+
+      // Find the subcategory/event type name if subcategoryId is provided
+      String? eventTypeName;
+      if (event.subcategoryId != null) {
+        final eventType = category.eventTypes.firstWhere(
+          (type) => type.id.toString() == event.subcategoryId,
+          orElse: () => throw Exception('Event type not found'),
+        );
+        eventTypeName = eventType.name;
+      }
+
+      Logger.debug('Filtering by category: ${category.name}, event type: $eventTypeName');
+      
+      final filteredEvents = await getEventsByCategoryUseCase(
+        category.name,
+        subcategoryId: eventTypeName,
+      );
+
+      Logger.debug('Found ${filteredEvents.length} events after filtering');
+
       if (state is EventsLoaded) {
         final currentState = state as EventsLoaded;
-        
-        // If selecting the same category, clear the filter
-        if (currentState.selectedCategoryId == event.category) {
-          emit(currentState.copyWith(
-            selectedCategoryId: null,
-            allEvents: await getAllEventsUseCase(), // Reset to all events
-          ));
-          return;
-        }
-        
-        // Filter events by new category
-        final filteredEvents = await getEventsByCategoryUseCase(event.category);
         emit(currentState.copyWith(
           allEvents: filteredEvents,
-          selectedCategoryId: event.category,
+          selectedCategoryId: event.categoryId,
+          selectedSubCategoryId: event.subcategoryId,
+        ));
+      } else {
+        emit(EventsLoaded(
+          categories: const [],
+          allEvents: filteredEvents,
+          trendingEvents: const [],
+          nearbyEvents: const [],
+          searchResults: const [],
+          selectedCategoryId: event.categoryId,
+          selectedSubCategoryId: event.subcategoryId,
         ));
       }
     } catch (e) {
       Logger.error('Error filtering events:', e);
-      emit(EventError('Failed to load events for this category'));
+      emit(const EventError('Failed to load events for this category'));
     }
   }
 
@@ -327,7 +362,36 @@ class EventBloc extends Bloc<EventBlocEvent, EventBlocState> {
       final mainCategories = categories.where((cat) => cat.parentId == null).toList();
       
       Logger.debug('Fetched ${mainCategories.length} main categories');
+      Logger.debug('=== Main Categories Details ===');
       
+      for (var category in mainCategories) {
+        Logger.debug('''
+Main Category: ${category.name}
+  ID: ${category.id}
+  Description: ${category.description}
+  Status: ${category.status}
+  Updated At: ${category.updatedAt}
+  Event Types Count: ${category.eventTypes.length}
+  ''');
+
+        // Log event types for this category
+        if (category.eventTypes.isNotEmpty) {
+          Logger.debug('  Event Types for ${category.name}:');
+          for (var eventType in category.eventTypes) {
+            Logger.debug('''
+    - Event Type: ${eventType.name}
+      ID: ${eventType.id}
+      Description: ${eventType.description ?? 'No description'}
+      Image: ${eventType.image ?? 'No image'}
+      Updated At: ${eventType.updatedAt ?? 'No update date'}
+  ''');
+          }
+        } else {
+          Logger.debug('  No event types found for this category');
+        }
+        Logger.debug('--------------------------------');
+      }
+
       if (mainCategories.isEmpty) {
         emit(EventsLoaded(
           categories: [],
@@ -369,27 +433,71 @@ class EventBloc extends Bloc<EventBlocEvent, EventBlocState> {
   ) async {
     try {
       emit(EventLoading());
-      Logger.debug('Fetching subcategories for ${event.parentCategoryId}...');
+      Logger.debug('Fetching subcategories (event types) for parentId: ${event.parentCategoryId}');
       
-      final categories = await categoriesUseCase();
-      // Filter subcategories for the selected parent
-      final subCategories = categories
-          .where((cat) => cat.parentId == event.parentCategoryId)
-          .toList();
+      // Fetch all categories if we don't have them cached
+      if (_cachedCategories.isEmpty) {
+        _cachedCategories = await categoriesUseCase();
+      }
       
-      Logger.debug('Fetched ${subCategories.length} subcategories');
+      // Find the main category
+      final mainCategory = _cachedCategories.firstWhere(
+        (cat) => cat.id.toString() == event.parentCategoryId,
+        orElse: () => throw Exception('Main category not found'),
+      );
       
-      emit(EventsLoaded(
-        categories: subCategories,
-        allEvents: const [],
-        trendingEvents: const [],
-        nearbyEvents: const [],
-        searchResults: const [],
-        searchQuery: '',
-      ));
-    } catch (e) {
-      Logger.error('Error fetching subcategories:', e);
-      emit(EventError('Unable to load subcategories'));
+      Logger.debug('Found main category: ${mainCategory.name} with ${mainCategory.eventTypes.length} event types');
+      
+      // Convert event types to categories for display
+      final subCategories = mainCategory.eventTypes.map((eventType) {
+        return CategoryEntity(
+          id: eventType.id,
+          name: eventType.name,
+          description: eventType.description ?? '',
+          parentId: event.parentCategoryId,
+          eventTypes: [],
+          image: eventType.image ?? '',
+          status: mainCategory.status,
+          updatedAt: eventType.updatedAt != null 
+            ? DateTime.tryParse(eventType.updatedAt.toString()) ?? DateTime.now()
+            : DateTime.now(),
+        );
+      }).toList();
+      
+      Logger.debug('Successfully converted ${subCategories.length} event types to subcategories');
+      for (var sub in subCategories) {
+        Logger.debug('Subcategory: ${sub.name} (ID: ${sub.id}, parentId: ${sub.parentId})');
+      }
+
+      if (subCategories.isEmpty) {
+        Logger.debug('No event types found for category: ${mainCategory.name}');
+        emit(EventsLoaded(
+          categories: [],
+          allEvents: const [],
+          trendingEvents: const [],
+          nearbyEvents: const [],
+          searchResults: const [],
+          searchQuery: '',
+          selectedSubCategoryId: event.parentCategoryId,
+          isSubcategoryView: true,
+        ));
+        
+        add(FilterEventsByCategoryEvent(event.parentCategoryId));
+      } else {
+        emit(EventsLoaded(
+          categories: subCategories,
+          allEvents: const [],
+          trendingEvents: const [],
+          nearbyEvents: const [],
+          searchResults: const [],
+          searchQuery: '',
+          selectedSubCategoryId: event.parentCategoryId,
+          isSubcategoryView: true,
+        ));
+      }
+    } catch (e, stackTrace) {
+      Logger.debug('Error fetching subcategories: $e\nStack trace: $stackTrace');
+      emit(EventError('Unable to load subcategories. Please try again.'));
     }
   }
 }

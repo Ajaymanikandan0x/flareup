@@ -7,7 +7,7 @@ abstract class EventRemoteDataSource {
   Future<ApiResponse<List<GetAllEventModel>>> getAllEvents();
   Future<ApiResponse<List<CategoryModel>>> getEventCategories();
   Future<ApiResponse<List<GetAllEventModel>>> getEventsByCategory(
-      String category);
+      String category, {String? subcategoryId});
   Future<ApiResponse<List<GetAllEventModel>>> getNearbyEvents({
     required double latitude,
     required double longitude,

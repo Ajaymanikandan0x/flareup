@@ -71,7 +71,13 @@ class _LocationContainerState extends State<LocationContainer> {
             child: Stack(
               children: [
                 GoogleMap(
-                  onMapCreated: _onMapCreated,
+                  onMapCreated: (GoogleMapController controller) {
+                    try {
+                      _onMapCreated(controller);
+                    } catch (e) {
+                      print('Google Maps initialization error: $e');
+                    }
+                  },
                   initialCameraPosition: CameraPosition(
                     target: latLng,
                     zoom: 15,
@@ -85,6 +91,7 @@ class _LocationContainerState extends State<LocationContainer> {
                   zoomGesturesEnabled: false,
                   myLocationButtonEnabled: false,
                   myLocationEnabled: false,
+                  mapType: MapType.normal,
                   onTap: (_) {}, // Prevent map interaction
                 ),
                 Container(

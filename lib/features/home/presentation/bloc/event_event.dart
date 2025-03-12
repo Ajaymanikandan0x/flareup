@@ -42,12 +42,13 @@ class SearchEventsEvent extends EventBlocEvent {
 }
 
 class FilterEventsByCategoryEvent extends EventBlocEvent {
-  final String category;
+  final String categoryId;
+  final String? subcategoryId;
 
-  const FilterEventsByCategoryEvent(this.category);
+  const FilterEventsByCategoryEvent(this.categoryId, {this.subcategoryId});
 
   @override
-  List<Object?> get props => [category];
+  List<Object?> get props => [categoryId, subcategoryId];
 }
 
 class FetchCategoriesEvent extends EventBlocEvent {

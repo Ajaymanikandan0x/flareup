@@ -10,6 +10,6 @@ abstract class EventRepositoryDomain {
     double radius,
   });
   Future<List<GetAllEventEntities>> searchEvents(String query);
-  Future<List<GetAllEventEntities>> getEventsByCategory(String category);
+  Future<List<GetAllEventEntities>> getEventsByCategory(String categoryId, {String? subcategoryId});
   Future<List<CategoryEntity>> getCategories();
 }

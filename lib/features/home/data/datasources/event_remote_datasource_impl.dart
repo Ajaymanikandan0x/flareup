@@ -162,10 +162,11 @@ class EventRemoteDataSourceImpl extends BaseApiClient
 
   @override
   Future<ApiResponse<List<GetAllEventModel>>> getEventsByCategory(
-      String category) async {
+      String category, {String? subcategoryId}) async {
     try {
-      final endpoint =
-          '${ApiEndpoints.baseUrl}${ApiEndpoints.getAllEvents}?category=$category';
+      final endpoint = subcategoryId != null
+          ? '${ApiEndpoints.baseUrl}${ApiEndpoints.getAllEvents}?category=$category&subcategory=$subcategoryId'
+          : '${ApiEndpoints.baseUrl}${ApiEndpoints.getAllEvents}?category=$category';
 
       final response = await networkService.dio
           .get(

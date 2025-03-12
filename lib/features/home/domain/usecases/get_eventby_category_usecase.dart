@@ -6,7 +6,7 @@ class GetEventsByCategoryUseCase {
 
   GetEventsByCategoryUseCase(this.repository);
 
-  Future<List<GetAllEventEntities>> call(String category) {
-    return repository.getEventsByCategory(category);
+  Future<List<GetAllEventEntities>> call(String categoryId, {String? subcategoryId}) {
+    return repository.getEventsByCategory(categoryId, subcategoryId: subcategoryId);
   }
 }

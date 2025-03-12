@@ -55,20 +55,33 @@ class EventRepositoryImpl implements EventRepositoryDomain {
   }
 
   @override
-  Future<List<GetAllEventEntities>> getEventsByCategory(String category) async {
+  Future<List<GetAllEventEntities>> getEventsByCategory(String categoryName, {String? subcategoryId}) async {
     try {
-      final response = await _remoteDataSource.getEventsByCategory(category);
-
+      final response = await _remoteDataSource.getAllEvents();
+      
       if (response.data == null) {
         return [];
       }
 
-      final events = response.data!
-          .where((model) => model.bannerImage.isNotEmpty)
-          .map((model) => model.toEntity())
-          .toList();
+      Logger.debug('Total events before filtering: ${response.data!.length}');
+      
+      final events = response.data!.where((model) {
+        // Debug log each event's category and type
+        Logger.debug('Event: ${model.title}');
+        Logger.debug('Category: ${model.category}, Type: ${model.type}');
+        
+        final categoryMatch = model.category.trim().toLowerCase() == categoryName.trim().toLowerCase();
+        
+        if (subcategoryId != null && model.type != null) {
+          final typeMatch = model.type!.trim().toLowerCase() == subcategoryId.trim().toLowerCase();
+          Logger.debug('Category match: $categoryMatch, Type match: $typeMatch');
+          return categoryMatch && typeMatch;
+        }
+        
+        return categoryMatch;
+      }).map((model) => model.toEntity()).toList();
 
-      Logger.debug('Returning ${events.length} events for category: $category');
+      Logger.debug('Filtered ${events.length} events for category: $categoryName, type: $subcategoryId');
       return events;
     } catch (e) {
       Logger.error('Get events by category error:', e);

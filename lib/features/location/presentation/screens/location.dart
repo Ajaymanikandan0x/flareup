@@ -3,7 +3,6 @@ import 'package:geolocator/geolocator.dart' as geo;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../../../core/theme/app_palette.dart';
-import '../../../../core/utils/current_location.dart';
 import '../../../../core/utils/responsive_utils.dart';
 
 class LocationScreen extends StatefulWidget {
@@ -28,51 +27,128 @@ class _LocationScreenState extends State<LocationScreen> {
 
   Future<void> _initializeMap() async {
     try {
-      final position = await getCurrentPosition();
-      setState(() {
-        currentPosition = position;
-        isLoading = false;
-      });
+      // Check location services
+      bool serviceEnabled = await geo.Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        setState(() {
+          errorMessage = 'Location services are disabled. Please enable them in device settings.';
+          isLoading = false;
+        });
+        return;
+      }
+
+      // Check and request location permissions
+      geo.LocationPermission permission = await geo.Geolocator.checkPermission();
       
-      // Add current location marker
-      _addMarker(
-        LatLng(position.latitude, position.longitude),
-        'current_location',
-        BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-        'Current Location'
-      );
-
-      // Check for event location arguments
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-        if (args != null) {
-          final latitude = args['latitude'] as double;
-          final longitude = args['longitude'] as double;
-          
-          // Add event location marker
-          _addMarker(
-            LatLng(latitude, longitude),
-            'event_location',
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-            'Event Location'
-          );
-
-          // Move camera to event location
-          mapController?.animateCamera(
-            CameraUpdate.newCameraPosition(
-              CameraPosition(
-                target: LatLng(latitude, longitude),
-                zoom: 15.0,
-              ),
-            ),
-          );
+      if (permission == geo.LocationPermission.denied) {
+        permission = await geo.Geolocator.requestPermission();
+        if (permission == geo.LocationPermission.denied) {
+          setState(() {
+            errorMessage = 'Location permissions are required to show the map';
+            isLoading = false;
+          });
+          return;
         }
-      });
+      }
+
+      if (permission == geo.LocationPermission.deniedForever) {
+        setState(() {
+          errorMessage = 'Location permissions are permanently denied. Please enable them in app settings.';
+          isLoading = false;
+        });
+        return;
+      }
+
+      try {
+        // Get current position
+        final position = await getCurrentPosition();
+        
+        setState(() {
+          currentPosition = position;
+          isLoading = false;
+        });
+        
+        // Add current location marker
+        _addMarker(
+          LatLng(position.latitude, position.longitude),
+          'current_location',
+          BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          'Current Location'
+        );
+
+        // Check for event location arguments
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+          if (args != null) {
+            final latitude = args['latitude'] as double;
+            final longitude = args['longitude'] as double;
+            
+            // Add event location marker
+            _addMarker(
+              LatLng(latitude, longitude),
+              'event_location',
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+              'Event Location'
+            );
+
+            // Move camera to event location
+            mapController?.animateCamera(
+              CameraUpdate.newCameraPosition(
+                CameraPosition(
+                  target: LatLng(latitude, longitude),
+                  zoom: 15.0,
+                ),
+              ),
+            );
+          }
+        });
+      } catch (locationError) {
+        setState(() {
+          errorMessage = 'Failed to get current location: ${locationError.toString()}';
+          isLoading = false;
+        });
+      }
     } catch (e) {
       setState(() {
-        errorMessage = e.toString();
+        errorMessage = 'An unexpected error occurred: ${e.toString()}';
         isLoading = false;
       });
+    }
+  }
+
+  Future<geo.Position> getCurrentPosition() async {
+    try {
+      print('Checking location services...');
+      bool serviceEnabled = await geo.Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        print('Location services are disabled');
+        throw Exception('Location services are disabled');
+      }
+
+      print('Checking location permissions...');
+      geo.LocationPermission permission = await geo.Geolocator.checkPermission();
+      
+      if (permission == geo.LocationPermission.denied) {
+        permission = await geo.Geolocator.requestPermission();
+        if (permission == geo.LocationPermission.denied) {
+          throw Exception('Location permissions are required to show the map');
+        }
+      }
+
+      if (permission == geo.LocationPermission.deniedForever) {
+        throw Exception('Location permissions are permanently denied. Please enable them in app settings.');
+      }
+
+      try {
+        final position = await geo.Geolocator.getCurrentPosition(
+          desiredAccuracy: geo.LocationAccuracy.high,
+        );
+        return position;
+      } catch (locationError) {
+        throw Exception('Failed to get current location: $locationError');
+      }
+    } catch (e) {
+      throw Exception('An unexpected error occurred: $e');
     }
   }
 
@@ -103,6 +179,40 @@ class _LocationScreenState extends State<LocationScreen> {
         body: Center(
           child: CircularProgressIndicator(
             color: AppPalette.gradient2,
+          ),
+        ),
+      );
+    }
+
+    if (errorMessage != null) {
+      return Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  color: Colors.red,
+                  size: 50,
+                ),
+                SizedBox(height: 16),
+                Text(
+                  errorMessage!,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 16,
+                  ),
+                ),
+                SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: _initializeMap,
+                  child: Text('Retry'),
+                ),
+              ],
+            ),
           ),
         ),
       );

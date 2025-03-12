@@ -1,4 +1,3 @@
-import 'package:flareup/core/routes/routs.dart';
 import 'package:flareup/features/events/presentation/screens/dummy_event_home.dart';
 import 'package:flareup/features/events/presentation/widgets/date_container.dart';
 import 'package:flareup/features/events/presentation/widgets/expandable_text.dart';

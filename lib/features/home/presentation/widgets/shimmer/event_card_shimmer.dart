@@ -24,15 +24,18 @@ class EventCardShimmer extends StatelessWidget {
           borderRadius: BorderRadius.circular(Responsive.borderRadius),
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Image placeholder
-            Container(
-              height: isHorizontal ? 200 : 150,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(Responsive.borderRadius),
+            Flexible(
+              child: Container(
+                height: isHorizontal ? 200 : 150,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(Responsive.borderRadius),
+                  ),
                 ),
               ),
             ),

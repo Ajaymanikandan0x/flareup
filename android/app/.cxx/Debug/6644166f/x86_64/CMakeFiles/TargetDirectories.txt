@@ -1,0 +1,2 @@
+/home/ajay_/program/Myflutter/Flutter/flareup/android/app/.cxx/Debug/6644166f/x86_64/CMakeFiles/edit_cache.dir
+/home/ajay_/program/Myflutter/Flutter/flareup/android/app/.cxx/Debug/6644166f/x86_64/CMakeFiles/rebuild_cache.dir

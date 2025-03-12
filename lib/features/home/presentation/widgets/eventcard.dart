@@ -210,13 +210,16 @@ class EventCard extends StatelessWidget {
   }
 
   Widget _buildBannerImage() {
-    if (!_isValidImageUrl("$cloudinaryBaseUrl${event.bannerImage}.png")) {
+    final imageUrl = "$cloudinaryBaseUrl${event.bannerImage}";
+    
+    if (!_isValidImageUrl(imageUrl)) {
       return _buildPlaceholderImage();
     }
+    
     return AspectRatio(
       aspectRatio: 16 / 9,
       child: Image.network(
-        "$cloudinaryBaseUrl${event.bannerImage}.png",
+        imageUrl,
         fit: BoxFit.cover,
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;

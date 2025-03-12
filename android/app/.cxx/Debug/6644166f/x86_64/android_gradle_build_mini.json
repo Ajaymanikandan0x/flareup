@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "/home/ajay_/development/flutter/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/home/ajay_/Android/Sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/home/ajay_/program/Myflutter/Flutter/flareup/android/app/.cxx/Debug/6644166f/x86_64",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/home/ajay_/Android/Sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/home/ajay_/program/Myflutter/Flutter/flareup/android/app/.cxx/Debug/6644166f/x86_64",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}
