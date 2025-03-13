@@ -8,7 +8,13 @@ import '../../features/authentication/presentation/screens/forgot_password.dart'
 import '../../features/authentication/presentation/screens/logo.dart';
 import '../../features/authentication/presentation/screens/onboard_screen.dart';
 import '../../features/authentication/presentation/screens/reset_password.dart';
+import '../../features/events/presentation/screens/event_home.dart';
+import '../../features/events/presentation/screens/event_logo.dart';
+import '../../features/home/presentation/screens/category/category.dart';
+import '../../features/home/presentation/screens/category/event_list.dart';
+import '../../features/home/presentation/screens/category/sub_category.dart';
 import '../../features/home/presentation/screens/home.dart';
+import '../../features/location/presentation/screens/location.dart';
 import '../../features/profile/presentation/screens/edit.dart';
 
 class AppRouts {
@@ -22,18 +28,30 @@ class AppRouts {
   static const editProf = '/editProfile';
   static const forgotPassword = '/forgotPassword';
   static const resetPassword = '/resetPassword';
+  static const eventLogo = '/eventLogo';
+  static const category = '/categoryScreen';
+  static const subCategories = '/subCategories';
+  static const eventList = '/eventList';
+  static const eventHome = '/eventHome';
+  static const location = '/locationScreen';
 
   static final Map<String, Widget Function(BuildContext)> routs = {
     logo: (_) => const Logo(),
     onBoard: (_) => const OnBoardingScreen(),
-    signIn: (_) => SignIn(),
+    signIn: (_) => const SignIn(),
     signUp: (_) => SignUp(),
-    home: (_) => const Home(),
+    home: (_) => const UserHome(),
     profile: (_) => const Profile(),
     otpScreen: (_) => const OtpScreen(),
     editProf: (_) => const EditProfile(),
     forgotPassword: (_) => const ForgotPasswordScreen(),
-    resetPassword: (_) => ResetPasswordScreen(),
+    resetPassword: (_) => const ResetPasswordScreen(),
+    eventLogo: (_) => const EventLogoScreen(),
+    category: (_) => const CategoryScreen(),
+    subCategories: (_) => const SubCategoryScreen(),
+    eventList: (_) => const EventListScreen(),
+    eventHome: (_) => const EventHome(),
+    location: (_) => LocationScreen(),
   };
 
   static Route<dynamic>? generateRoute(RouteSettings settings) {

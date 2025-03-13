@@ -7,7 +7,6 @@ import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/text_theme.dart';
 import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/utils/validation.dart';
-import '../../../../core/widgets/form_feild.dart';
 import '../../../../core/widgets/password_field.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../bloc/auth_bloc.dart';

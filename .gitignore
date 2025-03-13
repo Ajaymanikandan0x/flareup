@@ -32,6 +32,12 @@ lib/core/storage/secure_storage.dart
 .pub/
 /build/
 .env
+.env.*android/app/debug.keystore
+android/local.properties
+android/key.properties
+
+android/secrets.properties
+android/release_keystore.jks
 # Symbolication related
 app.*.symbols
 
@@ -42,4 +48,3 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-/android/app/debug.keystore
