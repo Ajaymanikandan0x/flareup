@@ -1,16 +1,76 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flareup/core/routes/routs.dart';
 import 'package:flareup/core/theme/text_theme.dart';
 import 'package:flareup/core/widgets/primary_button.dart';
 import 'package:flareup/features/events/presentation/widgets/loading/image_shimmer_loading.dart';
-import 'package:flutter/material.dart';
-
+import 'package:flareup/features/events/presentation/widgets/logo_error.dart';
+import '../../../../core/constants/constants.dart';
 import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/widgets/custom_image_wid.dart';
-import '../widgets/member_avatar_group.dart';
-import 'dummy_logo.dart';
+import '../../../home/domain/entities/get_event_entite.dart';
 
-class EventLogoScreen extends StatelessWidget {
+import '../widgets/member_avatar_group.dart';
+import '../bloc/single_event_bloc.dart';
+
+class EventLogoScreen extends StatefulWidget {
   const EventLogoScreen({super.key});
+
+  @override
+  State<EventLogoScreen> createState() => _EventLogoScreenState();
+}
+
+class _EventLogoScreenState extends State<EventLogoScreen> {
+  late GetAllEventEntities event;
+  bool _initialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      event = ModalRoute.of(context)!.settings.arguments as GetAllEventEntities;
+      context.read<SingleEventBloc>().add(SelectEvent(event));
+      _initialized = true;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<SingleEventBloc, SingleEventState>(
+      builder: (context, state) {
+        if (state is SingleEventLoading) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (state is SingleEventError) {
+          return Scaffold(
+            body: EventLogoErrorWidget(
+              message: state.message,
+              onRetry: () {
+                context.read<SingleEventBloc>().add(SelectEvent(event));
+              },
+            ),
+          );
+        }
+
+        if (state is SingleEventLoaded) {
+          return _EventContent(event: state.event);
+        }
+
+        return const Scaffold(
+          body: Center(child: Text('No event data available')),
+        );
+      },
+    );
+  }
+}
+
+class _EventContent extends StatelessWidget {
+  final GetAllEventEntities event;
+
+  const _EventContent({required this.event});
 
   @override
   Widget build(BuildContext context) {
@@ -31,26 +91,13 @@ class EventLogoScreen extends StatelessWidget {
     final memberTextSize =
         Responsive.bodyFontSize * (Responsive.isTablet ? 1.8 : 1.6);
 
-    // Using dummy data for now
-    final event = DummyEvent.sampleEvent;
-
-    /* Commented bloc implementation for future use
-    return BlocBuilder<SingleEventBloc, SingleEventState>(
-      builder: (context, state) {
-        if (state is SingleEventLoading) {
-          return const EventLogoShimmer();
-        }
-        // ... rest of the bloc implementation
-    });
-    */
-
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
         children: [
           // Background Image with Gradient Overlay
           CustomImageWidget(
-            imageUrl: event.bannerImage,
+            imageUrl: "$cloudinaryBaseUrl${event.bannerImage}",
             placeholder: ImageShimmerLoading(),
           ),
 
@@ -85,7 +132,6 @@ class EventLogoScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Spacer with responsive height
                             SizedBox(height: constraints.maxHeight * 0.3),
 
                             // Event Date
@@ -116,7 +162,7 @@ class EventLogoScreen extends StatelessWidget {
 
                             SizedBox(height: Responsive.spacingHeight),
 
-                            // Location with responsive layout
+                            // Location
                             Row(
                               children: [
                                 Icon(
@@ -133,6 +179,7 @@ class EventLogoScreen extends StatelessWidget {
                                       fontSize: locationSize,
                                       overflow: TextOverflow.ellipsis,
                                     ),
+                                    maxLines: 2,
                                   ),
                                 ),
                               ],
@@ -140,37 +187,71 @@ class EventLogoScreen extends StatelessWidget {
 
                             SizedBox(height: Responsive.spacingHeight * 1.5),
 
-                            // Members section with enhanced layout
+                            // Members section
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'Members',
-                                  style:
-                                      AppTextStyles.primaryTextTheme().copyWith(
-                                    color: Colors.white,
-                                    fontSize: memberTextSize,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        'Members',
+                                        style: AppTextStyles.primaryTextTheme()
+                                            .copyWith(
+                                          color: Colors.white,
+                                          fontSize: memberTextSize,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${event.keyParticipants.length}/${event.participantCapacity}',
+                                      style: AppTextStyles.primaryTextTheme()
+                                          .copyWith(
+                                        color: Colors.white70,
+                                        fontSize: memberTextSize,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 SizedBox(
                                     height: Responsive.spacingHeight * 0.5),
-                                MemberAvatarGroup(
-                                  memberCount: event.participantCount,
-                                  maxDisplayed: Responsive.isTablet ? 4 : 3,
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: MemberAvatarGroup(
+                                        memberCount:
+                                            event.keyParticipants.length,
+                                        maxDisplayed:
+                                            Responsive.isTablet ? 4 : 3,
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.arrow_forward_ios,
+                                      color: Colors.white54,
+                                      size: Responsive.isTablet ? 24 : 20,
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
 
                             const Spacer(),
 
-                            // Buy Ticket Button with responsive size
+                            // Buy Ticket Button
                             Align(
                               alignment: Alignment.bottomCenter,
                               child: PrimaryButton(
                                 onTap: () {
                                   Navigator.pushNamed(
-                                      context, AppRouts.eventHome);
+                                    context,
+                                    AppRouts.eventHome,
+                                    arguments: event,
+                                  );
                                 },
                                 text: 'BUY TICKET',
                                 width: Responsive.screenWidth * 0.85,

@@ -61,6 +61,7 @@ dependencies:
   flutter_compass: ^0.8.1
   carousel_slider: ^5.0.0
   circle_nav_bar: ^2.2.0
+  video_player: ^2.9.3
 
 
 

@@ -46,7 +46,7 @@ class _AppNavState extends State<AppNav> with SingleTickerProviderStateMixin {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Define a custom accent color for active states
-    final accentColor = isDark ? AppPalette.gradient2 : AppPalette.error;
+    final accentColor = isDark ? AppPalette.darkText : AppPalette.error;
 
     return Scaffold(
       body: PageView(
@@ -67,24 +67,30 @@ class _AppNavState extends State<AppNav> with SingleTickerProviderStateMixin {
         inactiveIcons: [
           Text("Home",
               style: TextStyle(
-                  color: isDark ? AppPalette.darkText.withOpacity(0.7) : AppPalette.lightText.withOpacity(0.7),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500)),
+                  color: isDark
+                      ? AppPalette.darkText.withValues(alpha: 0.7)
+                      : AppPalette.lightText.withValues(alpha: 0.7),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600)),
           Text("Chat",
               style: TextStyle(
-                  color: isDark ? AppPalette.darkText.withOpacity(0.7) : AppPalette.lightText.withOpacity(0.7),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500)),
+                  color: isDark
+                      ? AppPalette.darkText.withValues(alpha: 0.7)
+                      : AppPalette.lightText.withValues(alpha: 0.7),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600)),
           Text("Location",
               style: TextStyle(
-                  color: isDark ? AppPalette.darkText.withOpacity(0.7) : AppPalette.lightText.withOpacity(0.7),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500)),
+                  color: isDark
+                      ? AppPalette.darkText.withValues(alpha: 0.7)
+                      : AppPalette.lightText.withValues(alpha: 0.7),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600)),
         ],
         gradient: LinearGradient(
           colors: [
-            isDark ? AppPalette.darkGradientStart : AppPalette.lightGradientStart,
-            isDark ? AppPalette.lightGradientStart : AppPalette.lightGradientEnd,
+            isDark ? AppPalette.darkCard : AppPalette.darkHint,
+            isDark ? AppPalette.darkCard : AppPalette.darkHint,
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -103,9 +109,9 @@ class _AppNavState extends State<AppNav> with SingleTickerProviderStateMixin {
           bottomRight: Radius.circular(10),
           bottomLeft: Radius.circular(10),
         ),
-        shadowColor: AppPalette.gradient2.withOpacity(0.4), // Slightly darker shadow
-        elevation: 8,
-        color: isDark ? AppPalette.gradient2 : AppPalette.gradient1, // Dynamic base color
+        // shadowColor: AppPalette.gradient2.withOpacity(0.4), // Slightly darker shadow
+        // elevation: 8,
+        color: isDark ? AppPalette.darkCard : AppPalette.lightCard,
       ),
     );
   }

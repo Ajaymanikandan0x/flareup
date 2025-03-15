@@ -77,7 +77,7 @@ class GetAllEventModel extends GetAllEventEntities {
             int.parse(json['current_participants_count'].toString()),
       );
     } catch (e) {
-      print('Error parsing JSON: $e');
+    
       throw FormatException('Failed to parse event data: $e');
     }
   }

@@ -7,10 +7,10 @@ sealed class SingleEventEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class SelectEvent extends SingleEventEvent {
-  final GetEventEntities event;
+class SelectSingleEvent extends SingleEventEvent {
+  final GetAllEventEntities event;
 
-  const SelectEvent(this.event);
+  const SelectSingleEvent(this.event);
 
   @override
   List<Object?> get props => [event];

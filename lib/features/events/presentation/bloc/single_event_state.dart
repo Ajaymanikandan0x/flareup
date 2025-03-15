@@ -7,10 +7,10 @@ final class SingleEventInitial extends SingleEventState {}
 
 final class SingleEventLoading extends SingleEventState {}
 
-final class SingleEventLoaded extends SingleEventState {
-  final GetEventEntities event;
+final class SingleEventLoadedState extends SingleEventState {
+  final GetAllEventEntities event;
 
-  SingleEventLoaded(this.event);
+  SingleEventLoadedState(this.event);
 }
 
 final class SingleEventError extends SingleEventState {

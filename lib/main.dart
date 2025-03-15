@@ -24,6 +24,7 @@ void main() async {
       BlocProvider(create: (context) => DependencyInjector().eventBloc),
       BlocProvider(create: (context) => DependencyInjector().singleEventBloc),
       BlocProvider(create: (context) => ThemeCubit(pref)),
+      BlocProvider(create: (context) => DependencyInjector().videoPlayerCubit),
     ],
     child: const MyApp(),
   ));

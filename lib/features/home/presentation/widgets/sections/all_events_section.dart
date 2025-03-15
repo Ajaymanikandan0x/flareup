@@ -5,6 +5,7 @@ import '../../../../../core/routes/routs.dart';
 import '../../../../../core/theme/text_theme.dart';
 import '../../../../../core/utils/responsive_utils.dart';
 import '../../bloc/event_bloc.dart';
+import '../../bloc/event_event.dart';
 import '../../bloc/event_state.dart';
 import '../cards/all_event_card.dart';
 
@@ -68,11 +69,16 @@ class AllEventsSection extends StatelessWidget {
                     builder: (context, constraints) {
                       return AllEventCard(
                         event: event,
-                        onTap: () => Navigator.pushNamed(
-                          context,
-                          AppRouts.eventLogo,
-                          arguments: event,
-                        ),
+                        onTap: () {
+                          context
+                              .read<EventBloc>()
+                              .add(SelectEventEvent(event));
+                          Navigator.pushNamed(
+                            context,
+                            AppRouts.eventLogo,
+                            arguments: event,
+                          );
+                        },
                       );
                     },
                   );

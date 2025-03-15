@@ -114,7 +114,10 @@ class EventListScreen extends StatelessWidget {
 
   void _navigateToEventDetails(
       BuildContext context, GetAllEventEntities event) {
-    context.read<EventBloc>().add(SelectEventEvent(event));
-    Navigator.pushNamed(context, AppRouts.eventLogo);
+    Navigator.pushNamed(
+      context,
+      AppRouts.eventLogo,
+      arguments: event,
+    );
   }
 }

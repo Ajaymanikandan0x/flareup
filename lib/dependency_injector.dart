@@ -34,6 +34,7 @@ import 'features/profile/domain/usecases/get_user_profile_usecase.dart';
 import 'features/profile/domain/usecases/update_user_profile_usecase.dart';
 import 'features/profile/domain/usecases/upload_profile_image_usecase.dart';
 import 'features/profile/presentation/bloc/user_profile_bloc.dart';
+import 'features/events/presentation/cubit/video_player_cubit.dart';
 
 class DependencyInjector {
   static final DependencyInjector _instance = DependencyInjector._internal();
@@ -72,12 +73,15 @@ class DependencyInjector {
 
   late SingleEventBloc _singleEventBloc;
 
+  late VideoPlayerCubit _videoPlayerCubit;
+
   void setup() {
     _setupAuthenticationDependencies();
     _setupUserProfileDependencies();
     _setupEventDependencies();
 
     _setupSingleEventDependencies();
+    _videoPlayerCubit = VideoPlayerCubit();
   }
 
   void _setupSingleEventDependencies() {
@@ -171,4 +175,5 @@ class DependencyInjector {
   UserProfileBloc get userProfileBloc => _userProfileBloc;
   EventBloc get eventBloc => _eventBloc;
   SingleEventBloc get singleEventBloc => _singleEventBloc;
+  VideoPlayerCubit get videoPlayerCubit => VideoPlayerCubit();
 }

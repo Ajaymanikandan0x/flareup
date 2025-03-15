@@ -1,17 +1,24 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-
-import '../../../../core/utils/logger.dart';
+import '../../../home/domain/entities/get_event_entite.dart';
 import '../../domain/entities/get_event_entite.dart';
 
 part 'single_event_event.dart';
 part 'single_event_state.dart';
 
+class SingleEventLoaded extends SingleEventState {
+  final GetAllEventEntities event;
+
+  SingleEventLoaded(this.event);
+
+  @override
+  List<Object?> get props => [event];
+}
+
 class SingleEventBloc extends Bloc<SingleEventEvent, SingleEventState> {
   SingleEventBloc() : super(SingleEventInitial()) {
     on<SelectEvent>(_onSelectEvent);
-  
   }
 
   Future<void> _onSelectEvent(
@@ -19,22 +26,21 @@ class SingleEventBloc extends Bloc<SingleEventEvent, SingleEventState> {
     Emitter<SingleEventState> emit,
   ) async {
     try {
-      Logger.debug('Selecting event: ${event.event.title}');
-      
-      emit(SingleEventLoading());
-      
       if (event.event.id == 0) {
         throw Exception('Invalid event data: Missing event ID');
       }
-
       emit(SingleEventLoaded(event.event));
-      Logger.debug('Event selected successfully');
-      
-    } catch (e, stackTrace) {
-      Logger.error('Error selecting event:', e, stackTrace);
+    } catch (e) {
       emit(SingleEventError('Failed to load event: ${e.toString()}'));
     }
   }
+}
 
-  
+class SelectEvent extends SingleEventEvent {
+  final GetAllEventEntities event;
+
+  const SelectEvent(this.event);
+
+  @override
+  List<Object?> get props => [event];
 }
