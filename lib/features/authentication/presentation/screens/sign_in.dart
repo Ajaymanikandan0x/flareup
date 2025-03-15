@@ -59,7 +59,7 @@ class _SignInState extends State<SignIn> {
               context.read<UserProfileBloc>().add(LoadUserProfile(userId));
             }
             SnackbarHelper.showSuccess(context, state.message);
-            Navigator.pushReplacementNamed(context, AppRouts.home);
+            Navigator.pushReplacementNamed(context, AppRouts.navBar);
           }
         },
         child: SingleChildScrollView(

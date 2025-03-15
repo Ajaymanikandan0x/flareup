@@ -8,20 +8,22 @@ import '../../features/authentication/presentation/screens/forgot_password.dart'
 import '../../features/authentication/presentation/screens/logo.dart';
 import '../../features/authentication/presentation/screens/onboard_screen.dart';
 import '../../features/authentication/presentation/screens/reset_password.dart';
+import '../../features/chat/presentation/screens/chat.dart';
 import '../../features/events/presentation/screens/event_home.dart';
 import '../../features/events/presentation/screens/event_logo.dart';
 import '../../features/home/presentation/screens/category/category.dart';
 import '../../features/home/presentation/screens/category/event_list.dart';
 import '../../features/home/presentation/screens/category/sub_category.dart';
-import '../../features/home/presentation/screens/home.dart';
+
 import '../../features/home/presentation/screens/search_result.dart';
 import '../../features/location/presentation/screens/location.dart';
 import '../../features/profile/presentation/screens/edit.dart';
+import '../widgets/bottom_navbar.dart';
 
 class AppRouts {
   static const logo = '/';
   static const onBoard = '/onBoard';
-  static const home = '/home';
+
   static const signIn = '/signIn';
   static const signUp = '/signUp';
   static const profile = '/profile';
@@ -36,12 +38,14 @@ class AppRouts {
   static const eventHome = '/eventHome';
   static const location = '/locationScreen';
   static const searchResults = '/searchResults';
+  static const chat = '/chat';
+  static const navBar = '/navBar';
+
   static final Map<String, Widget Function(BuildContext)> routs = {
     logo: (_) => const Logo(),
     onBoard: (_) => const OnBoardingScreen(),
     signIn: (_) => const SignIn(),
     signUp: (_) => SignUp(),
-    home: (_) => const UserHome(),
     profile: (_) => const Profile(),
     otpScreen: (_) => const OtpScreen(),
     editProf: (_) => const EditProfile(),
@@ -54,6 +58,8 @@ class AppRouts {
     eventHome: (_) => const EventHome(),
     location: (_) => LocationScreen(),
     searchResults: (_) => const SearchResults(),
+    chat: (_) => const ChatScreen(),
+    navBar: (_) => const AppNav(),
   };
 
   static Route<dynamic>? generateRoute(RouteSettings settings) {

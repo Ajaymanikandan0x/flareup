@@ -60,6 +60,7 @@ dependencies:
   flutter_map_location_marker: ^9.1.1
   flutter_compass: ^0.8.1
   carousel_slider: ^5.0.0
+  circle_nav_bar: ^2.2.0
 
 
 
