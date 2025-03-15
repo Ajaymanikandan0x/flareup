@@ -40,13 +40,16 @@ class EventRepositoryImpl implements EventRepositoryDomain {
         return [];
       }
 
-      // Modified validation to accept any non-empty banner image
+      // Filter events that are approved and active
       final events = response.data!
-          .where((model) => model.bannerImage.isNotEmpty)
+          .where((model) =>
+              model.bannerImage.isNotEmpty &&
+              model.approvalStatus.toLowerCase() == 'approved' &&
+              model.status.toLowerCase() == 'active')
           .map((model) => model.toEntity())
           .toList();
 
-      Logger.debug('Returning ${events.length} valid events');
+      Logger.debug('Returning ${events.length} approved and active events');
       return events;
     } catch (e) {
       Logger.error('Get all events error:', e);
@@ -55,33 +58,39 @@ class EventRepositoryImpl implements EventRepositoryDomain {
   }
 
   @override
-  Future<List<GetAllEventEntities>> getEventsByCategory(String categoryName, {String? subcategoryId}) async {
+  Future<List<GetAllEventEntities>> getEventsByCategory(String categoryName,
+      {String? subcategoryId}) async {
     try {
       final response = await _remoteDataSource.getAllEvents();
-      
+
       if (response.data == null) {
         return [];
       }
 
-      Logger.debug('Total events before filtering: ${response.data!.length}');
-      
-      final events = response.data!.where((model) {
-        // Debug log each event's category and type
-        Logger.debug('Event: ${model.title}');
-        Logger.debug('Category: ${model.category}, Type: ${model.type}');
-        
-        final categoryMatch = model.category.trim().toLowerCase() == categoryName.trim().toLowerCase();
-        
-        if (subcategoryId != null && model.type != null) {
-          final typeMatch = model.type!.trim().toLowerCase() == subcategoryId.trim().toLowerCase();
-          Logger.debug('Category match: $categoryMatch, Type match: $typeMatch');
-          return categoryMatch && typeMatch;
-        }
-        
-        return categoryMatch;
-      }).map((model) => model.toEntity()).toList();
+      final events = response.data!
+          .where((model) {
+            // Check approval status first
+            if (model.approvalStatus.toLowerCase() != 'active' ||
+                model.bannerImage.isEmpty) {
+              return false;
+            }
 
-      Logger.debug('Filtered ${events.length} events for category: $categoryName, type: $subcategoryId');
+            final categoryMatch = model.category.trim().toLowerCase() ==
+                categoryName.trim().toLowerCase();
+
+            if (subcategoryId != null && model.type != null) {
+              final typeMatch = model.type.trim().toLowerCase() ==
+                  subcategoryId.trim().toLowerCase();
+              return categoryMatch && typeMatch;
+            }
+
+            return categoryMatch;
+          })
+          .map((model) => model.toEntity())
+          .toList();
+
+      Logger.debug(
+          'Filtered ${events.length} approved events for category: $categoryName');
       return events;
     } catch (e) {
       Logger.error('Get events by category error:', e);
@@ -104,12 +113,14 @@ class EventRepositoryImpl implements EventRepositoryDomain {
       }
 
       final events = response.data!
-          .where((model) => model.bannerImage.isNotEmpty)
+          .where((model) =>
+              model.bannerImage.isNotEmpty &&
+              model.approvalStatus.toLowerCase() == 'approved' &&
+              model.status.toLowerCase() == 'active')
           .map((model) => model.toEntity())
           .toList();
 
-      Logger.debug(
-          'Returning ${events.length} nearby events within ${radius}km');
+      Logger.debug('Returning ${events.length} approved nearby events');
       return events;
     } catch (e) {
       Logger.error('Get nearby events error:', e);
@@ -127,11 +138,14 @@ class EventRepositoryImpl implements EventRepositoryDomain {
       }
 
       final events = response.data!
-          .where((model) => model.bannerImage.isNotEmpty)
+          .where((model) =>
+              model.bannerImage.isNotEmpty &&
+              model.approvalStatus.toLowerCase() == 'approved' &&
+              model.status.toLowerCase() == 'active')
           .map((model) => model.toEntity())
           .toList();
 
-      Logger.debug('Returning ${events.length} trending events');
+      Logger.debug('Returning ${events.length} approved trending events');
       return events;
     } catch (e) {
       Logger.error('Get trending events error:', e);
@@ -149,11 +163,15 @@ class EventRepositoryImpl implements EventRepositoryDomain {
       }
 
       final events = response.data!
-          .where((model) => model.bannerImage.isNotEmpty)
+          .where((model) =>
+              model.bannerImage.isNotEmpty &&
+              model.approvalStatus.toLowerCase() == 'approved' &&
+              model.status.toLowerCase() == 'active')
           .map((model) => model.toEntity())
           .toList();
 
-      Logger.debug('Returning ${events.length} events matching query: $query');
+      Logger.debug(
+          'Returning ${events.length} approved events matching query: $query');
       return events;
     } catch (e) {
       Logger.error('Search events error:', e);

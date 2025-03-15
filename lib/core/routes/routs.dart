@@ -14,6 +14,7 @@ import '../../features/home/presentation/screens/category/category.dart';
 import '../../features/home/presentation/screens/category/event_list.dart';
 import '../../features/home/presentation/screens/category/sub_category.dart';
 import '../../features/home/presentation/screens/home.dart';
+import '../../features/home/presentation/screens/search_result.dart';
 import '../../features/location/presentation/screens/location.dart';
 import '../../features/profile/presentation/screens/edit.dart';
 
@@ -34,7 +35,7 @@ class AppRouts {
   static const eventList = '/eventList';
   static const eventHome = '/eventHome';
   static const location = '/locationScreen';
-
+  static const searchResults = '/searchResults';
   static final Map<String, Widget Function(BuildContext)> routs = {
     logo: (_) => const Logo(),
     onBoard: (_) => const OnBoardingScreen(),
@@ -52,6 +53,7 @@ class AppRouts {
     eventList: (_) => const EventListScreen(),
     eventHome: (_) => const EventHome(),
     location: (_) => LocationScreen(),
+    searchResults: (_) => const SearchResults(),
   };
 
   static Route<dynamic>? generateRoute(RouteSettings settings) {

@@ -15,7 +15,6 @@ class AppPalette {
   static const Color darkHint = Color(0xFF747688);
   static const Color darkDivider = Color(0xFF2C2C2C);
 
-
   static const Color lightBackground = Color(0xFFFFFFFF);
   static const Color lightCard = Color(0xFFF5F5F5);
   static const Color lightText = Color(0xFF1D2026);
@@ -41,5 +40,10 @@ class AppPalette {
   static const Color shimmerLightBase = Color(0xFFE0E0E0);
   static const Color shimmerLightHighlight = Color(0xFFF5F5F5);
 
-  static var white;
+  static const Color white = Color(0xFFFFFFFF);
+
+  static const Color active = Color(0xFF4CAF50); // Green
+  static const Color cancelled = Color(0xFFE53935); // Red
+  static const Color pending = Color(0xFFFFA726); // Orange
+  static const Color draft = Color(0xFF9E9E9E); // Grey
 }

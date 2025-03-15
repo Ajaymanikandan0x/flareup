@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flareup/features/home/presentation/bloc/event_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
@@ -5,179 +8,340 @@ import 'package:geolocator/geolocator.dart';
 import '../../../../../core/routes/routs.dart';
 import '../../../../../core/theme/text_theme.dart';
 import '../../../../../core/utils/responsive_utils.dart';
-import '../../../../../core/widgets/shimmer_loading.dart';
+
 import '../../bloc/event_bloc.dart';
 import '../../bloc/event_state.dart';
-import '../event_card_empty_state.dart';
-import '../eventcard.dart';
-import '../shimmer/event_card_shimmer.dart';
+import '../cards/locaton_event_card.dart';
 
-class NearbySection extends StatelessWidget {
+import '../empty_states/nearby_empty_state.dart';
+
+class NearbySection extends StatefulWidget {
   const NearbySection({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<EventBloc, EventBlocState>(
-      builder: (context, state) {
-        return _buildNearbySection(state);
-      },
-    );
+  State<NearbySection> createState() => _NearbySectionState();
+}
+
+class _NearbySectionState extends State<NearbySection> {
+  Position? _userPosition;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _getCurrentLocation();
+    });
   }
 
-  Widget _buildNearbySection(EventBlocState state) {
-    if (state is EventsLoaded) {
-      if (state.nearbyEvents.isEmpty) {
-        return Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: Responsive.horizontalPadding,
-            vertical: Responsive.verticalPadding * 0.5,
-          ),
-          child: const EventCardEmptyState(
-            message: 'No events found nearby',
-            icon: Icons.location_off,
+  Future<void> _getCurrentLocation() async {
+    try {
+      // Check location services
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                  'Location services are disabled. Please enable them in settings.'),
+            ),
+          );
+        }
+        return;
+      }
+
+      // Check permissions
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                    'Location permission denied. Distance calculation unavailable.'),
+              ),
+            );
+          }
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                  'Location permissions permanently denied. Please enable in app settings.'),
+            ),
+          );
+        }
+        return;
+      }
+
+      // Get position with timeout
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException('Location request timed out');
+        },
+      );
+
+      if (mounted) {
+        setState(() {
+          _userPosition = position;
+        });
+
+        // Fetch nearby events
+        context.read<EventBloc>().add(FetchNearbyEventsEvent(
+              latitude: position.latitude,
+              longitude: position.longitude,
+            ));
+      }
+    } catch (e) {
+      debugPrint('Error getting location: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error getting location: ${e.toString()}'),
           ),
         );
       }
+    }
+  }
 
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: Responsive.horizontalPadding,
-              vertical: Responsive.verticalPadding * 0.5,
-            ),
-            child: Row(
-              children: [
-                Text(
-                  'Nearby Events',
-                  style: AppTextStyles.primaryTextTheme().copyWith(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Icon(
-                  Icons.location_on,
-                  size: 24,
-                ),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: 320,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              itemCount: state.nearbyEvents.length,
-              itemBuilder: (context, index) {
-                final event = state.nearbyEvents[index];
-                return Stack(
-                  children: [
-                    EventCard(
-                      event: event,
-                      onTap: () => AppRouts.eventLogo,
-                      isHorizontal: true,
+  String _calculateDistance(double eventLat, double eventLng) {
+    if (_userPosition == null) {
+      debugPrint('Distance calculation failed: User position is null');
+      return '?';
+    }
+
+    if (eventLat == 0 && eventLng == 0) {
+      debugPrint(
+          'Distance calculation failed: Invalid event coordinates (0,0)');
+      return '?';
+    }
+
+    try {
+      debugPrint(
+          'Calculating distance from: (${_userPosition!.latitude}, ${_userPosition!.longitude}) to ($eventLat, $eventLng)');
+
+      final distance = Geolocator.distanceBetween(
+        _userPosition!.latitude,
+        _userPosition!.longitude,
+        eventLat,
+        eventLng,
+      );
+
+      debugPrint('Raw distance calculated: $distance meters');
+
+      if (distance < 1000) {
+        return '${distance.round()}m';
+      } else {
+        final km = distance / 1000;
+        if (km >= 100) {
+          return '${km.round()}km';
+        } else {
+          return '${km.toStringAsFixed(1)}km';
+        }
+      }
+    } catch (e) {
+      debugPrint('Error calculating distance: $e');
+      return '?';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Initialize responsive utilities
+    Responsive.init(context);
+
+    // Calculate responsive dimensions
+    final titleSize = Responsive.isTablet ? 28.0 : 24.0;
+    final iconSize = Responsive.isTablet ? 28.0 : 24.0;
+    final cardHeight = Responsive.screenHeight * 0.20;
+    final distanceChipPadding = EdgeInsets.symmetric(
+      horizontal: Responsive.horizontalPadding * 0.4,
+      vertical: Responsive.verticalPadding * 0.2,
+    );
+    final distanceFontSize = Responsive.isTablet ? 14.0 : 12.0;
+    final distanceIconSize = Responsive.isTablet ? 20.0 : 16.0;
+
+    return BlocBuilder<EventBloc, EventBlocState>(
+      builder: (context, state) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Title section always visible
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: Responsive.horizontalPadding,
+                vertical: Responsive.verticalPadding * 0.9,
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    'Nearby Events',
+                    style: AppTextStyles.primaryTextTheme().copyWith(
+                      fontSize: titleSize,
+                      fontWeight: FontWeight.bold,
                     ),
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
+                  ),
+                  SizedBox(width: Responsive.spacingWidth * 0.6),
+                  Icon(Icons.location_on, size: iconSize),
+                ],
+              ),
+            ),
+            // Content section
+            if (state is EventLoading)
+              Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: Responsive.isTablet ? 3.0 : 2.0,
+                ),
+              )
+            else if (state is EventsLoaded)
+              if (state.nearbyEvents.isEmpty)
+                NearbyEmptyState(onSearchDestinations: () async {
+                  try {
+                    // Check location permission
+                    final permission = await Geolocator.checkPermission();
+                    if (permission == LocationPermission.denied) {
+                      final requested = await Geolocator.requestPermission();
+                      if (requested == LocationPermission.denied) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                'Location permission is required to show nearby events'),
+                          ),
+                        );
+                        return;
+                      }
+                    }
+
+                    if (permission == LocationPermission.deniedForever) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                              'Please enable location permissions in app settings'),
                         ),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color.fromARGB(0, 0, 0, 2),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
+                      );
+                      return;
+                    }
+
+                    // Get current position and fetch nearby events
+                    final position = await Geolocator.getCurrentPosition(
+                      desiredAccuracy: LocationAccuracy.high,
+                    );
+                    if (context.mounted) {
+                      context.read<EventBloc>().add(
+                            FetchNearbyEventsEvent(
+                              latitude: position.latitude,
+                              longitude: position.longitude,
                             ),
-                          ],
+                          );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Error: ${e.toString()}'),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                      );
+                    }
+                  }
+                })
+              else
+                SizedBox(
+                  height: cardHeight,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: Responsive.horizontalPadding * 0.5,
+                    ),
+                    itemCount: state.nearbyEvents.length,
+                    controller: PageController(
+                      viewportFraction:
+                          0.85, // Shows part of next/previous items
+                    ),
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: Responsive.horizontalPadding * 0.3,
+                        ),
+                        child: Stack(
                           children: [
-                            const Icon(
-                              Icons.directions_walk,
-                              size: 16,
-                              color: Colors.white,
+                            LocationEventCard(
+                              event: state.nearbyEvents[index],
+                              onTap: () => Navigator.pushNamed(
+                                context,
+                                AppRouts.eventLogo,
+                                arguments: state.nearbyEvents[index],
+                              ),
+                              isHorizontal: true,
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${_calculateDistance(event.latitude, event.longitude, context)} km',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
+                            Positioned(
+                              top: Responsive.verticalPadding * 0.4,
+                              right: Responsive.horizontalPadding * 0.4,
+                              child: Container(
+                                padding: distanceChipPadding,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).primaryColor,
+                                  borderRadius: BorderRadius.circular(
+                                    Responsive.borderRadius * 0.6,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.directions_walk,
+                                      size: distanceIconSize,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(
+                                        width: Responsive.spacingWidth * 0.2),
+                                    GestureDetector(
+                                      onTap: _userPosition == null
+                                          ? _getCurrentLocation
+                                          : null,
+                                      child: Text(
+                                        _userPosition == null
+                                            ? 'Tap to retry'
+                                            : _calculateDistance(
+                                                state.nearbyEvents[index]
+                                                    .latitude,
+                                                state.nearbyEvents[index]
+                                                    .longitude,
+                                              ),
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: distanceFontSize,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-        ],
-      );
-    }
-
-    if (state is EventLoading) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: Responsive.horizontalPadding,
-              vertical: Responsive.verticalPadding * 0.5,
-            ),
-            child: const ShimmerLoading(
-              isLoading: true,
-              child: EventCardShimmer(isHorizontal: true),
-            ),
-          ),
-          SizedBox(
-            height: 320,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 3,
-              itemBuilder: (context, index) {
-                return const EventCardShimmer(isHorizontal: true);
-              },
-            ),
-          ),
-        ],
-      );
-    }
-
-    return const SizedBox.shrink();
-  }
-
-  String _calculateDistance(
-      double eventLat, double eventLng, BuildContext context) {
-    try {
-      final currentPosition = context.read<EventBloc>().state;
-      if (currentPosition is EventsLoaded &&
-          currentPosition.nearbyEvents.isNotEmpty) {
-        final distance = Geolocator.distanceBetween(
-          currentPosition.nearbyEvents.first.latitude,
-          currentPosition.nearbyEvents.first.longitude,
-          eventLat,
-          eventLng,
+                      );
+                    },
+                  ),
+                ),
+          ],
         );
-        return (distance / 1000)
-            .toStringAsFixed(1); // Convert to km and round to 1 decimal
-      }
-    } catch (e) {
-      debugPrint('Error calculating distance: $e');
-    }
-    return '?';
+      },
+    );
   }
 }

@@ -32,7 +32,6 @@ class GetAllEventModel extends GetAllEventEntities {
     required super.approvalUpdatedAt,
     required super.keyParticipants,
     required super.currentParticipants,
-
   });
 
   factory GetAllEventModel.fromJson(Map<String, dynamic> json) {
@@ -44,7 +43,8 @@ class GetAllEventModel extends GetAllEventEntities {
         category: json['category']?.toString() ?? '',
         type: json['type']?.toString() ?? '',
         hostId: int.tryParse(json['host_id']?.toString() ?? '') ?? 0,
-        organizationId: int.tryParse(json['organization_id']?.toString() ?? '') ?? 0,
+        organizationId:
+            int.tryParse(json['organization_id']?.toString() ?? '') ?? 0,
         latitude: double.tryParse(json['latitude']?.toString() ?? '') ?? 0.0,
         longitude: double.tryParse(json['longitude']?.toString() ?? '') ?? 0.0,
         addressLine1: json['address_line_1']?.toString() ?? '',
@@ -58,17 +58,23 @@ class GetAllEventModel extends GetAllEventEntities {
         promoVideo: json['promo_video']?.toString() ?? '',
         startDateTime: DateTime.parse(json['start_date_time'].toString()),
         endDateTime: DateTime.parse(json['end_date_time'].toString()),
-        registrationDeadline: DateTime.parse(json['registration_deadline'].toString()),
+        registrationDeadline:
+            DateTime.parse(json['registration_deadline'].toString()),
         createdAt: DateTime.parse(json['created_at'].toString()),
         updatedAt: DateTime.parse(json['updated_at'].toString()),
         status: json['status']?.toString() ?? '',
         statusRequest: (json['status_request'] ?? '').toString(),
         approvalStatus: json['approval_status']?.toString() ?? '',
         approvalComments: json['approval_comments']?.toString() ?? '',
-        approvalUpdatedAt: json['approval_updated_at'] != null ? 
-          DateTime.parse(json['approval_updated_at'].toString()) : DateTime.now(),
-        keyParticipants: (json['key_participants'] as List?)?.map((e) => e.toString()).toList() ?? [],
-        currentParticipants: int.parse(json['current_participants_count'].toString()),
+        approvalUpdatedAt: json['approval_updated_at'] != null
+            ? DateTime.parse(json['approval_updated_at'].toString())
+            : DateTime.now(),
+        keyParticipants: (json['key_participants'] as List?)
+                ?.map((e) => e.toString())
+                .toList() ??
+            [],
+        currentParticipants:
+            int.parse(json['current_participants_count'].toString()),
       );
     } catch (e) {
       print('Error parsing JSON: $e');
@@ -115,5 +121,3 @@ class GetAllEventModel extends GetAllEventEntities {
     return this;
   }
 }
-
-

@@ -1,8 +1,8 @@
 import 'package:flareup/core/routes/routs.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/utils/responsive_utils.dart';
-import '../../../../core/widgets/search_bar.dart';
+import '../../../../../core/utils/responsive_utils.dart';
+import '../../../../../core/widgets/search_bar.dart';
 
 class SearchEvents extends StatelessWidget {
   const SearchEvents({super.key});
@@ -14,7 +14,10 @@ class SearchEvents extends StatelessWidget {
 
   Widget _buildSearchSection(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(Responsive.horizontalPadding),
+      padding: EdgeInsets.symmetric(
+        horizontal: Responsive.horizontalPadding,
+        vertical: 0,
+      ),
       child: Row(
         children: [
           Expanded(

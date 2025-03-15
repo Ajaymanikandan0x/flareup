@@ -6,7 +6,7 @@ import '../../../domain/entities/get_event_entite.dart';
 import '../../bloc/event_bloc.dart';
 import '../../bloc/event_event.dart';
 import '../../bloc/event_state.dart';
-import '../../widgets/eventcard.dart';
+import '../../widgets/cards/eventcard.dart';
 import '../../widgets/shimmer/event_card_shimmer.dart';
 
 class EventListScreen extends StatelessWidget {

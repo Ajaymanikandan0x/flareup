@@ -5,6 +5,7 @@ import '../../features/home/presentation/bloc/event_bloc.dart';
 import '../../features/home/presentation/bloc/event_event.dart';
 import '../../features/home/presentation/screens/search_result.dart';
 import '../../features/home/presentation/widgets/ SearchOverlay .dart';
+import '../routes/routs.dart';
 
 class EventSearchBar extends StatefulWidget {
   const EventSearchBar({super.key});
@@ -74,9 +75,9 @@ class _EventSearchBarState extends State<EventSearchBar> {
         borderRadius: BorderRadius.circular(24),
         child: InkWell(
           onTap: () {
-            Navigator.push(
+            Navigator.pushNamed(
               context,
-              MaterialPageRoute(builder: (context) => const SearchResults()),
+              AppRouts.searchResults,
             );
           },
           borderRadius: BorderRadius.circular(24),

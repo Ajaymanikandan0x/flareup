@@ -1,4 +1,5 @@
-import 'package:flareup/features/home/presentation/widgets/trending_imagecard.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flareup/features/home/presentation/widgets/cards/trending_imagecard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -43,13 +44,12 @@ class TrendingSection extends StatelessWidget {
         horizontal: Responsive.horizontalPadding,
         vertical: Responsive.verticalPadding * 0.5,
       );
-      final titleFontSize = Responsive.isTablet ? 28.0 : 24.0;
-      final iconSize = Responsive.isTablet ? 28.0 : 24.0;
-      final cardHeight = Responsive.screenHeight * 0.4;
-      final participantsBadgePadding = EdgeInsets.symmetric(
-        horizontal: Responsive.horizontalPadding * 0.4,
-        vertical: Responsive.verticalPadding * 0.2,
-      );
+      final titleFontSize = Responsive.isTablet
+          ? Responsive.titleFontSize * 1.2
+          : Responsive.titleFontSize;
+      final iconSize = Responsive.iconSize;
+      final cardHeight =
+          Responsive.screenHeight * (Responsive.isTablet ? 0.45 : 0.28);
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -94,76 +94,79 @@ class TrendingSection extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(
-            height: cardHeight,
-            child: ListView.builder(
+          CarouselSlider.builder(
+            itemCount: trendingEvents.length,
+            options: CarouselOptions(
+              height: cardHeight,
+              aspectRatio: 16 / 9,
+              viewportFraction: Responsive.isTablet ? 0.8 : 0.85,
+              enlargeCenterPage: true,
+              autoPlay: true,
+              autoPlayInterval: const Duration(seconds: 3),
+              autoPlayAnimationDuration: const Duration(milliseconds: 800),
+              autoPlayCurve: Curves.fastOutSlowIn,
+              enableInfiniteScroll: true,
               scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.symmetric(
-                horizontal: Responsive.horizontalPadding * 0.5,
-              ),
-              itemCount: trendingEvents.length,
-              itemBuilder: (context, index) {
-                final event = trendingEvents[index];
-                return Stack(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: Responsive.horizontalPadding * 0.5,
-                        vertical: Responsive.verticalPadding * 0.5,
-                      ),
-                      child: TrendingImageCard(
-                        event: event,
-                        onTap: () => Navigator.pushNamed(
-                          context,
-                          AppRouts.eventLogo,
-                          arguments: event,
-                        ),
-                        isHorizontal: true,
-                      ),
-                    ),
-                    Positioned(
-                      top: Responsive.verticalPadding,
-                      right: Responsive.horizontalPadding,
-                      child: Container(
-                        padding: participantsBadgePadding,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          borderRadius: BorderRadius.circular(
-                              Responsive.borderRadius * 0.8),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color.fromRGBO(0, 0, 0, 0.2),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.people,
-                              size: Responsive.bodyFontSize,
-                              color: Colors.white,
-                            ),
-                            SizedBox(width: Responsive.spacingWidth * 0.2),
-                            Text(
-                              '${event.currentParticipants}',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: Responsive.bodyFontSize * 0.8,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              },
+              padEnds: true,
             ),
+            itemBuilder: (context, index, realIndex) {
+              final event = trendingEvents[index];
+              return Stack(
+                children: [
+                  TrendingImageCard(
+                    event: event,
+                    onTap: () => Navigator.pushNamed(
+                      context,
+                      AppRouts.eventLogo,
+                      arguments: event,
+                    ),
+                    isHorizontal: true,
+                  ),
+                  Positioned(
+                    top: Responsive.verticalPadding,
+                    right: Responsive.horizontalPadding,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: Responsive.horizontalPadding * 0.4,
+                        vertical: Responsive.verticalPadding * 0.2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor,
+                        borderRadius: BorderRadius.circular(
+                          Responsive.borderRadius * 0.8,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.people,
+                            size: Responsive.bodyFontSize,
+                            color: Colors.white,
+                          ),
+                          SizedBox(width: Responsive.spacingWidth * 0.2),
+                          Text(
+                            '${event.currentParticipants}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: Responsive.bodyFontSize * 0.8,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ],
       );
@@ -186,29 +189,17 @@ class TrendingSection extends StatelessWidget {
             horizontal: Responsive.horizontalPadding,
             vertical: Responsive.verticalPadding * 0.5,
           ),
-          child: const ShimmerLoading(
+          child: ShimmerLoading(
             isLoading: true,
-            child: EventCardShimmer(isHorizontal: true),
-          ),
-        ),
-        SizedBox(
-          height: Responsive.screenHeight * 0.4,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: EdgeInsets.symmetric(
-              horizontal: Responsive.horizontalPadding * 0.5,
+            child: Container(
+              height:
+                  Responsive.screenHeight * (Responsive.isTablet ? 0.45 : 0.4),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(Responsive.borderRadius),
+                color: Colors.grey.shade300,
+              ),
             ),
-            itemCount: 3,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: Responsive.horizontalPadding * 0.5,
-                  vertical: Responsive.verticalPadding * 0.5,
-                ),
-                child: const EventCardShimmer(isHorizontal: true),
-              );
-            },
           ),
         ),
       ],

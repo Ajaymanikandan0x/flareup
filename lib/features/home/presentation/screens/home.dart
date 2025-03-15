@@ -1,4 +1,5 @@
 import 'package:flareup/features/home/presentation/widgets/drawer.dart';
+import 'package:flareup/features/home/presentation/widgets/sections/all_events_section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,7 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/event_bloc.dart';
 import '../bloc/event_event.dart';
 import '../bloc/event_state.dart';
-import '../widgets/search_events.dart';
+import '../widgets/cards/search_events.dart';
 import '../widgets/sections/nearby_section.dart';
 import '../widgets/sections/trending_section.dart';
 
@@ -83,6 +84,7 @@ class _UserHomeState extends State<UserHome> {
                   SearchEvents(),
                   TrendingSection(),
                   NearbySection(),
+                  AllEventsSection(),
                 ],
               ),
             ),

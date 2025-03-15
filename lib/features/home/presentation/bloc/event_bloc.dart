@@ -16,9 +16,7 @@ import 'event_state.dart';
 import '../../../../core/utils/debouncer.dart';
 import 'package:geolocator/geolocator.dart';
 
-
 class EventBloc extends Bloc<EventBlocEvent, EventBlocState> {
-
   final GetAllEventsUseCase getAllEventsUseCase;
   final GetTrendingEventsUseCase getTrendingEventsUseCase;
   final GetNearbyEventsUseCase getNearbyEventsUseCase;
@@ -36,7 +34,7 @@ class EventBloc extends Bloc<EventBlocEvent, EventBlocState> {
     required this.getNearbyEventsUseCase,
     required this.getEventsByCategoryUseCase,
     required this.categoriesUseCase,
-  })  : super(EventInitial()) {
+  }) : super(EventInitial()) {
     on<FetchAllEventsEvent>(_onFetchAllEvents);
     on<FetchTrendingEventsEvent>(_onFetchTrendingEvents);
     on<FetchNearbyEventsEvent>(_onFetchNearbyEvents);
@@ -79,18 +77,19 @@ class EventBloc extends Bloc<EventBlocEvent, EventBlocState> {
     try {
       emit(EventLoading());
       Logger.debug('Fetching all events...');
-      
+
       final events = await getAllEventsUseCase();
       Logger.debug('Fetched ${events.length} events');
-      
+
       final trending = await getTrendingEventsUseCase();
       Logger.debug('Fetched ${trending.length} trending events');
-      
+
       try {
         final categories = await categoriesUseCase();
         Logger.debug('Fetched ${categories.length} categories');
-        
-        Logger.debug('Emitting EventsLoaded state with: ${events.length} events, ${trending.length} trending events');
+
+        Logger.debug(
+            'Emitting EventsLoaded state with: ${events.length} events, ${trending.length} trending events');
         _cachedEvents = events; // Cache after fetch
         emit(EventsLoaded(
           allEvents: events,
@@ -142,24 +141,9 @@ class EventBloc extends Bloc<EventBlocEvent, EventBlocState> {
         emit(EventLoading());
       }
 
-      // Check if location permission is granted
-      final permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        final requested = await Geolocator.requestPermission();
-        if (requested == LocationPermission.denied) {
-          emit(EventError('Location permission denied'));
-          return;
-        }
-      }
-
-      // Get current location
-      final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-
       final nearbyEvents = await getNearbyEventsUseCase(
-        latitude: position.latitude,
-        longitude: position.longitude,
+        latitude: event.latitude,
+        longitude: event.longitude,
         radius: event.radius,
       );
 
@@ -178,7 +162,7 @@ class EventBloc extends Bloc<EventBlocEvent, EventBlocState> {
       }
     } catch (e) {
       Logger.error('Fetch nearby events error:', e);
-      emit(EventError(e.toString()));
+      emit(EventError('Failed to fetch nearby events: ${e.toString()}'));
     }
   }
 
@@ -187,15 +171,15 @@ class EventBloc extends Bloc<EventBlocEvent, EventBlocState> {
     Emitter<EventBlocState> emit,
   ) async {
     Logger.debug('Search initiated with query: "${event.query}"');
-    
+
     if (state is! EventsLoaded) {
       Logger.debug('Search canceled - State is not EventsLoaded');
       return;
     }
-    
+
     final currentState = state as EventsLoaded;
     Logger.debug('Current all events count: ${currentState.allEvents.length}');
-    
+
     try {
       // If query is empty, clear search results
       if (event.query.isEmpty) {
@@ -217,14 +201,14 @@ class EventBloc extends Bloc<EventBlocEvent, EventBlocState> {
 
       final query = event.query.toLowerCase();
       Logger.debug('Filtering events with query: "$query"');
-      
+
       final filteredEvents = currentState.allEvents.where((event) {
         final matches = event.title.toLowerCase().contains(query) ||
-               event.description.toLowerCase().contains(query) ||
-               event.category.toLowerCase().contains(query) ||
-               event.type.toLowerCase().contains(query) ||
-               event.city.toLowerCase().contains(query);
-               
+            event.description.toLowerCase().contains(query) ||
+            event.category.toLowerCase().contains(query) ||
+            event.type.toLowerCase().contains(query) ||
+            event.city.toLowerCase().contains(query);
+
         if (matches) {
           Logger.debug('Match found: ${event.title}');
         }
@@ -254,8 +238,9 @@ class EventBloc extends Bloc<EventBlocEvent, EventBlocState> {
   ) async {
     try {
       emit(EventLoading());
-      Logger.debug('Filtering events for category ID: ${event.categoryId}, subcategory ID: ${event.subcategoryId}');
-      
+      Logger.debug(
+          'Filtering events for category ID: ${event.categoryId}, subcategory ID: ${event.subcategoryId}');
+
       // Find the category name from cached categories
       final category = _cachedCategories.firstWhere(
         (cat) => cat.id.toString() == event.categoryId,
@@ -272,8 +257,9 @@ class EventBloc extends Bloc<EventBlocEvent, EventBlocState> {
         eventTypeName = eventType.name;
       }
 
-      Logger.debug('Filtering by category: ${category.name}, event type: $eventTypeName');
-      
+      Logger.debug(
+          'Filtering by category: ${category.name}, event type: $eventTypeName');
+
       final filteredEvents = await getEventsByCategoryUseCase(
         category.name,
         subcategoryId: eventTypeName,
@@ -328,10 +314,11 @@ class EventBloc extends Bloc<EventBlocEvent, EventBlocState> {
         await _onFetchAllEvents(const FetchAllEventsEvent(), emit);
         return;
       }
-      
+
       final currentState = state as EventsLoaded;
-      Logger.debug('Showing all ${currentState.allEvents.length} events in search');
-      
+      Logger.debug(
+          'Showing all ${currentState.allEvents.length} events in search');
+
       // Keep the current state but update search results
       emit(currentState.copyWith(
         searchResults: currentState.allEvents,
@@ -357,13 +344,14 @@ class EventBloc extends Bloc<EventBlocEvent, EventBlocState> {
     try {
       emit(EventLoading());
       Logger.debug('Fetching main categories...');
-      
+
       final categories = await categoriesUseCase();
-      final mainCategories = categories.where((cat) => cat.parentId == null).toList();
-      
+      final mainCategories =
+          categories.where((cat) => cat.parentId == null).toList();
+
       Logger.debug('Fetched ${mainCategories.length} main categories');
       Logger.debug('=== Main Categories Details ===');
-      
+
       for (var category in mainCategories) {
         Logger.debug('''
 Main Category: ${category.name}
@@ -400,11 +388,12 @@ Main Category: ${category.name}
           nearbyEvents: const [],
           searchResults: const [],
           searchQuery: '',
-          searchError: 'No categories available at the moment. Please try again later.',
+          searchError:
+              'No categories available at the moment. Please try again later.',
         ));
         return;
       }
-      
+
       emit(EventsLoaded(
         categories: mainCategories,
         allEvents: const [],
@@ -420,7 +409,8 @@ Main Category: ${category.name}
         if (e.type == ErrorType.network) {
           message = 'Please check your internet connection';
         } else if (e.type == ErrorType.server) {
-          message = 'Categories are temporarily unavailable. Please try again later.';
+          message =
+              'Categories are temporarily unavailable. Please try again later.';
         }
       }
       emit(EventError(message));
@@ -433,21 +423,23 @@ Main Category: ${category.name}
   ) async {
     try {
       emit(EventLoading());
-      Logger.debug('Fetching subcategories (event types) for parentId: ${event.parentCategoryId}');
-      
+      Logger.debug(
+          'Fetching subcategories (event types) for parentId: ${event.parentCategoryId}');
+
       // Fetch all categories if we don't have them cached
       if (_cachedCategories.isEmpty) {
         _cachedCategories = await categoriesUseCase();
       }
-      
+
       // Find the main category
       final mainCategory = _cachedCategories.firstWhere(
         (cat) => cat.id.toString() == event.parentCategoryId,
         orElse: () => throw Exception('Main category not found'),
       );
-      
-      Logger.debug('Found main category: ${mainCategory.name} with ${mainCategory.eventTypes.length} event types');
-      
+
+      Logger.debug(
+          'Found main category: ${mainCategory.name} with ${mainCategory.eventTypes.length} event types');
+
       // Convert event types to categories for display
       final subCategories = mainCategory.eventTypes.map((eventType) {
         return CategoryEntity(
@@ -458,15 +450,18 @@ Main Category: ${category.name}
           eventTypes: [],
           image: eventType.image ?? '',
           status: mainCategory.status,
-          updatedAt: eventType.updatedAt != null 
-            ? DateTime.tryParse(eventType.updatedAt.toString()) ?? DateTime.now()
-            : DateTime.now(),
+          updatedAt: eventType.updatedAt != null
+              ? DateTime.tryParse(eventType.updatedAt.toString()) ??
+                  DateTime.now()
+              : DateTime.now(),
         );
       }).toList();
-      
-      Logger.debug('Successfully converted ${subCategories.length} event types to subcategories');
+
+      Logger.debug(
+          'Successfully converted ${subCategories.length} event types to subcategories');
       for (var sub in subCategories) {
-        Logger.debug('Subcategory: ${sub.name} (ID: ${sub.id}, parentId: ${sub.parentId})');
+        Logger.debug(
+            'Subcategory: ${sub.name} (ID: ${sub.id}, parentId: ${sub.parentId})');
       }
 
       if (subCategories.isEmpty) {
@@ -481,7 +476,7 @@ Main Category: ${category.name}
           selectedSubCategoryId: event.parentCategoryId,
           isSubcategoryView: true,
         ));
-        
+
         add(FilterEventsByCategoryEvent(event.parentCategoryId));
       } else {
         emit(EventsLoaded(
@@ -496,7 +491,8 @@ Main Category: ${category.name}
         ));
       }
     } catch (e, stackTrace) {
-      Logger.debug('Error fetching subcategories: $e\nStack trace: $stackTrace');
+      Logger.debug(
+          'Error fetching subcategories: $e\nStack trace: $stackTrace');
       emit(EventError('Unable to load subcategories. Please try again.'));
     }
   }

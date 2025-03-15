@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../empty_state.dart';
+import '../empty_states/empty_state.dart';
 
 
 

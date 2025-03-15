@@ -3,12 +3,14 @@ import 'package:flareup/core/theme/text_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/constants/constants.dart';
 import '../../../../core/theme/app_palette.dart';
+import '../../../../core/widgets/custom_image_wid.dart';
 import '../../domain/entities/get_event_entite.dart';
 import '../bloc/event_bloc.dart';
 import '../bloc/event_event.dart';
 import '../bloc/event_state.dart';
-import '../widgets/empty_state.dart';
+import '../widgets/empty_states/empty_state.dart';
 
 class SearchResults extends StatelessWidget {
   const SearchResults({super.key});
@@ -160,8 +162,8 @@ class SearchResults extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    event.bannerImage,
+                  child: CustomImageWidget(
+                    imageUrl: "$cloudinaryBaseUrl${event.bannerImage}.png",
                     width: 80,
                     height: 80,
                     fit: BoxFit.cover,

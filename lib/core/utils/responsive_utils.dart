@@ -8,6 +8,7 @@ class Responsive {
   static late double verticalPadding;
   static late bool isTablet;
   static late double spacingWidth;
+  static late double iconSize;
   
   static void init(BuildContext context) {
     _mediaQueryData = MediaQuery.of(context);
@@ -17,6 +18,7 @@ class Responsive {
     horizontalPadding = screenWidth * 0.05;
     verticalPadding = screenHeight * 0.02;
     spacingWidth = screenWidth * 0.02;
+    iconSize = screenWidth * 0.04;
   }
 
   // Font sizes

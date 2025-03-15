@@ -15,6 +15,7 @@ import 'features/authentication/domain/usecases/resend_otp_usecase.dart';
 import 'features/authentication/domain/usecases/signup_usecase.dart';
 import 'features/authentication/domain/usecases/verify_reset_password_otp_usecase.dart';
 import 'features/authentication/presentation/bloc/auth_bloc.dart';
+import 'features/events/presentation/bloc/single_event_bloc.dart';
 import 'features/home/data/datasources/event_remote_datasource.dart';
 import 'features/home/data/datasources/event_remote_datasource_impl.dart';
 import 'features/home/data/repositories/event_repository_impl.dart';
@@ -33,7 +34,6 @@ import 'features/profile/domain/usecases/get_user_profile_usecase.dart';
 import 'features/profile/domain/usecases/update_user_profile_usecase.dart';
 import 'features/profile/domain/usecases/upload_profile_image_usecase.dart';
 import 'features/profile/presentation/bloc/user_profile_bloc.dart';
-import 'features/events/presentation/bloc/single_event_bloc.dart';
 
 class DependencyInjector {
   static final DependencyInjector _instance = DependencyInjector._internal();
@@ -166,7 +166,7 @@ class DependencyInjector {
     );
   }
 
-  // Getters
+  // Getters6
   AuthBloc get authBloc => _authBloc;
   UserProfileBloc get userProfileBloc => _userProfileBloc;
   EventBloc get eventBloc => _eventBloc;

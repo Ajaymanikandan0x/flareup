@@ -4,11 +4,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_palette.dart';
 import '../utils/responsive_utils.dart';
 
-enum ImageSource {
-  network,
-  asset,
-  file
-}
+enum ImageSource { network, asset, file }
 
 class CustomImageWidget extends StatelessWidget {
   final String imageUrl;
@@ -46,13 +42,13 @@ class CustomImageWidget extends StatelessWidget {
     // Calculate responsive dimensions
     final screenWidth = Responsive.screenWidth;
     final screenHeight = Responsive.screenHeight;
-    
+
     final responsiveWidth = width ?? screenWidth * 0.8;
     final responsiveHeight = height ?? screenHeight * 0.3;
-    
+
     final iconSize = responsiveWidth * 0.25;
     final fontSize = Responsive.isTablet ? 14.0 : 12.0;
-    
+
     // Get theme brightness
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -82,7 +78,7 @@ class CustomImageWidget extends StatelessWidget {
         color: AppPalette.gradient2,
       ),
     );
-    
+
     final defaultErrorWidget = Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -91,16 +87,14 @@ class CustomImageWidget extends StatelessWidget {
           Icon(
             Icons.broken_image_outlined,
             size: iconSize,
-            color: isDark 
-                ? AppPalette.darkHint 
-                : AppPalette.lightHint,
+            color: isDark ? AppPalette.darkHint : AppPalette.lightHint,
           ),
           SizedBox(height: Responsive.spacingHeight * 0.5),
           Text(
             'Image not available',
             style: TextStyle(
-              color: isDark 
-                  ? AppPalette.darkTextSecondary 
+              color: isDark
+                  ? AppPalette.darkTextSecondary
                   : AppPalette.lightTextSecondary,
               fontSize: fontSize,
             ),
@@ -131,12 +125,12 @@ class CustomImageWidget extends StatelessWidget {
             return errorWidget ?? defaultErrorWidget;
           },
         );
-        
+
       case ImageSource.asset:
         return Image.asset(
           imageUrl,
           fit: fit ?? BoxFit.cover,
-          frameBuilder: enableFadeAnimation 
+          frameBuilder: enableFadeAnimation
               ? (context, child, frame, wasSynchronouslyLoaded) {
                   if (wasSynchronouslyLoaded) return child;
                   return AnimatedOpacity(
@@ -152,7 +146,7 @@ class CustomImageWidget extends StatelessWidget {
             return errorWidget ?? defaultErrorWidget;
           },
         );
-        
+
       case ImageSource.file:
         final file = File(imageUrl);
         if (!file.existsSync()) {
@@ -161,7 +155,7 @@ class CustomImageWidget extends StatelessWidget {
         return Image.file(
           file,
           fit: fit ?? BoxFit.cover,
-          frameBuilder: enableFadeAnimation 
+          frameBuilder: enableFadeAnimation
               ? (context, child, frame, wasSynchronouslyLoaded) {
                   if (wasSynchronouslyLoaded) return child;
                   return AnimatedOpacity(
@@ -179,14 +173,20 @@ class CustomImageWidget extends StatelessWidget {
         );
     }
   }
-  
+
   /// Checks if a URL is a valid image URL
   static bool isValidImageUrl(String url) {
     final validExtensions = [
-      '.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp'
+      '.jpg',
+      '.jpeg',
+      '.png',
+      '.gif',
+      '.webp',
+      '.svg',
+      '.bmp'
     ];
-    return url.isNotEmpty && 
-           (url.startsWith('http://') || url.startsWith('https://')) &&
-           validExtensions.any((ext) => url.toLowerCase().endsWith(ext));
+    return url.isNotEmpty &&
+        (url.startsWith('http://') || url.startsWith('https://')) &&
+        validExtensions.any((ext) => url.toLowerCase().endsWith(ext));
   }
 }
