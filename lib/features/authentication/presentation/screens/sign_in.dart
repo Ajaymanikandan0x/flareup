@@ -17,6 +17,7 @@ import '../widgets/auth/google_log.dart';
 import '../widgets/auth/sign_up_text.dart';
 import 'package:flareup/core/utils/responsive_utils.dart';
 import 'package:flareup/core/presentation/helpers/snackbar_helper.dart';
+import 'package:flareup/core/utils/logger.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({super.key});
@@ -40,7 +41,7 @@ class _SignInState extends State<SignIn> {
   @override
   Widget build(BuildContext context) {
     Responsive.init(context);
-    
+
     final authBloc = DependencyInjector().authBloc;
     return Scaffold(
         body: Padding(
@@ -51,15 +52,29 @@ class _SignInState extends State<SignIn> {
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthFailure) {
+            Logger.debug('Auth Failure: ${state.error}');
             SnackbarHelper.showError(context, state.error);
           } else if (state is AuthSuccess) {
+            Logger.debug('Auth Success - User ID: ${state.userEntity.id}');
+            Logger.debug('Auth Success - Role: ${state.userEntity.role}');
+
             final role = state.userEntity.role;
             if (role == 'user') {
               final userId = state.userEntity.id.toString();
+              Logger.debug('Triggering profile load for user ID: $userId');
+
+              // Remove the Future.delayed and handle navigation properly
               context.read<UserProfileBloc>().add(LoadUserProfile(userId));
+
+              // Use correct route name and add navigation delay
+              Future.delayed(const Duration(milliseconds: 100), () {
+                if (mounted) {
+                  Navigator.pushReplacementNamed(context, AppRouts.navBar);
+                }
+              });
             }
+
             SnackbarHelper.showSuccess(context, state.message);
-            Navigator.pushReplacementNamed(context, AppRouts.navBar);
           }
         },
         child: SingleChildScrollView(

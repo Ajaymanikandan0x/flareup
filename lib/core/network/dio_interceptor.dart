@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../constants/api_constants.dart';
 import '../storage/secure_storage_service.dart';
+import '../utils/logger.dart';
 
 class AuthInterceptor extends Interceptor {
   final SecureStorageService storageService;
@@ -14,10 +15,19 @@ class AuthInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
+    Logger.debug('DioInterceptor: Processing request to ${options.path}');
+
     final token = await storageService.getAccessToken();
+    Logger.debug('DioInterceptor: Token available: ${token != null}');
+
     if (token != null) {
       options.headers['Authorization'] = 'Bearer $token';
+      Logger.debug('DioInterceptor: Added authorization header');
+    } else {
+      Logger.debug('DioInterceptor: No token available');
     }
+
+    Logger.debug('DioInterceptor: Final request headers: ${options.headers}');
     return handler.next(options);
   }
 
@@ -81,7 +91,5 @@ class AuthInterceptor extends Interceptor {
   Future<void> _logout() async {
     await storageService.clearAll();
     // Redirect to login screen or emit a logout event
-
   }
 }
-

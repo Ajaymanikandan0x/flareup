@@ -68,6 +68,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         userId: userEntity.id.toString(),
       );
 
+      final savedToken = await storageService.getAccessToken();
+      final savedUserId = await storageService.getUserId();
+
+      if (savedToken == null || savedUserId == null) {
+        throw AppError(
+            userMessage: 'Failed to save authentication data',
+            type: ErrorType.server);
+      }
+
       emit(AuthSuccess(userEntity: userEntity, message: 'Login successful!'));
     } catch (e) {
       errorHandler.logError(e as Exception, StackTrace.current);

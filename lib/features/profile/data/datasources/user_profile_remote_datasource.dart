@@ -24,59 +24,72 @@ class UserProfileRemoteDataSourceImpl implements UserProfileRemoteDataSource {
   @override
   Future<UserProfileModel> fetchUserProfile(String userId) async {
     try {
-      final int numericId = int.parse(userId);
-      Logger.debug('Converting user ID to numeric: $numericId');
+      Logger.debug('Fetching profile for user ID: $userId');
+      int retryCount = 0;
+      const maxRetries = 3;
 
-      final endpoint = ApiEndpoints.baseUrl +
-          ApiEndpoints.user.replaceAll('user_id', numericId.toString());
+      while (retryCount < maxRetries) {
+        try {
+          final token = await storageService.getAccessToken();
 
-      Logger.debug('Fetching user profile from: $endpoint');
+          if (token == null) {
+            await Future.delayed(
+                Duration(milliseconds: 500 * (retryCount + 1)));
+            retryCount++;
+            continue;
+          }
 
-      // Get the access token
-      final token = await storageService.getAccessToken();
-      Logger.debug('Access token available: ${token != null}');
+          final int numericId = int.parse(userId);
+          final endpoint = ApiEndpoints.baseUrl +
+              ApiEndpoints.user.replaceAll('user_id', numericId.toString());
 
-      final response = await dio.get(
-        endpoint,
-        options: Options(
-          validateStatus: (status) => status! < 500,
-          headers: {
-            'Content-Type': 'application/json',
-            if (token != null) 'Authorization': 'Bearer $token',
-          },
-        ),
-      );
+          final response = await dio.get(
+            endpoint,
+            options: Options(
+              validateStatus: (status) => status! < 500,
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer $token',
+              },
+            ),
+          );
 
-      if (response.statusCode == 404) {
-        throw AppError(
-            userMessage: 'User profile not found',
-            technicalMessage: 'User ID $numericId not found in the system',
-            type: ErrorType.businessLogic);
+          if (response.statusCode == 401) {
+            await Future.delayed(
+                Duration(milliseconds: 500 * (retryCount + 1)));
+            retryCount++;
+            continue;
+          }
+
+          if (response.statusCode == 404) {
+            throw AppError(
+                userMessage: 'User profile not found',
+                technicalMessage: 'User ID $numericId not found in the system',
+                type: ErrorType.businessLogic);
+          }
+
+          if (response.statusCode != 200) {
+            throw AppError(
+                userMessage: 'Failed to load profile',
+                technicalMessage:
+                    'Status ${response.statusCode}: ${response.data}',
+                type: ErrorType.server);
+          }
+
+          return UserProfileModel.fromJson(response.data);
+        } catch (e) {
+          if (retryCount == maxRetries - 1) rethrow;
+          retryCount++;
+          await Future.delayed(Duration(milliseconds: 500 * retryCount));
+        }
       }
 
-      if (response.statusCode != 200) {
-        throw AppError(
-            userMessage: 'Failed to load profile',
-            technicalMessage: 'Status ${response.statusCode}: ${response.data}',
-            type: ErrorType.server);
-      }
-
-      final data = response.data;
-      Logger.debug('Received user data: $data');
-
-      return UserProfileModel.fromJson(data);
-    } on FormatException {
       throw AppError(
-          userMessage: 'Invalid user ID format',
-          technicalMessage: 'Failed to parse user ID: $userId',
-          type: ErrorType.validation);
+          userMessage: 'Failed to load profile after multiple attempts',
+          type: ErrorType.server);
     } catch (e) {
-      Logger.error('Error fetching user profile:', e);
-      if (e is AppError) rethrow;
-      throw AppError(
-          userMessage: 'Failed to load profile',
-          technicalMessage: e.toString(),
-          type: ErrorType.unknown);
+      Logger.error('Profile fetch error:', e);
+      rethrow;
     }
   }
 
