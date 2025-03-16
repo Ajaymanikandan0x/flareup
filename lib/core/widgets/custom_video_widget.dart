@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../features/events/presentation/cubit/video_player_cubit.dart';
@@ -29,11 +30,12 @@ class CustomVideoWidget extends StatefulWidget {
 
 class _CustomVideoWidgetState extends State<CustomVideoWidget> {
   late VideoPlayerController _controller;
-  bool _isInitialized = false;
+  late VideoPlayerCubit _videoPlayerCubit;
 
   @override
   void initState() {
     super.initState();
+    _videoPlayerCubit = widget.videoPlayerCubit ?? VideoPlayerCubit();
     _initializeVideo();
   }
 
@@ -69,11 +71,8 @@ class _CustomVideoWidgetState extends State<CustomVideoWidget> {
       await _controller.initialize();
 
       if (mounted) {
-        setState(() {
-          _isInitialized = true;
-        });
-
-        widget.videoPlayerCubit?.setController(_controller);
+        _videoPlayerCubit.setController(_controller);
+        _videoPlayerCubit.setInitialized(true);
 
         if (widget.autoPlay) {
           await _controller.play();
@@ -84,29 +83,35 @@ class _CustomVideoWidgetState extends State<CustomVideoWidget> {
       }
     } catch (e) {
       debugPrint('Error initializing video: $e');
-      setState(() {
-        _isInitialized = false;
-      });
+      _videoPlayerCubit.setInitialized(false);
     }
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    if (widget.videoPlayerCubit == null) {
+      _videoPlayerCubit.close();
+    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: widget.width,
-      height: widget.height,
-      child: _isInitialized
-          ? AspectRatio(
-              aspectRatio: _controller.value.aspectRatio,
-              child: VideoPlayer(_controller),
-            )
-          : widget.placeholder,
+    return BlocBuilder<VideoPlayerCubit, VideoPlayerState>(
+      bloc: _videoPlayerCubit,
+      builder: (context, state) {
+        return SizedBox(
+          width: widget.width,
+          height: widget.height,
+          child: state.isInitialized
+              ? AspectRatio(
+                  aspectRatio: _controller.value.aspectRatio,
+                  child: VideoPlayer(_controller),
+                )
+              : widget.placeholder,
+        );
+      },
     );
   }
 }

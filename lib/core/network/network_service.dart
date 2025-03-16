@@ -1,12 +1,28 @@
 import 'package:dio/dio.dart';
 
 import '../error/app_error.dart';
+import '../storage/secure_storage_service.dart';
 import 'api_response.dart';
+
 
 class NetworkService {
   final Dio dio;
+  final SecureStorageService storageService;
 
-  NetworkService(this.dio);
+  NetworkService(this.dio, this.storageService);
+
+  Future<Options> getRequestOptions() async {
+    final token = await storageService.getAccessToken();
+    return Options(
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      validateStatus: (status) => status! < 500,
+      responseType: ResponseType.json,
+    );
+  }
 
   Future<ApiResponse<T>> safeApiCall<T>({
     required Future<Response> Function() apiCall,
@@ -14,7 +30,7 @@ class NetworkService {
   }) async {
     try {
       final response = await apiCall();
-      
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         return ApiResponse.success(
           data: transform(response.data),
@@ -51,7 +67,7 @@ class NetworkService {
           type: ErrorType.network,
         );
       }
-      
+
       // Handle response errors
       if (e.response?.data != null) {
         final message = e.response?.data['message'] ?? 'Authentication failed';
@@ -60,7 +76,7 @@ class NetworkService {
           type: ErrorType.authentication,
         );
       }
-      
+
       throw AppError(
         userMessage: 'Unable to connect to server',
         type: ErrorType.network,

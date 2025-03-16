@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/constants/constants.dart';
+import '../../../../core/routes/routs.dart';
 import '../../../../core/widgets/custom_video_widget.dart';
 import '../../../../dependency_injector.dart';
 import '../../../home/domain/entities/get_event_entite.dart';
@@ -183,9 +184,11 @@ class _EventHomeState extends State<EventHome> {
                         ),
                       ),
 
-                      // Add BookingPlace here, outside the ScrollView
+                      
                       BookingPlace(
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.pushNamed(context, AppRouts.ticketCount, arguments: event);
+                        },
                         price: event.ticketPrice.toString(),
                       ),
                     ],

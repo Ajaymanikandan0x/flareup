@@ -10,6 +10,7 @@ import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/widgets/custom_image_wid.dart';
 import '../../../home/domain/entities/get_event_entite.dart';
 
+import '../bloc/single_event_state.dart';
 import '../widgets/member_avatar_group.dart';
 import '../bloc/single_event_bloc.dart';
 
@@ -56,7 +57,7 @@ class _EventLogoScreenState extends State<EventLogoScreen> {
         }
 
         if (state is SingleEventLoaded) {
-          return _EventContent(event: state.event);
+          return _EventContent(event: state.event!);
         }
 
         return const Scaffold(

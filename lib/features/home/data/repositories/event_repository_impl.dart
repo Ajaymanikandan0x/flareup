@@ -69,8 +69,9 @@ class EventRepositoryImpl implements EventRepositoryDomain {
 
       final events = response.data!
           .where((model) {
-            // Check approval status first
-            if (model.approvalStatus.toLowerCase() != 'active' ||
+            // Check both approval status and active status
+            if (model.approvalStatus.toLowerCase() != 'approved' ||
+                model.status.toLowerCase() != 'active' ||
                 model.bannerImage.isEmpty) {
               return false;
             }

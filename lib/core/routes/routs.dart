@@ -11,6 +11,7 @@ import '../../features/authentication/presentation/screens/reset_password.dart';
 import '../../features/chat/presentation/screens/chat.dart';
 import '../../features/events/presentation/screens/event_home.dart';
 import '../../features/events/presentation/screens/event_logo.dart';
+import '../../features/events/presentation/screens/ticket_count_screen.dart';
 import '../../features/home/presentation/screens/category/category.dart';
 import '../../features/home/presentation/screens/category/event_list.dart';
 import '../../features/home/presentation/screens/category/sub_category.dart';
@@ -40,7 +41,7 @@ class AppRouts {
   static const searchResults = '/searchResults';
   static const chat = '/chat';
   static const navBar = '/navBar';
-
+  static const ticketCount = '/ticketCount';
   static final Map<String, Widget Function(BuildContext)> routs = {
     logo: (_) => const Logo(),
     onBoard: (_) => const OnBoardingScreen(),
@@ -60,6 +61,7 @@ class AppRouts {
     searchResults: (_) => const SearchResults(),
     chat: (_) => const ChatScreen(),
     navBar: (_) => const AppNav(),
+    ticketCount: (_) => const TicketCountScreen(),
   };
 
   static Route<dynamic>? generateRoute(RouteSettings settings) {
