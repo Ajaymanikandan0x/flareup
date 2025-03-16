@@ -11,6 +11,10 @@ class SecureStorageService {
   static const String _userIdKey = 'user_id';
   static const String _cloudinaryApiKey = '366556954235497';
   static const String _cloudinaryApiSecret = 'rXaQX1rtw1HLav_tisG2e1eRw8Y';
+  static const String _stripePublishableKey =
+      'pk_test_51QOwBVEoHTcQ6zGjLjuWXuhGMGa4bKAFjM3iwkcRMaEMzq1GSBFuSx1o1Llv0sZbFFMczTlY2j5p6mLwtOqxD5aH0056InV0d3';
+  static const String _stripeSecretKey =
+      'sk_test_51QOwBVEoHTcQ6zGjYZRfLB0YO1wkbcJlx68RHvUe5dW1kytGPlEemeb00nFH3kO50MEsyAxGN0e69Hj3AEjKe59P00qhpAac1z';
 
   Future<void> saveTokens({
     required String accessToken,
@@ -36,6 +40,14 @@ class SecureStorageService {
 
   Future<String?> getCloudinaryApiSecret() async {
     return await _storage.read(key: _cloudinaryApiSecret);
+  }
+
+  Future<String?> getStripePublishableKey() async {
+    return await _storage.read(key: _stripePublishableKey);
+  }
+
+  Future<String?> getStripeSecretKey() async {
+    return await _storage.read(key: _stripeSecretKey);
   }
 
   Future<bool> hasCloudinaryCredentials() async {

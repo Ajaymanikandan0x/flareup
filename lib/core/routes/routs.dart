@@ -18,6 +18,7 @@ import '../../features/home/presentation/screens/category/sub_category.dart';
 
 import '../../features/home/presentation/screens/search_result.dart';
 import '../../features/location/presentation/screens/location.dart';
+import '../../features/payment/presentation/screens/payment_screen.dart';
 import '../../features/profile/presentation/screens/edit.dart';
 import '../widgets/bottom_navbar.dart';
 
@@ -42,6 +43,7 @@ class AppRouts {
   static const chat = '/chat';
   static const navBar = '/navBar';
   static const ticketCount = '/ticketCount';
+  static const paymentScreen = '/paymentScreen';
   static final Map<String, Widget Function(BuildContext)> routs = {
     logo: (_) => const Logo(),
     onBoard: (_) => const OnBoardingScreen(),
@@ -62,6 +64,7 @@ class AppRouts {
     chat: (_) => const ChatScreen(),
     navBar: (_) => const AppNav(),
     ticketCount: (_) => const TicketCountScreen(),
+    paymentScreen: (_) => const PaymentScreen(),
   };
 
   static Route<dynamic>? generateRoute(RouteSettings settings) {

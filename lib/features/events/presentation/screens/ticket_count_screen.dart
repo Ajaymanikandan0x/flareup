@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/constants.dart';
+import '../../../../core/routes/routs.dart';
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/widgets/custom_image_wid.dart';
@@ -184,7 +185,8 @@ class _TicketCountScreenState extends State<TicketCountScreen> {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String text, Color color, {double iconSize = 16}) {
+  Widget _buildInfoRow(IconData icon, String text, Color color,
+      {double iconSize = 16}) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -340,9 +342,16 @@ class _TicketCountScreenState extends State<TicketCountScreen> {
           SizedBox(height: Responsive.verticalPadding),
           PrimaryButton(
             onTap: () {
-              // TODO: Implement checkout logic
+              Navigator.pushNamed(
+                context,
+                AppRouts.paymentScreen,
+                arguments: {
+                  'event': state.event,
+                  'ticketCount': state.ticketCount,
+                },
+              );
             },
-            text: 'Continue to Checkout',
+            text: 'Continue to Payment',
             width: double.infinity,
           ),
           SizedBox(height: Responsive.verticalPadding),

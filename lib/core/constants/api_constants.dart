@@ -23,4 +23,6 @@ class ApiEndpoints {
   static const getAllEvents = 'events/'; // (get) get all events
   static const eventCategory = 'events/event-types-and-categories/'; //(get) [
 //  'name', 'description', 'event_types=[‘name’,’description’,’image’,]’  , ’image’]
+  static const paymentSession =
+      'payment_api/create-checkout-session/'; //(post) username, event_id, hoster_id, title, price, quantity
 }

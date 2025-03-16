@@ -28,6 +28,7 @@ import 'features/home/domain/usecases/category_usecase.dart';
 import 'features/home/domain/usecases/get_event_usecase.dart';
 import 'features/home/domain/usecases/get_eventby_category_usecase.dart';
 import 'features/home/presentation/bloc/event_bloc.dart';
+import 'features/payment/domain/usecases/process_payment_usecase.dart';
 import 'features/profile/data/datasources/user_profile_remote_datasource.dart';
 import 'features/profile/data/repositories/profile_image_repository_impl.dart';
 import 'features/profile/data/repositories/user_profile_repository_impl.dart';
@@ -39,6 +40,11 @@ import 'features/profile/presentation/bloc/user_profile_bloc.dart';
 import 'features/events/presentation/cubit/video_player_cubit.dart';
 import 'features/events/domain/usecases/get_event_usecase.dart';
 import 'features/events/domain/usecases/update_ticket_count_usecase.dart';
+import 'features/payment/data/datasources/payment_remote_datasource.dart';
+import 'features/payment/data/repositories/payment_repository_impl.dart';
+import 'features/payment/domain/usecases/create_payment_session_usecase.dart';
+
+import 'features/payment/presentation/bloc/payment_bloc.dart';
 
 class DependencyInjector {
   static final DependencyInjector _instance = DependencyInjector._internal();
@@ -79,6 +85,9 @@ class DependencyInjector {
 
   late VideoPlayerCubit _videoPlayerCubit;
 
+  // Payment dependencies
+  late PaymentBloc _paymentBloc;
+
   void setup() {
     _setupAuthenticationDependencies();
     _setupUserProfileDependencies();
@@ -86,6 +95,8 @@ class DependencyInjector {
 
     _setupSingleEventDependencies();
     _videoPlayerCubit = VideoPlayerCubit();
+
+    _setupPaymentDependencies();
   }
 
   void _setupSingleEventDependencies() {
@@ -185,10 +196,29 @@ class DependencyInjector {
     );
   }
 
+  void _setupPaymentDependencies() {
+    final storageService = SecureStorageService();
+    final networkService = NetworkService(Dio(), storageService);
+    final paymentRemoteDataSource =
+        PaymentRemoteDataSourceImpl(networkService, storageService);
+    final paymentRepository = PaymentRepositoryImpl(paymentRemoteDataSource);
+
+    final createPaymentSessionUseCase =
+        CreatePaymentSessionUseCase(paymentRepository);
+    final processPaymentUseCase = ProcessPaymentUseCase(paymentRepository);
+
+    _paymentBloc = PaymentBloc(
+      createPaymentSessionUseCase: createPaymentSessionUseCase,
+      processPaymentUseCase: processPaymentUseCase,
+      authBloc: _authBloc,
+    );
+  }
+
   // Getters6
   AuthBloc get authBloc => _authBloc;
   UserProfileBloc get userProfileBloc => _userProfileBloc;
   EventBloc get eventBloc => _eventBloc;
   SingleEventBloc get singleEventBloc => _singleEventBloc;
   VideoPlayerCubit get videoPlayerCubit => VideoPlayerCubit();
+  PaymentBloc get paymentBloc => _paymentBloc;
 }
